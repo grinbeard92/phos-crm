@@ -1,0 +1,248 @@
+=== Creating Relationships Between Objects ===
+
+1. Creating Project → Company relationship...
+{
+  "errors": [
+    {
+      "message": "Multiple validation errors occurred while creating field",
+      "extensions": {
+        "code": "METADATA_VALIDATION_FAILED",
+        "errors": {
+          "fieldMetadata": [
+            {
+              "errors": [
+                {
+                  "code": "FIELD_METADATA_RELATION_MALFORMED",
+                  "message": "Object metadata relation target not found for relation creation payload",
+                  "userFriendlyMessage": "Object targeted by field to create not found",
+                  "value": {
+                    "type": "MANY_TO_ONE",
+                    "targetObjectMetadataId": "61225a5e-556a-4ca9-b139-51091e7eb68f",
+                    "targetFieldLabel": "Projects",
+                    "targetFieldIcon": "IconBriefcase"
+                  }
+                }
+              ],
+              "type": "create",
+              "metadataName": "fieldMetadata",
+              "flatEntityMinimalInformation": {
+                "id": ""
+              }
+            }
+          ]
+        },
+        "summary": {
+          "totalErrors": 1,
+          "fieldMetadata": 1
+        },
+        "message": "Validation failed for 1 fieldMetadata",
+        "userFriendlyMessage": "Metadata validation failed"
+      }
+    }
+  ],
+  "data": null
+}
+
+2. Creating Expense → Project relationship...
+{
+  "data": {
+    "createOneField": {
+      "id": "1ed4d14a-f4b2-4758-a90a-a94ae36e6226",
+      "name": "project",
+      "label": "Project",
+      "type": "RELATION"
+    }
+  }
+}
+
+3. Creating Expense → Company relationship...
+{
+  "errors": [
+    {
+      "message": "Multiple validation errors occurred while creating field",
+      "extensions": {
+        "code": "METADATA_VALIDATION_FAILED",
+        "errors": {
+          "fieldMetadata": [
+            {
+              "errors": [
+                {
+                  "code": "FIELD_METADATA_RELATION_MALFORMED",
+                  "message": "Object metadata relation target not found for relation creation payload",
+                  "userFriendlyMessage": "Object targeted by field to create not found",
+                  "value": {
+                    "type": "MANY_TO_ONE",
+                    "targetObjectMetadataId": "61225a5e-556a-4ca9-b139-51091e7eb68f",
+                    "targetFieldLabel": "Expenses",
+                    "targetFieldIcon": "IconReceipt"
+                  }
+                }
+              ],
+              "type": "create",
+              "metadataName": "fieldMetadata",
+              "flatEntityMinimalInformation": {
+                "id": ""
+              }
+            }
+          ]
+        },
+        "summary": {
+          "totalErrors": 1,
+          "fieldMetadata": 1
+        },
+        "message": "Validation failed for 1 fieldMetadata",
+        "userFriendlyMessage": "Metadata validation failed"
+      }
+    }
+  ],
+  "data": null
+}
+
+4. Creating Quote → Company relationship...
+{
+  "errors": [
+    {
+      "message": "Multiple validation errors occurred while creating field",
+      "extensions": {
+        "code": "METADATA_VALIDATION_FAILED",
+        "errors": {
+          "fieldMetadata": [
+            {
+              "errors": [
+                {
+                  "code": "FIELD_METADATA_RELATION_MALFORMED",
+                  "message": "Object metadata relation target not found for relation creation payload",
+                  "userFriendlyMessage": "Object targeted by field to create not found",
+                  "value": {
+                    "type": "MANY_TO_ONE",
+                    "targetObjectMetadataId": "61225a5e-556a-4ca9-b139-51091e7eb68f",
+                    "targetFieldLabel": "Quotes",
+                    "targetFieldIcon": "IconFileText"
+                  }
+                }
+              ],
+              "type": "create",
+              "metadataName": "fieldMetadata",
+              "flatEntityMinimalInformation": {
+                "id": ""
+              }
+            }
+          ]
+        },
+        "summary": {
+          "totalErrors": 1,
+          "fieldMetadata": 1
+        },
+        "message": "Validation failed for 1 fieldMetadata",
+        "userFriendlyMessage": "Metadata validation failed"
+      }
+    }
+  ],
+  "data": null
+}
+
+5. Creating Invoice → Company relationship...
+{
+  "errors": [
+    {
+      "message": "Multiple validation errors occurred while creating field",
+      "extensions": {
+        "code": "METADATA_VALIDATION_FAILED",
+        "errors": {
+          "fieldMetadata": [
+            {
+              "errors": [
+                {
+                  "code": "FIELD_METADATA_RELATION_MALFORMED",
+                  "message": "Object metadata relation target not found for relation creation payload",
+                  "userFriendlyMessage": "Object targeted by field to create not found",
+                  "value": {
+                    "type": "MANY_TO_ONE",
+                    "targetObjectMetadataId": "61225a5e-556a-4ca9-b139-51091e7eb68f",
+                    "targetFieldLabel": "Invoices",
+                    "targetFieldIcon": "IconCurrencyDollar"
+                  }
+                }
+              ],
+              "type": "create",
+              "metadataName": "fieldMetadata",
+              "flatEntityMinimalInformation": {
+                "id": ""
+              }
+            }
+          ]
+        },
+        "summary": {
+          "totalErrors": 1,
+          "fieldMetadata": 1
+        },
+        "message": "Validation failed for 1 fieldMetadata",
+        "userFriendlyMessage": "Metadata validation failed"
+      }
+    }
+  ],
+  "data": null
+}
+
+6. Creating Invoice → Quote relationship...
+{
+  "data": {
+    "createOneField": {
+      "id": "5eb3bf4b-7809-4d0c-9d57-d238aeeba677",
+      "name": "quote",
+      "label": "Quote",
+      "type": "RELATION"
+    }
+  }
+}
+
+7. Creating Support Ticket → Company relationship...
+{
+  "errors": [
+    {
+      "message": "Multiple validation errors occurred while creating field",
+      "extensions": {
+        "code": "METADATA_VALIDATION_FAILED",
+        "errors": {
+          "fieldMetadata": [
+            {
+              "errors": [
+                {
+                  "code": "FIELD_METADATA_RELATION_MALFORMED",
+                  "message": "Object metadata relation target not found for relation creation payload",
+                  "userFriendlyMessage": "Object targeted by field to create not found",
+                  "value": {
+                    "type": "MANY_TO_ONE",
+                    "targetObjectMetadataId": "61225a5e-556a-4ca9-b139-51091e7eb68f",
+                    "targetFieldLabel": "Support Tickets",
+                    "targetFieldIcon": "IconHelp"
+                  }
+                }
+              ],
+              "type": "create",
+              "metadataName": "fieldMetadata",
+              "flatEntityMinimalInformation": {
+                "id": ""
+              }
+            }
+          ]
+        },
+        "summary": {
+          "totalErrors": 1,
+          "fieldMetadata": 1
+        },
+        "message": "Validation failed for 1 fieldMetadata",
+        "userFriendlyMessage": "Metadata validation failed"
+      }
+    }
+  ],
+  "data": null
+}
+
+✓ All relationships created!
+Your objects are now connected:
+  - Projects belong to Companies
+  - Expenses can link to Projects OR Companies
+  - Quotes belong to Companies
+  - Invoices belong to Companies (and optionally link to Quotes)
+  - Support Tickets belong to Companies
