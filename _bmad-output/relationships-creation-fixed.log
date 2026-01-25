@@ -1,0 +1,263 @@
+=== Creating Relationships Between Objects ===
+
+1. Creating Project → Company relationship...
+{
+  "data": {
+    "createOneField": {
+      "id": "656cb053-1318-446d-8628-071566740509",
+      "name": "company",
+      "label": "Company",
+      "type": "RELATION"
+    }
+  }
+}
+
+2. Creating Expense → Project relationship...
+{
+  "errors": [
+    {
+      "message": "Multiple validation errors occurred while creating fields",
+      "extensions": {
+        "code": "METADATA_VALIDATION_FAILED",
+        "errors": {
+          "fieldMetadata": [
+            {
+              "status": "fail",
+              "errors": [
+                {
+                  "code": "NOT_AVAILABLE",
+                  "value": "project",
+                  "message": "Name \"project\" is not available as it is already used by another field",
+                  "userFriendlyMessage": "Name \"project\" is not available as it is already used by another field"
+                },
+                {
+                  "code": "NOT_AVAILABLE",
+                  "value": "projectId",
+                  "message": "Name \"projectId\" is not available as it is already used by another join column name",
+                  "userFriendlyMessage": "Name \"projectId\" is not available as it is already used by join column name"
+                }
+              ],
+              "flatEntityMinimalInformation": {
+                "id": "c2e2ba3f-f542-438b-be49-98b40a308d5b",
+                "universalIdentifier": "8ee03f49-2fb9-49e3-9606-dd9665f9a4f6",
+                "name": "project",
+                "objectMetadataId": "de73f140-b98e-4f50-8de5-b0c494c7dbb4"
+              },
+              "metadataName": "fieldMetadata",
+              "type": "create"
+            },
+            {
+              "status": "fail",
+              "errors": [
+                {
+                  "code": "NOT_AVAILABLE",
+                  "value": "expenses",
+                  "message": "Name \"expenses\" is not available as it is already used by another field",
+                  "userFriendlyMessage": "Name \"expenses\" is not available as it is already used by another field"
+                },
+                {
+                  "code": "FIELD_METADATA_NOT_FOUND",
+                  "message": "Relation field target metadata not found in both existing and about to be created field metadatas",
+                  "userFriendlyMessage": "Relation field target metadata not found"
+                }
+              ],
+              "flatEntityMinimalInformation": {
+                "id": "56034372-7bf9-4dbc-bad2-44e26932ca06",
+                "universalIdentifier": "1bdff959-259c-43a2-8828-0b4ae26ef404",
+                "name": "expenses",
+                "objectMetadataId": "908deb12-79d9-4516-bf60-f4f0e2853dc3"
+              },
+              "metadataName": "fieldMetadata",
+              "type": "create"
+            }
+          ],
+          "index": [
+            {
+              "status": "fail",
+              "errors": [
+                {
+                  "code": "INDEX_ALREADY_EXISTS",
+                  "message": "Index with same name already exists",
+                  "userFriendlyMessage": "Index with same name already exists"
+                },
+                {
+                  "code": "INDEX_FIELD_NOT_FOUND",
+                  "message": "Could not find index field related field metadata",
+                  "userFriendlyMessage": "Field referenced in index does not exist"
+                }
+              ],
+              "flatEntityMinimalInformation": {
+                "id": "9a783169-9c51-4e27-986a-53ec2d2ad71e",
+                "universalIdentifier": "9a783169-9c51-4e27-986a-53ec2d2ad71e",
+                "name": "IDX_81ba2617e67f66c389487959770"
+              },
+              "metadataName": "index",
+              "type": "create"
+            }
+          ]
+        },
+        "summary": {
+          "totalErrors": 3,
+          "fieldMetadata": 2,
+          "index": 1
+        },
+        "message": "Validation failed for 2 fieldMetadatas, 1 index",
+        "userFriendlyMessage": "Metadata validation failed"
+      }
+    }
+  ],
+  "data": null
+}
+
+3. Creating Expense → Company relationship...
+{
+  "data": {
+    "createOneField": {
+      "id": "3b68a4da-d2e4-4cc0-8647-5085721cf18b",
+      "name": "company",
+      "label": "Company",
+      "type": "RELATION"
+    }
+  }
+}
+
+4. Creating Quote → Company relationship...
+{
+  "data": {
+    "createOneField": {
+      "id": "33b6e5fb-0a5c-49a1-b10e-7ac93849a7ba",
+      "name": "company",
+      "label": "Company",
+      "type": "RELATION"
+    }
+  }
+}
+
+5. Creating Invoice → Company relationship...
+{
+  "data": {
+    "createOneField": {
+      "id": "85ec5811-cae8-4a18-8ea4-d4efe00a2342",
+      "name": "company",
+      "label": "Company",
+      "type": "RELATION"
+    }
+  }
+}
+
+6. Creating Invoice → Quote relationship...
+{
+  "errors": [
+    {
+      "message": "Multiple validation errors occurred while creating fields",
+      "extensions": {
+        "code": "METADATA_VALIDATION_FAILED",
+        "errors": {
+          "fieldMetadata": [
+            {
+              "status": "fail",
+              "errors": [
+                {
+                  "code": "NOT_AVAILABLE",
+                  "value": "quote",
+                  "message": "Name \"quote\" is not available as it is already used by another field",
+                  "userFriendlyMessage": "Name \"quote\" is not available as it is already used by another field"
+                },
+                {
+                  "code": "NOT_AVAILABLE",
+                  "value": "quoteId",
+                  "message": "Name \"quoteId\" is not available as it is already used by another join column name",
+                  "userFriendlyMessage": "Name \"quoteId\" is not available as it is already used by join column name"
+                }
+              ],
+              "flatEntityMinimalInformation": {
+                "id": "4d334d3c-9c81-4549-b29f-ccf25f66ae7d",
+                "universalIdentifier": "248b13f6-bebc-4a00-9bc8-42a4c808609c",
+                "name": "quote",
+                "objectMetadataId": "ab4f4492-82f6-4628-87cb-0b07358ea899"
+              },
+              "metadataName": "fieldMetadata",
+              "type": "create"
+            },
+            {
+              "status": "fail",
+              "errors": [
+                {
+                  "code": "NOT_AVAILABLE",
+                  "value": "invoices",
+                  "message": "Name \"invoices\" is not available as it is already used by another field",
+                  "userFriendlyMessage": "Name \"invoices\" is not available as it is already used by another field"
+                },
+                {
+                  "code": "FIELD_METADATA_NOT_FOUND",
+                  "message": "Relation field target metadata not found in both existing and about to be created field metadatas",
+                  "userFriendlyMessage": "Relation field target metadata not found"
+                }
+              ],
+              "flatEntityMinimalInformation": {
+                "id": "de672fb0-f052-4522-aab7-a823f316ec3e",
+                "universalIdentifier": "9cea9f2c-f800-410b-9de5-0cbf82596b36",
+                "name": "invoices",
+                "objectMetadataId": "1e395f61-91dd-4ce3-8872-0b674cec9b41"
+              },
+              "metadataName": "fieldMetadata",
+              "type": "create"
+            }
+          ],
+          "index": [
+            {
+              "status": "fail",
+              "errors": [
+                {
+                  "code": "INDEX_ALREADY_EXISTS",
+                  "message": "Index with same name already exists",
+                  "userFriendlyMessage": "Index with same name already exists"
+                },
+                {
+                  "code": "INDEX_FIELD_NOT_FOUND",
+                  "message": "Could not find index field related field metadata",
+                  "userFriendlyMessage": "Field referenced in index does not exist"
+                }
+              ],
+              "flatEntityMinimalInformation": {
+                "id": "dce4950b-7f81-4bae-9adc-cd8add683e6f",
+                "universalIdentifier": "dce4950b-7f81-4bae-9adc-cd8add683e6f",
+                "name": "IDX_b4430adb805047f14908f030126"
+              },
+              "metadataName": "index",
+              "type": "create"
+            }
+          ]
+        },
+        "summary": {
+          "totalErrors": 3,
+          "fieldMetadata": 2,
+          "index": 1
+        },
+        "message": "Validation failed for 2 fieldMetadatas, 1 index",
+        "userFriendlyMessage": "Metadata validation failed"
+      }
+    }
+  ],
+  "data": null
+}
+
+7. Creating Support Ticket → Company relationship...
+{
+  "data": {
+    "createOneField": {
+      "id": "5d56e060-b20f-4b58-9157-5fa4904fac29",
+      "name": "company",
+      "label": "Company",
+      "type": "RELATION"
+    }
+  }
+}
+
+✓ All relationships created!
+Your objects are now connected:
+  - Projects belong to Companies
+  - Expenses can link to Projects OR Companies
+  - Quotes belong to Companies
+  - Invoices belong to Companies (and optionally link to Quotes)
+  - Support Tickets belong to Companies

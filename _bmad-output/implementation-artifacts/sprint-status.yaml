@@ -1,0 +1,125 @@
+# generated: 2026-01-24
+# project: phos-crm
+# project_key: phos-crm
+# tracking_system: file-system
+# story_location: _bmad-output/implementation-artifacts
+
+# STATUS DEFINITIONS:
+# ==================
+# Epic Status:
+#   - backlog: Epic not yet started
+#   - in-progress: Epic actively being worked on
+#   - done: All stories in epic completed
+#
+# Epic Status Transitions:
+#   - backlog → in-progress: Automatically when first story is created (via create-story)
+#   - in-progress → done: Manually when all stories reach 'done' status
+#
+# Story Status:
+#   - backlog: Story only exists in epic file
+#   - ready-for-dev: Story file created in stories folder
+#   - in-progress: Developer actively working on implementation
+#   - review: Ready for code review (via Dev's code-review workflow)
+#   - done: Story completed
+#
+# Retrospective Status:
+#   - optional: Can be completed but not required
+#   - done: Retrospective has been completed
+#
+# WORKFLOW NOTES:
+# ===============
+# - Epic transitions to 'in-progress' automatically when first story is created
+# - Stories can be worked in parallel if team capacity allows
+# - SM typically creates next story after previous one is 'done' to incorporate learnings
+# - Dev moves story to 'review', then runs code-review (fresh context, different LLM recommended)
+
+generated: 2026-01-24
+project: phos-crm
+project_key: phos-crm
+tracking_system: file-system
+story_location: _bmad-output/implementation-artifacts
+
+development_status:
+  epic-1: in-progress
+  1-1-create-project-custom-object: in-progress
+  1-2-create-projectmilestone-and-projectdeliverable-objects: backlog
+  1-3-create-expense-and-expensecategory-objects: backlog
+  1-4-create-quote-and-quotelineitem-objects: backlog
+  1-5-create-invoice-invoicelineitem-and-payment-objects: backlog
+  1-6-configure-object-relations-and-test-graphql-api: backlog
+  epic-1-retrospective: optional
+
+  epic-2: backlog
+  2-1-build-quote-creation-ui-with-line-item-editor: backlog
+  2-2-build-invoice-creation-ui: backlog
+  2-3-implement-pdf-generation-for-quotes: backlog
+  2-4-implement-pdf-generation-for-invoices: backlog
+  2-5-create-email-templates-and-sending-functionality: backlog
+  2-6-build-quote-to-invoice-conversion-workflow: backlog
+  2-7-build-invoice-payment-tracking-ui: backlog
+  epic-2-retrospective: optional
+
+  epic-3: backlog
+  3-1-set-up-stripe-api-integration-module: backlog
+  3-2-implement-stripe-invoice-creation: backlog
+  3-3-implement-payment-link-generation: backlog
+  3-4-configure-stripe-webhook-endpoint: backlog
+  3-5-implement-webhook-handlers-for-payment-events: backlog
+  3-6-test-full-payment-flow: backlog
+  epic-3-retrospective: optional
+
+  epic-4: backlog
+  4-1-build-expense-submission-form-with-receipt-upload: backlog
+  4-2-implement-expense-approval-workflow: backlog
+  4-3-create-project-expense-relationship-views: backlog
+  4-4-build-expense-category-management-ui: backlog
+  4-5-create-financial-dashboard-widgets: backlog
+  4-6-implement-tax-year-export-functionality: backlog
+  4-7-create-expense-report-pdf-generation: backlog
+  epic-4-retrospective: optional
+
+  epic-5: backlog
+  5-1-create-gantttask-custom-object: backlog
+  5-2-integrate-gantt-task-react-library: backlog
+  5-3-build-gantt-view-components: backlog
+  5-4-add-gantt-to-view-picker: backlog
+  5-5-implement-drag-and-drop-date-editing: backlog
+  5-6-add-task-dependency-visualization: backlog
+  5-7-build-critical-path-calculation: backlog
+  5-8-implement-multi-project-gantt-view: backlog
+  epic-5-retrospective: optional
+
+  epic-6: backlog
+  6-1-create-invoice-payment-reminder-workflow: backlog
+  6-2-create-project-budget-alert-workflow: backlog
+  6-3-create-milestone-notification-workflow: backlog
+  6-4-create-expense-approval-automation: backlog
+  6-5-build-custom-email-templates-for-workflows: backlog
+  6-6-implement-quote-expiry-workflow: backlog
+  6-7-create-customer-activity-summary-workflow: backlog
+  6-8-test-all-workflows-end-to-end: backlog
+  epic-6-retrospective: optional
+
+  epic-7: backlog
+  7-1-ui-ux-review-of-all-custom-pages: backlog
+  7-2-performance-optimization: backlog
+  7-3-mobile-responsiveness-check: backlog
+  7-4-accessibility-audit-wcag-2-1: backlog
+  7-5-cross-browser-testing: backlog
+  7-6-documentation-creation: backlog
+  7-7-training-video-creation: backlog
+  7-8-bug-fixes-and-polish: backlog
+  epic-7-retrospective: optional
+
+  epic-8: backlog
+  8-1-unit-test-coverage: backlog
+  8-2-integration-testing: backlog
+  8-3-e2e-testing: backlog
+  8-4-load-testing: backlog
+  8-5-security-audit: backlog
+  8-6-backup-and-recovery-testing: backlog
+  8-7-staging-environment-deployment: backlog
+  8-8-user-acceptance-testing: backlog
+  8-9-production-deployment: backlog
+  8-10-post-deployment-monitoring: backlog
+  epic-8-retrospective: optional

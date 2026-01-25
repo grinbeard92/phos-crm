@@ -1,0 +1,798 @@
+=== Adding Fields to Projects ===
+1. Project Status (SELECT)...
+{
+  "errors": [
+    {
+      "message": "Multiple validation errors occurred while creating fields",
+      "extensions": {
+        "code": "METADATA_VALIDATION_FAILED",
+        "errors": {
+          "fieldMetadata": [
+            {
+              "status": "fail",
+              "errors": [
+                {
+                  "code": "INVALID_FIELD_INPUT",
+                  "message": "Duplicated option position",
+                  "userFriendlyMessage": "Duplicated option position",
+                  "value": [
+                    {
+                      "id": "163d5947-b880-4360-b29b-5c3ebd6f1b97",
+                      "value": "NOT_STARTED",
+                      "label": "Not Started",
+                      "color": "gray"
+                    },
+                    {
+                      "id": "a5979410-5a6e-47f8-b3c4-d73c6ddbdae5",
+                      "value": "IN_PROGRESS",
+                      "label": "In Progress",
+                      "color": "blue"
+                    },
+                    {
+                      "id": "6ebca26c-2937-4b13-9fd4-dbaf32198f10",
+                      "value": "ON_HOLD",
+                      "label": "On Hold",
+                      "color": "yellow"
+                    },
+                    {
+                      "id": "9513c964-c329-4748-878f-b068d8e51cc0",
+                      "value": "COMPLETED",
+                      "label": "Completed",
+                      "color": "green"
+                    },
+                    {
+                      "id": "2a3d655c-d940-43c1-b1c7-3f013351e87b",
+                      "value": "CANCELLED",
+                      "label": "Cancelled",
+                      "color": "red"
+                    }
+                  ]
+                }
+              ],
+              "flatEntityMinimalInformation": {
+                "id": "41897f6c-a294-456b-b7b0-51d3ec66a991",
+                "universalIdentifier": "352beb97-4d9a-470b-8aec-23b441c133bb",
+                "name": "status",
+                "objectMetadataId": "908deb12-79d9-4516-bf60-f4f0e2853dc3"
+              },
+              "metadataName": "fieldMetadata",
+              "type": "create"
+            }
+          ]
+        },
+        "summary": {
+          "totalErrors": 1,
+          "fieldMetadata": 1
+        },
+        "message": "Validation failed for 1 fieldMetadata",
+        "userFriendlyMessage": "Metadata validation failed"
+      }
+    }
+  ],
+  "data": null
+}
+2. Start Date...
+{
+  "data": {
+    "createOneField": {
+      "id": "4af7303c-c89f-4c5c-ad08-20135508b5db",
+      "name": "startDate",
+      "label": "Start Date",
+      "type": "DATE"
+    }
+  }
+}
+3. End Date...
+{
+  "data": {
+    "createOneField": {
+      "id": "372d5ed8-e149-49ad-94c4-bff82c3ff81b",
+      "name": "endDate",
+      "label": "End Date",
+      "type": "DATE"
+    }
+  }
+}
+4. Budget...
+{
+  "data": {
+    "createOneField": {
+      "id": "93395952-b4df-4f08-abf1-835771fe0431",
+      "name": "budget",
+      "label": "Budget",
+      "type": "CURRENCY"
+    }
+  }
+}
+5. Description...
+{
+  "data": {
+    "createOneField": {
+      "id": "e4b65407-eb1a-486d-b015-8fd06f189412",
+      "name": "description",
+      "label": "Description",
+      "type": "RICH_TEXT"
+    }
+  }
+}
+
+=== Adding Fields to Expenses ===
+1. Amount...
+{
+  "data": {
+    "createOneField": {
+      "id": "1b9beea0-be47-44f1-abb5-b734ea051364",
+      "name": "amount",
+      "label": "Amount",
+      "type": "CURRENCY"
+    }
+  }
+}
+2. Expense Date...
+{
+  "data": {
+    "createOneField": {
+      "id": "468b07b7-c35a-45b7-b0ac-53711c8ba9f9",
+      "name": "expenseDate",
+      "label": "Expense Date",
+      "type": "DATE"
+    }
+  }
+}
+3. Category (SELECT)...
+{
+  "errors": [
+    {
+      "message": "Multiple validation errors occurred while creating fields",
+      "extensions": {
+        "code": "METADATA_VALIDATION_FAILED",
+        "errors": {
+          "fieldMetadata": [
+            {
+              "status": "fail",
+              "errors": [
+                {
+                  "code": "INVALID_FIELD_INPUT",
+                  "message": "Duplicated option position",
+                  "userFriendlyMessage": "Duplicated option position",
+                  "value": [
+                    {
+                      "id": "5abd589b-75b2-4c3e-8a7a-a9b666ce6dc5",
+                      "value": "MATERIALS",
+                      "label": "Materials",
+                      "color": "blue"
+                    },
+                    {
+                      "id": "395945f6-2064-41e5-876f-2abdd17563d3",
+                      "value": "LABOR",
+                      "label": "Labor",
+                      "color": "green"
+                    },
+                    {
+                      "id": "65a5e9b0-fce0-43cb-8a26-8249d0e61f5d",
+                      "value": "EQUIPMENT",
+                      "label": "Equipment",
+                      "color": "purple"
+                    },
+                    {
+                      "id": "44a2e5eb-c515-4328-a294-a9b78d6fee6e",
+                      "value": "TRAVEL",
+                      "label": "Travel",
+                      "color": "orange"
+                    },
+                    {
+                      "id": "17de5251-c42c-442d-9d1d-5507efa5a395",
+                      "value": "SOFTWARE",
+                      "label": "Software",
+                      "color": "cyan"
+                    },
+                    {
+                      "id": "ca21722e-645e-4b46-89fa-bc09b83c2e4b",
+                      "value": "OTHER",
+                      "label": "Other",
+                      "color": "gray"
+                    }
+                  ]
+                }
+              ],
+              "flatEntityMinimalInformation": {
+                "id": "74f6dbcb-514a-4c47-a27b-7c7e75b90760",
+                "universalIdentifier": "d1f89eda-a067-48ee-870c-bd3858b43440",
+                "name": "category",
+                "objectMetadataId": "de73f140-b98e-4f50-8de5-b0c494c7dbb4"
+              },
+              "metadataName": "fieldMetadata",
+              "type": "create"
+            }
+          ]
+        },
+        "summary": {
+          "totalErrors": 1,
+          "fieldMetadata": 1
+        },
+        "message": "Validation failed for 1 fieldMetadata",
+        "userFriendlyMessage": "Metadata validation failed"
+      }
+    }
+  ],
+  "data": null
+}
+4. Receipt Number...
+{
+  "data": {
+    "createOneField": {
+      "id": "fa981609-63dc-4c62-b116-0d35132e5ebe",
+      "name": "receiptNumber",
+      "label": "Receipt Number",
+      "type": "TEXT"
+    }
+  }
+}
+5. Vendor...
+{
+  "data": {
+    "createOneField": {
+      "id": "9f6bb1ee-8c5d-45a6-a095-0b9b236b40fa",
+      "name": "vendor",
+      "label": "Vendor",
+      "type": "TEXT"
+    }
+  }
+}
+6. Notes...
+{
+  "data": {
+    "createOneField": {
+      "id": "603fa6f3-38ca-474f-8624-a5c205cba0e6",
+      "name": "notes",
+      "label": "Notes",
+      "type": "RICH_TEXT"
+    }
+  }
+}
+7. Tax Deductible...
+{
+  "data": {
+    "createOneField": {
+      "id": "94daaa58-43d0-430f-bea7-432f62804fd3",
+      "name": "taxDeductible",
+      "label": "Tax Deductible",
+      "type": "BOOLEAN"
+    }
+  }
+}
+
+=== Adding Fields to Quotes ===
+1. Quote Number...
+{
+  "data": {
+    "createOneField": {
+      "id": "a384c30f-6bea-4352-9693-9988f6607613",
+      "name": "quoteNumber",
+      "label": "Quote Number",
+      "type": "TEXT"
+    }
+  }
+}
+2. Quote Date...
+{
+  "data": {
+    "createOneField": {
+      "id": "efd16065-f9af-4d5f-a816-401f8d48cc57",
+      "name": "quoteDate",
+      "label": "Quote Date",
+      "type": "DATE"
+    }
+  }
+}
+3. Valid Until...
+{
+  "data": {
+    "createOneField": {
+      "id": "91ae542a-a2c1-47dd-a09c-c873c93f2feb",
+      "name": "validUntil",
+      "label": "Valid Until",
+      "type": "DATE"
+    }
+  }
+}
+4. Total Amount...
+{
+  "data": {
+    "createOneField": {
+      "id": "cba56b04-9d18-4ea6-8d82-b031ca2fbd66",
+      "name": "totalAmount",
+      "label": "Total Amount",
+      "type": "CURRENCY"
+    }
+  }
+}
+5. Status (SELECT)...
+{
+  "errors": [
+    {
+      "message": "Multiple validation errors occurred while creating fields",
+      "extensions": {
+        "code": "METADATA_VALIDATION_FAILED",
+        "errors": {
+          "fieldMetadata": [
+            {
+              "status": "fail",
+              "errors": [
+                {
+                  "code": "INVALID_FIELD_INPUT",
+                  "message": "Duplicated option position",
+                  "userFriendlyMessage": "Duplicated option position",
+                  "value": [
+                    {
+                      "id": "6d8ac9ab-3f91-4091-8716-b55fba0f1398",
+                      "value": "DRAFT",
+                      "label": "Draft",
+                      "color": "gray"
+                    },
+                    {
+                      "id": "3c89e421-380e-48c3-9ebf-210698646b19",
+                      "value": "SENT",
+                      "label": "Sent",
+                      "color": "blue"
+                    },
+                    {
+                      "id": "089b551c-0741-43a6-bb14-a876bd60d232",
+                      "value": "VIEWED",
+                      "label": "Viewed",
+                      "color": "cyan"
+                    },
+                    {
+                      "id": "a3ded3c2-080e-44af-89b1-4ddf10eb1f9a",
+                      "value": "ACCEPTED",
+                      "label": "Accepted",
+                      "color": "green"
+                    },
+                    {
+                      "id": "b84549c3-acae-4568-a168-e079243a3e5c",
+                      "value": "DECLINED",
+                      "label": "Declined",
+                      "color": "red"
+                    },
+                    {
+                      "id": "8032e569-473d-404d-adf8-adb03b8e3780",
+                      "value": "EXPIRED",
+                      "label": "Expired",
+                      "color": "orange"
+                    }
+                  ]
+                }
+              ],
+              "flatEntityMinimalInformation": {
+                "id": "fa836da5-abca-4fc8-a6e0-aa980e1509af",
+                "universalIdentifier": "bba2266b-9801-4b25-9502-f0f50ece71b4",
+                "name": "status",
+                "objectMetadataId": "1e395f61-91dd-4ce3-8872-0b674cec9b41"
+              },
+              "metadataName": "fieldMetadata",
+              "type": "create"
+            }
+          ]
+        },
+        "summary": {
+          "totalErrors": 1,
+          "fieldMetadata": 1
+        },
+        "message": "Validation failed for 1 fieldMetadata",
+        "userFriendlyMessage": "Metadata validation failed"
+      }
+    }
+  ],
+  "data": null
+}
+6. Terms...
+{
+  "data": {
+    "createOneField": {
+      "id": "319a704a-3eb2-40db-809f-2c251fcdd18e",
+      "name": "terms",
+      "label": "Terms",
+      "type": "RICH_TEXT"
+    }
+  }
+}
+7. Notes...
+{
+  "data": {
+    "createOneField": {
+      "id": "1b85ee06-f370-4054-824a-e78cdbf4d61f",
+      "name": "notes",
+      "label": "Notes",
+      "type": "RICH_TEXT"
+    }
+  }
+}
+
+=== Adding Fields to Invoices ===
+1. Invoice Number...
+{
+  "data": {
+    "createOneField": {
+      "id": "cdeaf1b9-1b72-4ed7-b687-7aa3c0759b33",
+      "name": "invoiceNumber",
+      "label": "Invoice Number",
+      "type": "TEXT"
+    }
+  }
+}
+2. Invoice Date...
+{
+  "data": {
+    "createOneField": {
+      "id": "7b962364-1ccf-4785-b743-cad64dfb9251",
+      "name": "invoiceDate",
+      "label": "Invoice Date",
+      "type": "DATE"
+    }
+  }
+}
+3. Due Date...
+{
+  "data": {
+    "createOneField": {
+      "id": "fc93cb88-f52b-4cdd-8518-bb0eb3acefd7",
+      "name": "dueDate",
+      "label": "Due Date",
+      "type": "DATE"
+    }
+  }
+}
+4. Total Amount...
+{
+  "data": {
+    "createOneField": {
+      "id": "bae60741-fe7a-436e-9534-81aa199f92c0",
+      "name": "totalAmount",
+      "label": "Total Amount",
+      "type": "CURRENCY"
+    }
+  }
+}
+5. Amount Paid...
+{
+  "data": {
+    "createOneField": {
+      "id": "43d7e1f9-99dc-4efc-9871-3b7bcbe61c8a",
+      "name": "amountPaid",
+      "label": "Amount Paid",
+      "type": "CURRENCY"
+    }
+  }
+}
+6. Status (SELECT)...
+{
+  "errors": [
+    {
+      "message": "Multiple validation errors occurred while creating fields",
+      "extensions": {
+        "code": "METADATA_VALIDATION_FAILED",
+        "errors": {
+          "fieldMetadata": [
+            {
+              "status": "fail",
+              "errors": [
+                {
+                  "code": "INVALID_FIELD_INPUT",
+                  "message": "Duplicated option position",
+                  "userFriendlyMessage": "Duplicated option position",
+                  "value": [
+                    {
+                      "id": "62bd0a07-d428-45ef-a816-b826dc911a96",
+                      "value": "DRAFT",
+                      "label": "Draft",
+                      "color": "gray"
+                    },
+                    {
+                      "id": "e1d9880a-6904-437b-bfde-6f35aa0cf65d",
+                      "value": "SENT",
+                      "label": "Sent",
+                      "color": "blue"
+                    },
+                    {
+                      "id": "fd0a344f-6f14-46cf-8f61-9166f319447a",
+                      "value": "VIEWED",
+                      "label": "Viewed",
+                      "color": "cyan"
+                    },
+                    {
+                      "id": "57f6a348-c7a8-41fc-aa75-a0880c58fa60",
+                      "value": "PARTIAL",
+                      "label": "Partially Paid",
+                      "color": "yellow"
+                    },
+                    {
+                      "id": "dcdd93a4-b6b0-4a10-97ca-53cd8f633935",
+                      "value": "PAID",
+                      "label": "Paid",
+                      "color": "green"
+                    },
+                    {
+                      "id": "2b386eb4-3f54-4bdf-a104-29f934e20d5b",
+                      "value": "OVERDUE",
+                      "label": "Overdue",
+                      "color": "red"
+                    },
+                    {
+                      "id": "e19c505c-1362-496b-b6c2-d5571bb718c0",
+                      "value": "CANCELLED",
+                      "label": "Cancelled",
+                      "color": "orange"
+                    }
+                  ]
+                }
+              ],
+              "flatEntityMinimalInformation": {
+                "id": "392f49a1-750f-4631-8dd4-8d8c6f72cbe7",
+                "universalIdentifier": "f0b529f4-3f70-4780-8536-1baed8e0183e",
+                "name": "status",
+                "objectMetadataId": "ab4f4492-82f6-4628-87cb-0b07358ea899"
+              },
+              "metadataName": "fieldMetadata",
+              "type": "create"
+            }
+          ]
+        },
+        "summary": {
+          "totalErrors": 1,
+          "fieldMetadata": 1
+        },
+        "message": "Validation failed for 1 fieldMetadata",
+        "userFriendlyMessage": "Metadata validation failed"
+      }
+    }
+  ],
+  "data": null
+}
+7. Stripe Payment ID...
+{
+  "data": {
+    "createOneField": {
+      "id": "f3230baa-51b6-4ff7-a002-e4bd196e9294",
+      "name": "stripePaymentId",
+      "label": "Stripe Payment ID",
+      "type": "TEXT"
+    }
+  }
+}
+8. Payment Method...
+{
+  "data": {
+    "createOneField": {
+      "id": "4070f82f-6c74-4a78-8d63-829ea79b4ecf",
+      "name": "paymentMethod",
+      "label": "Payment Method",
+      "type": "TEXT"
+    }
+  }
+}
+9. Notes...
+{
+  "data": {
+    "createOneField": {
+      "id": "cc2220fb-4cad-4195-a595-bc25c32656af",
+      "name": "notes",
+      "label": "Notes",
+      "type": "RICH_TEXT"
+    }
+  }
+}
+
+=== Adding Fields to Support Tickets ===
+1. Ticket Number...
+{
+  "data": {
+    "createOneField": {
+      "id": "d175bb4a-cdfa-4bd2-9f01-b267b583edde",
+      "name": "ticketNumber",
+      "label": "Ticket Number",
+      "type": "TEXT"
+    }
+  }
+}
+2. Priority (SELECT)...
+{
+  "errors": [
+    {
+      "message": "Multiple validation errors occurred while creating fields",
+      "extensions": {
+        "code": "METADATA_VALIDATION_FAILED",
+        "errors": {
+          "fieldMetadata": [
+            {
+              "status": "fail",
+              "errors": [
+                {
+                  "code": "INVALID_FIELD_INPUT",
+                  "message": "Duplicated option position",
+                  "userFriendlyMessage": "Duplicated option position",
+                  "value": [
+                    {
+                      "id": "f014baa4-e0dd-4af2-8335-83014db01c22",
+                      "value": "LOW",
+                      "label": "Low",
+                      "color": "gray"
+                    },
+                    {
+                      "id": "1e6b7c13-87f4-47c1-a716-76006bd7cc5d",
+                      "value": "MEDIUM",
+                      "label": "Medium",
+                      "color": "blue"
+                    },
+                    {
+                      "id": "cf9854c2-0dda-49ea-9bc9-d5dfda2554b0",
+                      "value": "HIGH",
+                      "label": "High",
+                      "color": "orange"
+                    },
+                    {
+                      "id": "a2c77e9c-0fee-45d2-ab21-54fb8ff8289d",
+                      "value": "URGENT",
+                      "label": "Urgent",
+                      "color": "red"
+                    }
+                  ]
+                }
+              ],
+              "flatEntityMinimalInformation": {
+                "id": "2a2cb831-9ee8-4107-ae1b-7c98a32d31d7",
+                "universalIdentifier": "64f82f07-6930-4194-ad97-80d08f461a7c",
+                "name": "priority",
+                "objectMetadataId": "3c04feb6-846e-47e6-a207-4c5eb0c59cb5"
+              },
+              "metadataName": "fieldMetadata",
+              "type": "create"
+            }
+          ]
+        },
+        "summary": {
+          "totalErrors": 1,
+          "fieldMetadata": 1
+        },
+        "message": "Validation failed for 1 fieldMetadata",
+        "userFriendlyMessage": "Metadata validation failed"
+      }
+    }
+  ],
+  "data": null
+}
+3. Status (SELECT)...
+{
+  "errors": [
+    {
+      "message": "Multiple validation errors occurred while creating fields",
+      "extensions": {
+        "code": "METADATA_VALIDATION_FAILED",
+        "errors": {
+          "fieldMetadata": [
+            {
+              "status": "fail",
+              "errors": [
+                {
+                  "code": "INVALID_FIELD_INPUT",
+                  "message": "Duplicated option position",
+                  "userFriendlyMessage": "Duplicated option position",
+                  "value": [
+                    {
+                      "id": "7dcdaa30-58e1-4ffb-a238-5d2292947333",
+                      "value": "NEW",
+                      "label": "New",
+                      "color": "blue"
+                    },
+                    {
+                      "id": "a3ee01ed-4a81-4369-81ab-e6f52a7d00a8",
+                      "value": "OPEN",
+                      "label": "Open",
+                      "color": "cyan"
+                    },
+                    {
+                      "id": "ff88d8cc-4af6-4b75-9358-902ce8330f53",
+                      "value": "IN_PROGRESS",
+                      "label": "In Progress",
+                      "color": "yellow"
+                    },
+                    {
+                      "id": "ba394f74-e034-4dd0-8928-08bb55bf8417",
+                      "value": "WAITING",
+                      "label": "Waiting on Customer",
+                      "color": "orange"
+                    },
+                    {
+                      "id": "e5f32cbb-e23c-4506-b054-6de1b769b848",
+                      "value": "RESOLVED",
+                      "label": "Resolved",
+                      "color": "green"
+                    },
+                    {
+                      "id": "ed40ec62-b7b4-44c3-bfcd-badb5afab127",
+                      "value": "CLOSED",
+                      "label": "Closed",
+                      "color": "gray"
+                    }
+                  ]
+                }
+              ],
+              "flatEntityMinimalInformation": {
+                "id": "9867350f-c257-40de-ac9c-4326bb4b33fd",
+                "universalIdentifier": "86697aa6-8e1a-4911-bb72-35e2d6c5a717",
+                "name": "status",
+                "objectMetadataId": "3c04feb6-846e-47e6-a207-4c5eb0c59cb5"
+              },
+              "metadataName": "fieldMetadata",
+              "type": "create"
+            }
+          ]
+        },
+        "summary": {
+          "totalErrors": 1,
+          "fieldMetadata": 1
+        },
+        "message": "Validation failed for 1 fieldMetadata",
+        "userFriendlyMessage": "Metadata validation failed"
+      }
+    }
+  ],
+  "data": null
+}
+4. Subject...
+{
+  "data": {
+    "createOneField": {
+      "id": "8b6c3af1-350e-4fba-9ea0-d1d8b58bb87e",
+      "name": "subject",
+      "label": "Subject",
+      "type": "TEXT"
+    }
+  }
+}
+5. Description...
+{
+  "data": {
+    "createOneField": {
+      "id": "5cdbbfc0-bd8d-47c5-b7f6-982a711e04de",
+      "name": "description",
+      "label": "Description",
+      "type": "RICH_TEXT"
+    }
+  }
+}
+6. Resolution...
+{
+  "data": {
+    "createOneField": {
+      "id": "e9522bbe-a401-4a4d-aa4f-0bcb2575f011",
+      "name": "resolution",
+      "label": "Resolution",
+      "type": "RICH_TEXT"
+    }
+  }
+}
+7. Created Date...
+{
+  "data": {
+    "createOneField": {
+      "id": "0a0a920d-8c8e-498a-9e7c-ebc0bb639081",
+      "name": "createdDate",
+      "label": "Created Date",
+      "type": "DATE_TIME"
+    }
+  }
+}
+8. Resolved Date...
+{
+  "data": {
+    "createOneField": {
+      "id": "072a99d1-5650-4bac-bd3b-439ceef1773a",
+      "name": "resolvedDate",
+      "label": "Resolved Date",
+      "type": "DATE_TIME"
+    }
+  }
+}
+
+✓ All fields added successfully!
+Check your objects in the UI: http://localhost:3001/settings/objects
