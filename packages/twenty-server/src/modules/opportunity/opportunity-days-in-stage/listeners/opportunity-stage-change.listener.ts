@@ -1,11 +1,12 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { InjectDataSource } from '@nestjs/typeorm';
 
+import { type ObjectRecordUpdateEvent } from 'twenty-shared/database-events';
 import { DataSource } from 'typeorm';
 
 import { OnDatabaseBatchEvent } from 'src/engine/api/graphql/graphql-query-runner/decorators/on-database-batch-event.decorator';
-import { DatabaseEventAction } from 'src/engine/api/graphql/graphql-query-runner/enums/database-event-action.enum';
-import type { ObjectRecordBaseEvent } from 'src/engine/core-modules/event-emitter/types/object-record.base.event';
+import { DatabaseEventAction } from 'src/engine/api/graphql/graphql-query-runner/enums/database-event-action';
+import { type WorkspaceEventBatch } from 'src/engine/workspace-event-emitter/types/workspace-event-batch.type';
 import { getWorkspaceSchemaName } from 'src/engine/workspace-datasource/utils/get-workspace-schema-name.util';
 
 @Injectable()
@@ -19,14 +20,22 @@ export class OpportunityStageChangeListener {
 
   @OnDatabaseBatchEvent('opportunity', DatabaseEventAction.UPDATED)
   async handleOpportunityUpdate(
-    payload: ObjectRecordBaseEvent,
+    payload: WorkspaceEventBatch<ObjectRecordUpdateEvent>,
   ): Promise<void> {
-    const { workspaceId, objectMetadata, recordIds, properties } = payload;
+    const { workspaceId, events } = payload;
 
-    // Only process if stage field was updated
-    if (!properties?.diff?.stage) {
+    // Filter events where stage was updated
+    const stageChangeEvents = events.filter((event) => {
+      const diff = event.properties?.diff as Record<string, any> | undefined;
+
+      return diff && 'stage' in diff;
+    });
+
+    if (stageChangeEvents.length === 0) {
       return;
     }
+
+    const recordIds = stageChangeEvents.map((event) => event.recordId);
 
     this.logger.log(
       `Opportunity stage changed for ${recordIds.length} record(s) in workspace ${workspaceId}`,

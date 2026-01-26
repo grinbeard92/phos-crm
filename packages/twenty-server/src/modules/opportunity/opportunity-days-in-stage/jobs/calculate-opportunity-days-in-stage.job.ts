@@ -6,7 +6,6 @@ import { DataSource } from 'typeorm';
 import { Process } from 'src/engine/core-modules/message-queue/decorators/process.decorator';
 import { Processor } from 'src/engine/core-modules/message-queue/decorators/processor.decorator';
 import { MessageQueue } from 'src/engine/core-modules/message-queue/message-queue.constants';
-import { TwentyORMManager } from 'src/engine/twenty-orm/twenty-orm.manager';
 import { getWorkspaceSchemaName } from 'src/engine/workspace-datasource/utils/get-workspace-schema-name.util';
 
 export type CalculateOpportunityDaysInStageJobData = {
@@ -23,7 +22,6 @@ export class CalculateOpportunityDaysInStageJob {
   constructor(
     @InjectDataSource()
     private readonly dataSource: DataSource,
-    private readonly twentyORMManager: TwentyORMManager,
   ) {}
 
   @Process(CalculateOpportunityDaysInStageJob.name)
