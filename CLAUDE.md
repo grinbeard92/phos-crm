@@ -2,6 +2,12 @@
 
 Use the native ways to extend Twenty as far as possible to maintain schema integrity. That would be GraphQL, REST API, and create-twenty-app@latest (https://docs.twenty.com/developers/extend/capabilities/apps). Only when truly custom implementations are required should we implement anything with scripts, etc. ALWAYS PREFER NATIVE DOCUMENTED TWENTY CRM PROCESSES TO ADD OBJECTS, VIEWS, DASHBOARDS, INTEGRATIONS, etc. Start there first.
 
+Review the pages in both of the following routes for MANDATORY design patterns when developing backend and frontend features so they can eventually be released as Twenty CRM feature recommendations.
+https://docs.twenty.com/developers/contribute/capabilities/frontend-development/
+https://docs.twenty.com/developers/contribute/capabilities/backend-development/
+
+All of our additions need to be modular in design and added with Twenty's Feature Flag conventions so that I can later request that they be features when completed and so that they feel very Twenty-native.
+
 Our Workspace will be "Phos Industries" and allowable domains will be "@phos-ind.com" and "@lvnlaser.com" and "@beehivebirth.com" (Multi-tenant)
 
 We are focused on Phos only right now.
@@ -92,16 +98,35 @@ npx nx build twenty-server
 ### Database Operations
 
 ```bash
-# Database management
-npx nx database:reset twenty-server         # Reset database
-npx nx run twenty-server:database:init:prod # Initialize database
-npx nx run twenty-server:database:migrate:prod # Run migrations
+# 🚨 CRITICAL: LIVE PRODUCTION DATA - NO RESETS ALLOWED 🚨
+# Railway deployment imminent - maintain schema integrity at all costs
 
-# Generate migration
+# ❌ FORBIDDEN - NEVER USE THESE:
+# npx nx database:reset twenty-server         # ❌ DESTROYS LIVE DATA
+# npx nx run twenty-server:database:init:prod # ❌ WIPES PRODUCTION
+
+# ✅ SAFE MIGRATION WORKFLOW - ALWAYS USE THIS:
+
+# 1. Generate migration (captures schema changes)
 npx nx run twenty-server:typeorm migration:generate src/database/typeorm/core/migrations/common/[name] -d src/database/typeorm/core/core.datasource.ts
 
-# Sync metadata
+# 2. Review generated migration file - verify no data loss
+# Check: up() and down() methods are reversible
+# Check: No DROP TABLE/COLUMN on existing production data
+# Check: Nullable constraints on new columns or provide defaults
+
+# 3. Run migration (applies changes safely)
+npx nx run twenty-server:database:migrate:prod # Run migrations
+
+# 4. Sync metadata (updates Twenty's GraphQL schema)
 npx nx run twenty-server:command workspace:sync-metadata
+
+# PRODUCTION-SAFE MIGRATION PRINCIPLES:
+# - Always additive: ADD columns/tables, never DROP existing ones
+# - New columns must be nullable OR have default values
+# - Test locally before deploying to Railway
+# - Keep migrations atomic and reversible
+# - Document breaking changes in migration comments
 ```
 
 ### GraphQL
