@@ -55,3 +55,5 @@ agent_behavior:
     - "SECONDARY: Direct database queries ONLY for critical bug fixes or deep diagnostics"
     - "Always start server and use GraphQL endpoint to verify implementations"
     - "Test features through UI (localhost:3001) and GraphQL (localhost:3000/graphql)"
+    - "ALWAYS atomically commit work after completing logical units for easy tracking"
+    - "USE twenty-crm-builder custom agent for ALL Twenty CRM development tasks"
