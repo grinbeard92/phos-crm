@@ -188,13 +188,47 @@
 - Solution needed: Promote user to ADMIN role via database
 - Paused investigation to store memories for the evening
 
+### Priority 1: Sales Acceleration - Fields Complete (2026-01-26)
+
+✅ **Custom Fields Added to Opportunity Object:**
+- `salesGuidance` (RICH_TEXT): ID d8f4b27e-a13c-4745-a279-9e206fb6d9d5
+- `leadSource` (SELECT): ID ad1225f1-492f-4aa2-9519-e7cddf972cc6
+- `daysInStage` (NUMBER): ID 622b13ae-6445-4938-9d9f-edcabb0d6fb3
+
+**Implementation:**
+- Created via GraphQL metadata API (production-safe)
+- All 50 existing opportunities preserved
+- Fields verified via GraphQL queries and mutations
+- Atomic commit: d1a6c41d26
+
+**Remaining Priority 1 Work:**
+1. ⏳ **Days-in-Stage Automation**: Create workflow to auto-calculate field
+   - DATABASE_EVENT trigger on Opportunity.stage changes
+   - CRON trigger for nightly recalculation of all opportunities
+2. ⏳ **Email → Opportunity Workflow**: Auto-create opportunities from emails
+   - Leverage Twenty's messaging integration
+   - Create workflow to detect opportunity emails and create records
+3. ⏳ **Stall Detection Dashboard**: Visual dashboard widget
+   - Query opportunities where daysInStage > threshold
+   - Color-coded warnings (green/yellow/red)
+   - Kanban board filtered by stall status
+
+**Workflow Architecture Discovered (2026-01-26):**
+- Twenty has FULL workflow engine with BullMQ background jobs
+- DATABASE_EVENT triggers for record changes
+- CRON triggers for scheduled tasks
+- Visual workflow builder with action system
+- Event enrichment and related entity loading
+- Existing email→contact automation pattern to extend
+
 ### Next Steps
-1. ⏳ Grant ADMIN role to user via database (enable Admin Panel access)
-2. ⏳ Add remaining approved domains (lvnlaser.com, beehivebirth.com) via UI
-3. ⏳ Validate all approved domains (click email confirmation links)
-4. ⏳ Create NEW Order object in CRM schema
-5. ⏳ Add Stripe integration fields to Quote, Invoice, Company objects
-6. ⏳ Implement Stripe webhook endpoint in Twenty backend
-7. ⏳ Implement 10 workflows from workflow-design-guide.md
-8. ⏳ Test complete Quote → Order → Invoice → Payment flow
-9. ⏳ Build custom views (Kanban for projects, table views for others)
+1. ⏳ Implement days-in-stage workflow (DATABASE_EVENT + CRON)
+2. ⏳ Implement Email → Opportunity workflow
+3. ⏳ Build stall detection dashboard widget
+4. ⏳ Grant ADMIN role to user via database (enable Admin Panel access)
+5. ⏳ Create NEW Order object in CRM schema (Stripe integration)
+6. ⏳ Add Stripe integration fields to Quote, Invoice, Company objects
+7. ⏳ Implement Stripe webhook endpoint in Twenty backend
+8. ⏳ Implement 10 workflows from workflow-design-guide.md
+9. ⏳ Test complete Quote → Order → Invoice → Payment flow
+10. ⏳ Build custom views (Kanban for projects, table views for others)
