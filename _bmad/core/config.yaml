@@ -7,3 +7,53 @@ user_name: Ben
 communication_language: English
 document_output_language: English
 output_folder: "{project-root}/_bmad-output"
+
+# 🚨 CRITICAL PRODUCTION DIRECTIVES 🚨
+critical_directives:
+  database_safety:
+    - "NEVER use database:reset commands - LIVE DATA EXISTS"
+    - "ALL schema changes MUST use proper TypeORM migrations"
+    - "Test migrations in development before production deployment"
+    - "Railway production deployment imminent - maintain schema integrity"
+    - "Always craft reversible migrations with proper up() and down() methods"
+    - "Verify migration safety: no data loss, no breaking changes to existing records"
+
+  deployment_context:
+    platform: "Railway"
+    status: "Production deployment imminent"
+    data_state: "Live production data active"
+
+# Environment & Credentials Reference
+environment:
+  server_env_path: "{project-root}/packages/twenty-server/.env"
+  frontend_env_path: "{project-root}/packages/twenty-front/.env"
+
+  database:
+    url: "postgres://postgres:postgres@localhost:5432/default"
+    host: "localhost"
+    port: 5432
+    user: "postgres"
+    password: "postgres"
+    database: "default"
+
+  server:
+    port: 3000
+    frontend_url: "http://localhost:3001"
+
+  redis:
+    url: "redis://localhost:6379"
+
+# Agent Behavior Rules
+agent_behavior:
+  database_commands:
+    - "psql SELECT/\\d/\\dt/\\dn/\\l commands (read-only diagnostics): NO CONFIRMATION NEEDED"
+    - "psql INSERT/UPDATE/DELETE/DROP/ALTER commands (data modification): REQUIRE CONFIRMATION"
+    - "Always use PGPASSWORD=postgres psql -h localhost -U postgres -d default for queries"
+
+  workflow_preferences:
+    - "PRIMARY: Use GraphQL API for daily work - query objects, fields, data"
+    - "SECONDARY: Direct database queries ONLY for critical bug fixes or deep diagnostics"
+    - "Always start server and use GraphQL endpoint to verify implementations"
+    - "Test features through UI (localhost:3001) and GraphQL (localhost:3000/graphql)"
+    - "ALWAYS atomically commit work after completing logical units for easy tracking"
+    - "USE twenty-crm-builder custom agent for ALL Twenty CRM development tasks"
