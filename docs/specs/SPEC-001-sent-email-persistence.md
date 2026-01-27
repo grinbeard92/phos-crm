@@ -42,6 +42,7 @@ Email vanishes from CRM
 3. **Enable threading** by wiring up In-Reply-To and References headers
 4. **Link to entities** - Connect sent emails to Person, Company, Opportunity
 5. **Show in timeline** - Sent emails appear in activity feeds with "Outgoing" indicator
+6. **Historical sync** - Import past emails from Inbox and Sent folders when account is connected
 
 ---
 
@@ -833,10 +834,19 @@ When user clicks "Reply" from the email thread view:
 - [ ] Add "Outgoing" / "Sent" indicator to timeline message cards
 - [ ] Ensure Person/Company timeline shows both sent and received
 
-### Phase 4: Testing & Documentation
+### Phase 4: Historical Email Sync (Section 15)
+- [ ] Verify `messageFolderImportPolicy` defaults to `ALL_FOLDERS` or auto-enables Inbox + Sent
+- [ ] Test full sync flow: connect fresh account → verify all historical messages import
+- [ ] Add sync progress indicator UI in Settings > Accounts
+- [ ] Add manual "Re-sync" button for users to trigger full re-import
+- [ ] Test performance with large mailboxes (10k+ messages)
+- [ ] Add sync completion notification (toast when initial sync finishes)
+
+### Phase 5: Testing & Documentation
 - [ ] Write unit tests for `SentMessagePersistenceService`
 - [ ] Write integration tests for threading scenarios
 - [ ] Write E2E test: CRM reply → check Gmail thread intact
+- [ ] Test historical sync: new account → verify Inbox + Sent imported
 - [ ] Document API changes in README or changelog
 
 ---
@@ -866,3 +876,164 @@ When we persist sent emails immediately AND the Sent folder syncs later:
 No duplicates will appear because:
 - Unique constraint on `(messageChannelId, messageId)` prevents duplicate associations
 - `headerMessageId` lookup prevents duplicate Message records
+
+---
+
+## 15. Historical Email Sync (Past Email Import)
+
+### 15.1 Problem Statement
+
+When a user connects their email account to Twenty CRM, they need to see their **existing email history** - not just new emails going forward. This includes:
+
+1. **Past received emails** - Inbox messages from before the account was connected
+2. **Past sent emails** - Sent folder messages from before the account was connected
+3. **Existing threads** - Complete conversation history, not just fragments
+
+### 15.2 Current Twenty Sync Architecture
+
+Twenty CRM already has robust email sync infrastructure:
+
+```
+Account Connected
+    ↓
+MessageChannel created with:
+  - syncStage: PENDING_CONFIGURATION → MESSAGE_LIST_FETCH_PENDING
+  - syncCursor: null (no cursor = full sync)
+    ↓
+Cron Job (every 5 min): MessagingMessageListFetchCronJob
+    ↓
+MessagingMessageListFetchService.processMessageListFetch()
+    ↓
+If syncCursor is null → Full Sync (fetches ALL messages from enabled folders)
+If syncCursor exists → Incremental Sync (fetches only new messages since cursor)
+    ↓
+Messages queued in cache: messages-to-import:{workspaceId}:{channelId}
+    ↓
+Cron Job (every 1 min): MessagingMessagesImportCronJob
+    ↓
+Fetches full message content and persists to database
+```
+
+### 15.3 Key Insight: Full Sync is Already Implemented
+
+From `messaging-message-list-fetch.service.ts`:
+
+```typescript
+const isFullSync =
+  messageLists.every(
+    (messageList) => !isNonEmptyString(messageList.previousSyncCursor),
+  ) && !isNonEmptyString(freshMessageChannel.syncCursor);
+```
+
+**When `syncCursor` is null**, the system performs a **full sync** that:
+1. Fetches ALL message IDs from all enabled folders (Inbox, Sent, etc.)
+2. Filters out already-imported messages
+3. Queues new messages for import
+4. Deletes messages that no longer exist in provider
+
+### 15.4 What Needs Configuration for Historical Sync
+
+#### 15.4.1 Enable Sent Folder Sync
+
+By default, whether Sent folder syncs depends on `messageFolderImportPolicy`:
+
+| Policy | Behavior |
+|--------|----------|
+| `ALL_FOLDERS` | Sent folder `isSynced: true` by default ✅ |
+| `SELECTED_FOLDERS` | User must explicitly enable Sent folder |
+
+**Recommendation**: For Phos CRM, set `ALL_FOLDERS` as default or auto-enable Inbox + Sent.
+
+#### 15.4.2 Trigger Initial Full Sync
+
+When account is first connected:
+
+```bash
+# CLI command to trigger immediate sync (doesn't wait for cron)
+npx nx run twenty-server:command messaging:trigger-message-list-fetch \
+  --workspace-id <workspace_id> \
+  --message-channel-id <channel_id>
+```
+
+Or programmatically when account is connected:
+```typescript
+// After connected account is created
+await messageChannelRepository.update(messageChannel.id, {
+  syncStage: MessageChannelSyncStage.MESSAGE_LIST_FETCH_PENDING,
+  syncCursor: null,  // null triggers full sync
+});
+
+// Optionally queue immediate job instead of waiting for cron
+await this.messageQueueService.add<MessagingMessageListFetchJobData>(
+  MessagingMessageListFetchJob.name,
+  { messageChannelId: messageChannel.id, workspaceId },
+);
+```
+
+### 15.5 Handling Large Historical Imports
+
+For accounts with thousands of emails, the import happens in batches:
+
+1. **Message list fetch**: Gets IDs in batches of 200
+2. **Message import**: Fetches and persists in batches
+3. **Progress visible**: `syncStage` shows current status
+
+Potential issues and mitigations:
+
+| Issue | Mitigation |
+|-------|------------|
+| Rate limiting | Exponential backoff already implemented |
+| Memory pressure | Batched processing (200 at a time) |
+| User impatience | Show sync progress indicator in UI |
+| Partial failures | Retry mechanism with error tracking |
+
+### 15.6 UI Considerations for Initial Sync
+
+When a user first connects their email, the UI should:
+
+1. **Show sync status** - "Syncing your email history... 1,234 messages imported"
+2. **Allow partial use** - Show already-imported messages while sync continues
+3. **Indicate completion** - "Email sync complete! All 5,678 messages imported"
+
+**Suggested UI component**: Email sync progress card in Settings > Accounts
+
+```typescript
+// Query sync status
+const messageChannel = await messageChannelRepository.findOne({
+  where: { connectedAccountId },
+  select: ['syncStatus', 'syncStage', 'syncedAt'],
+});
+
+// Display states:
+// ONGOING + MESSAGE_LIST_FETCH_ONGOING → "Discovering messages..."
+// ONGOING + MESSAGES_IMPORT_ONGOING → "Importing messages..."
+// ACTIVE → "Sync complete"
+// FAILED_* → "Sync failed - check connection"
+```
+
+### 15.7 Re-Sync / Manual Backfill
+
+If a user wants to re-import all historical emails (e.g., after fixing an issue):
+
+```typescript
+// Reset sync cursor to trigger full re-sync
+await messageChannelRepository.update(messageChannel.id, {
+  syncCursor: null,
+  syncStage: MessageChannelSyncStage.MESSAGE_LIST_FETCH_PENDING,
+});
+
+// For folder-level reset (e.g., just Sent folder)
+await messageFolderRepository.update(
+  { messageChannelId, name: 'Sent' },
+  { syncCursor: null },
+);
+```
+
+### 15.8 Implementation Checklist for Historical Sync
+
+- [ ] **Verify folder policy**: Ensure `ALL_FOLDERS` or explicitly enable Inbox + Sent
+- [ ] **Test full sync flow**: Connect fresh account, verify all messages import
+- [ ] **Add sync progress UI**: Show status in Settings > Accounts
+- [ ] **Add manual re-sync button**: Allow users to trigger full re-import
+- [ ] **Test large mailboxes**: Verify performance with 10k+ messages
+- [ ] **Add sync completion notification**: Toast when initial sync finishes
