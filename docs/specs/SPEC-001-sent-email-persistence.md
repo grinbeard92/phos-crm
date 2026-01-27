@@ -836,6 +836,16 @@ When user clicks "Reply" from the email thread view:
 - [x] Update `EmailThreadMessage` type with direction support
 - [x] Timeline already shows both sent and received (direction field on association)
 
+### Phase 3.5: In-CRM Reply Mode ✅ COMPLETE (2026-01-27)
+- [x] Add `isReply` and `references` props to `EmailComposeModal`
+- [x] Create recoil state (`emailComposeModalOptionsState`) for passing options to modal
+- [x] Update `useEmailComposer` hook to set state before opening modal
+- [x] Wire Reply button in `CommandMenuMessageThreadPage` to open compose modal (not external Gmail/Outlook)
+- [x] Add `headerMessageId` field to `EmailThreadMessage` type for RFC 5322 threading
+- [x] Update `useEmailThreadInCommandMenu` hook to return `lastMessageHeaderId` and `threadReferences`
+- [x] Hide template selector when in reply mode for cleaner UX
+- [x] Build quoted message HTML with theme colors and localized strings
+
 ### Phase 4: Historical Email Sync (Section 15)
 - [ ] Verify `messageFolderImportPolicy` defaults to `ALL_FOLDERS` or auto-enables Inbox + Sent
 - [ ] Test full sync flow: connect fresh account → verify all historical messages import
