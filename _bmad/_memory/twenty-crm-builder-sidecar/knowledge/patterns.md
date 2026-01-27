@@ -137,6 +137,172 @@ mutation CreateField($input: CreateOneFieldMetadataInput!) {
 
 ---
 
+## Authentication Patterns
+
+### API Key vs User Access Token
+**CRITICAL DISTINCTION:**
+- **API Key**: Works for data CRUD operations (companies, people, opportunities, etc.)
+- **User Access Token**: Required for admin operations (workflows, settings, permissions)
+
+**When to use which:**
+| Operation | Auth Type |
+|-----------|-----------|
+| Create/Read/Update/Delete records | API Key ✅ |
+| Create workflow | API Key ✅ |
+| Update workflow trigger | API Key ✅ |
+| Create/Update workflow STEPS | User Token ⚠️ |
+| Activate workflow | User Token ⚠️ |
+| Admin panel operations | User Token ⚠️ |
+
+### Getting User Access Token
+**Script**: `scripts/get-user-access-token.sh`
+**Credentials**: Stored in `_bmad/.env` (gitignored)
+
+**Two-step process:**
+1. **Get Login Token** (password auth):
+```graphql
+mutation GetLoginTokenFromCredentials($email: String!, $password: String!, $origin: String!) {
+  getLoginTokenFromCredentials(email: $email, password: $password, origin: $origin) {
+    loginToken { token expiresAt }
+  }
+}
+```
+Variables: `{ email, password, origin: "http://phos-ind.localhost:3001" }`
+
+2. **Exchange for Access Token**:
+```graphql
+mutation GetAuthTokensFromLoginToken($loginToken: String!, $origin: String!) {
+  getAuthTokensFromLoginToken(loginToken: $loginToken, origin: $origin) {
+    tokens {
+      accessOrWorkspaceAgnosticToken { token expiresAt }
+      refreshToken { token expiresAt }
+    }
+  }
+}
+```
+
+**Key learnings:**
+- Origin MUST match workspace subdomain: `http://{subdomain}.localhost:3001`
+- Field is `accessOrWorkspaceAgnosticToken` not `accessToken`
+- Access tokens expire in ~30 minutes, refresh tokens last ~60 days
+- Password special characters handled automatically by Python's json.dumps()
+
+---
+
+## Workflow Patterns
+
+### Creating Workflows via GraphQL
+**IMPORTANT**: Workflow creation has TWO permission levels:
+1. Workflow + Trigger: API Key works ✅
+2. Workflow Steps: Requires User Access Token ⚠️
+
+**Complete workflow creation flow:**
+
+**Step 1: Create Workflow** (API Key OK)
+```graphql
+mutation CreateWorkflow {
+  createWorkflow(data: { name: "My Workflow" }) {
+    id
+  }
+}
+```
+
+**Step 2: Get Auto-Created Version** (API Key OK)
+```graphql
+query GetWorkflow($id: UUID!) {
+  workflow(filter: { id: { eq: $id } }) {
+    id
+    versions { edges { node { id status } } }
+  }
+}
+```
+
+**Step 3: Set Trigger** (API Key OK)
+```graphql
+mutation UpdateWorkflowVersion($id: UUID!, $data: WorkflowVersionUpdateInput!) {
+  updateWorkflowVersion(id: $id, data: $data) {
+    id trigger
+  }
+}
+```
+Variables:
+```json
+{
+  "id": "version-id",
+  "data": {
+    "trigger": {
+      "name": "New Email Received",
+      "type": "DATABASE_EVENT",
+      "settings": {
+        "eventName": "message.created",
+        "objectType": "message",
+        "outputSchema": {}
+      },
+      "nextStepIds": [],
+      "position": { "x": 0, "y": 0 }
+    }
+  }
+}
+```
+
+**Step 4: Create Step** (User Token REQUIRED)
+```graphql
+mutation CreateWorkflowVersionStep($input: CreateWorkflowVersionStepInput!) {
+  createWorkflowVersionStep(input: $input) {
+    stepsDiff
+  }
+}
+```
+Variables:
+```json
+{
+  "input": {
+    "workflowVersionId": "version-id",
+    "stepType": "CREATE_RECORD",
+    "parentStepId": "trigger",
+    "position": { "x": 200, "y": 0 }
+  }
+}
+```
+
+**Step 5: Configure Step** (User Token REQUIRED)
+```graphql
+mutation UpdateWorkflowVersionStep($input: UpdateWorkflowVersionStepInput!) {
+  updateWorkflowVersionStep(input: $input) {
+    id type name
+  }
+}
+```
+
+**Step 6: Activate Workflow** (User Token REQUIRED)
+```graphql
+mutation ActivateWorkflowVersion($workflowVersionId: UUID!) {
+  activateWorkflowVersion(workflowVersionId: $workflowVersionId)
+}
+```
+
+### Trigger Types
+- `DATABASE_EVENT`: Fires on record create/update/delete
+  - eventName format: `{objectName}.{action}` (e.g., `message.created`, `opportunity.updated`)
+- `MANUAL`: User-triggered workflows
+- `CRON`: Scheduled workflows
+- `WEBHOOK`: External trigger via HTTP
+
+### Step Types
+- `CREATE_RECORD`: Create new record
+- `UPDATE_RECORD`: Update existing record
+- `DELETE_RECORD`: Delete record
+- `SEND_EMAIL`: Send email
+- `IF_ELSE`: Conditional branching
+- `CODE`: Custom serverless function
+- `HTTP_REQUEST`: External API call
+
+### Variable References in Workflows
+Access trigger data: `{{trigger.object.fieldName}}`
+Access step output: `{{stepId.output.fieldName}}`
+
+---
+
 ## Gotchas & Pitfalls
 
 ### Admin Panel Visibility
