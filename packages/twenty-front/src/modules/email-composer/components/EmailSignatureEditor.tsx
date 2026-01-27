@@ -87,8 +87,10 @@ export const EmailSignatureEditor = () => {
   const {
     signature,
     includeSignature,
+    showSignaturePreview,
     updateSignature,
     toggleIncludeSignature,
+    toggleShowSignaturePreview,
   } = useEmailSignature();
 
   const [hasChanges, setHasChanges] = useState(false);
@@ -168,11 +170,29 @@ export const EmailSignatureEditor = () => {
           </StyledToggleTitle>
           <StyledToggleDescription>
             <Trans>
-              Automatically include your signature when composing new emails.
+              Automatically include your signature when sending emails.
             </Trans>
           </StyledToggleDescription>
         </StyledToggleLabel>
         <Toggle value={includeSignature} onChange={toggleIncludeSignature} />
+      </StyledToggleRow>
+
+      <StyledToggleRow>
+        <StyledToggleLabel>
+          <StyledToggleTitle>
+            <Trans>Preview signature in compose</Trans>
+          </StyledToggleTitle>
+          <StyledToggleDescription>
+            <Trans>
+              Show signature preview at the bottom of the email compose window.
+            </Trans>
+          </StyledToggleDescription>
+        </StyledToggleLabel>
+        <Toggle
+          value={showSignaturePreview}
+          onChange={toggleShowSignaturePreview}
+          disabled={!includeSignature}
+        />
       </StyledToggleRow>
 
       <StyledEditorContainer>

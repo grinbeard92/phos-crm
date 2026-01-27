@@ -6,6 +6,7 @@ import { currentWorkspaceMemberState } from '@/auth/states/currentWorkspaceMembe
 import {
   emailSignatureState,
   includeSignatureState,
+  showSignaturePreviewState,
 } from '@/email-composer/states/emailComposerSettingsState';
 
 /**
@@ -22,6 +23,9 @@ export const useEmailSignature = () => {
   const [includeSignature, setIncludeSignature] = useRecoilState(
     includeSignatureState(memberId),
   );
+  const [showSignaturePreview, setShowSignaturePreview] = useRecoilState(
+    showSignaturePreviewState(memberId),
+  );
 
   const updateSignature = useCallback(
     (newSignature: string) => {
@@ -33,6 +37,10 @@ export const useEmailSignature = () => {
   const toggleIncludeSignature = useCallback(() => {
     setIncludeSignature((prev) => !prev);
   }, [setIncludeSignature]);
+
+  const toggleShowSignaturePreview = useCallback(() => {
+    setShowSignaturePreview((prev) => !prev);
+  }, [setShowSignaturePreview]);
 
   /**
    * Returns the signature HTML to append to emails.
@@ -50,9 +58,12 @@ export const useEmailSignature = () => {
   return {
     signature,
     includeSignature,
+    showSignaturePreview,
     updateSignature,
     setIncludeSignature,
+    setShowSignaturePreview,
     toggleIncludeSignature,
+    toggleShowSignaturePreview,
     getSignatureForEmail,
   };
 };

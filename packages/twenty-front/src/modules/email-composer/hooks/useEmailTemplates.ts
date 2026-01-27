@@ -6,6 +6,7 @@ import { currentWorkspaceState } from '@/auth/states/currentWorkspaceState';
 import { type EmailTemplateOption } from '@/email-composer/types/EmailComposerTypes';
 import {
   DEFAULT_EMAIL_TEMPLATES,
+  emailTemplatesInitializedState,
   type LocalEmailTemplate,
   localEmailTemplatesState,
 } from '@/email-composer/states/emailComposerSettingsState';
@@ -22,11 +23,24 @@ export const useEmailTemplates = () => {
     localEmailTemplatesState(workspaceId),
   );
 
+  const [emailTemplatesInitialized, setEmailTemplatesInitialized] =
+    useRecoilState(emailTemplatesInitializedState);
+
   // Initialize with default templates if empty
-  // This runs on mount and whenever localTemplates becomes empty
+  // Track initialization per workspace to avoid race conditions
   useEffect(() => {
-    // Only initialize if we have a valid workspace and templates are empty
-    if (localTemplates.length === 0 && workspaceId !== '') {
+    const shouldInitialize =
+      localTemplates.length === 0 &&
+      workspaceId !== '' &&
+      emailTemplatesInitialized[workspaceId] !== true;
+
+    if (shouldInitialize) {
+      // Mark as initialized before setting to prevent duplicate calls
+      setEmailTemplatesInitialized((prev) => ({
+        ...prev,
+        [workspaceId]: true,
+      }));
+
       const now = new Date().toISOString();
       const defaultTemplates: LocalEmailTemplate[] =
         DEFAULT_EMAIL_TEMPLATES.map((tmpl, index) => ({
@@ -37,7 +51,13 @@ export const useEmailTemplates = () => {
         }));
       setLocalTemplates(defaultTemplates);
     }
-  }, [localTemplates.length, setLocalTemplates, workspaceId]);
+  }, [
+    localTemplates.length,
+    setLocalTemplates,
+    workspaceId,
+    emailTemplatesInitialized,
+    setEmailTemplatesInitialized,
+  ]);
 
   // Filter to active templates only
   const templates: EmailTemplateOption[] = useMemo(

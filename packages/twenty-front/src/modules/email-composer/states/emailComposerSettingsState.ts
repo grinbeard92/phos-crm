@@ -1,4 +1,4 @@
-import { atomFamily } from 'recoil';
+import { atom, atomFamily } from 'recoil';
 
 import { localStorageEffect } from '~/utils/recoil/localStorageEffect';
 
@@ -23,6 +23,26 @@ export const includeSignatureState = atomFamily<boolean, string>({
   effects: (workspaceMemberId) => [
     localStorageEffect(`includeSignature-${workspaceMemberId}`),
   ],
+});
+
+/**
+ * Whether to show signature preview in the email compose body.
+ */
+export const showSignaturePreviewState = atomFamily<boolean, string>({
+  key: 'showSignaturePreview',
+  default: true,
+  effects: (workspaceMemberId) => [
+    localStorageEffect(`showSignaturePreview-${workspaceMemberId}`),
+  ],
+});
+
+/**
+ * Track which workspaces have had their templates initialized.
+ * This is a module-level state (not persisted) to prevent re-initialization.
+ */
+export const emailTemplatesInitializedState = atom<Record<string, boolean>>({
+  key: 'emailTemplatesInitialized',
+  default: {},
 });
 
 /**

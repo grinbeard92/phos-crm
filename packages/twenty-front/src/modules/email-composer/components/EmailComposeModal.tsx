@@ -4,6 +4,7 @@ import { WorkflowSendEmailAttachments } from '@/advanced-text-editor/components/
 import { currentWorkspaceMemberState } from '@/auth/states/currentWorkspaceMemberState';
 import { EmailTemplateSelector } from '@/email-composer/components/EmailTemplateSelector';
 import { useEmailSignature } from '@/email-composer/hooks/useEmailSignature';
+import DOMPurify from 'dompurify';
 import { useSendEmail } from '@/email-composer/hooks/useSendEmail';
 import { useUploadEmailImage } from '@/email-composer/hooks/useUploadEmailImage';
 import {
@@ -117,6 +118,29 @@ const StyledEditorLabel = styled.div`
   margin-bottom: ${({ theme }) => theme.spacing(1)};
 `;
 
+const StyledSignaturePreview = styled.div`
+  border-top: 1px solid ${({ theme }) => theme.border.color.light};
+  margin-top: ${({ theme }) => theme.spacing(3)};
+  padding-top: ${({ theme }) => theme.spacing(3)};
+`;
+
+const StyledSignatureLabel = styled.div`
+  color: ${({ theme }) => theme.font.color.tertiary};
+  font-size: ${({ theme }) => theme.font.size.xs};
+  font-weight: ${({ theme }) => theme.font.weight.medium};
+  margin-bottom: ${({ theme }) => theme.spacing(2)};
+`;
+
+const StyledSignatureContent = styled.div`
+  color: ${({ theme }) => theme.font.color.secondary};
+  font-size: ${({ theme }) => theme.font.size.sm};
+  line-height: 1.5;
+
+  p {
+    margin: 0 0 ${({ theme }) => theme.spacing(2)};
+  }
+`;
+
 type EmailAttachmentFile = {
   id: string;
   name: string;
@@ -150,7 +174,12 @@ export const EmailComposeModal = ({
   const { enqueueErrorSnackBar, enqueueSuccessSnackBar } = useSnackBar();
   const { uploadEmailImage } = useUploadEmailImage();
   const { sendEmail } = useSendEmail();
-  const { getSignatureForEmail } = useEmailSignature();
+  const {
+    signature,
+    includeSignature,
+    showSignaturePreview,
+    getSignatureForEmail,
+  } = useEmailSignature();
   const currentWorkspaceMember = useRecoilValue(currentWorkspaceMemberState);
 
   const [connectedAccountId, setConnectedAccountId] = useState<string | null>(
@@ -168,6 +197,12 @@ export const EmailComposeModal = ({
   const [subject, setSubject] = useState(defaultSubject);
   const [attachments, setAttachments] = useState<EmailAttachmentFile[]>([]);
   const [isSending, setIsSending] = useState(false);
+
+  // Sanitize signature for preview rendering
+  const sanitizedSignature = useMemo(
+    () => (signature ? DOMPurify.sanitize(signature) : ''),
+    [signature],
+  );
 
   // Initialize BlockNote editor
   const initialContent = useMemo(() => {
@@ -450,6 +485,22 @@ export const EmailComposeModal = ({
               <StyledEditorContainer>
                 <BlockEditor editor={editor} />
               </StyledEditorContainer>
+              {showSignaturePreview &&
+                includeSignature &&
+                sanitizedSignature !== '' && (
+                  <StyledSignaturePreview>
+                    <StyledSignatureLabel>
+                      <Trans>Signature Preview</Trans>
+                    </StyledSignatureLabel>
+                    <StyledSignatureContent>
+                      <div>--</div>
+                      {/* Signature HTML is sanitized with DOMPurify above */}
+                      <div
+                        dangerouslySetInnerHTML={{ __html: sanitizedSignature }}
+                      />
+                    </StyledSignatureContent>
+                  </StyledSignaturePreview>
+                )}
             </div>
 
             <WorkflowSendEmailAttachments
