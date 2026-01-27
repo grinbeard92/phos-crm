@@ -23,8 +23,10 @@ export const useEmailTemplates = () => {
   );
 
   // Initialize with default templates if empty
+  // This runs on mount and whenever localTemplates becomes empty
   useEffect(() => {
-    if (localTemplates.length === 0) {
+    // Only initialize if we have a valid workspace and templates are empty
+    if (localTemplates.length === 0 && workspaceId !== '') {
       const now = new Date().toISOString();
       const defaultTemplates: LocalEmailTemplate[] =
         DEFAULT_EMAIL_TEMPLATES.map((tmpl, index) => ({
@@ -35,7 +37,7 @@ export const useEmailTemplates = () => {
         }));
       setLocalTemplates(defaultTemplates);
     }
-  }, [localTemplates.length, setLocalTemplates]);
+  }, [localTemplates.length, setLocalTemplates, workspaceId]);
 
   // Filter to active templates only
   const templates: EmailTemplateOption[] = useMemo(
