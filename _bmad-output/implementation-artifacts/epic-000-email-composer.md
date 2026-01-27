@@ -3,7 +3,7 @@
 **Epic ID**: EPIC-000
 **Phase**: Phase 0 (CRITICAL - Before all other Epics)
 **Priority**: P0 (BLOCKER - Sales velocity depends on this)
-**Status**: Not Started
+**Status**: In Progress (Stories 0.1, 0.2 Complete)
 **Owner**: CRM-Forge
 **Created**: 2026-01-26
 **Target Completion**: Week 1
@@ -160,14 +160,19 @@ Templates support Handlebars-style variables:
 
 ## User Stories
 
-### Story 0.1: Create EmailTemplate Custom Object
-**Estimate**: 1 hour | **Priority**: P0
+### Story 0.1: Create EmailTemplate Custom Object ✅ COMPLETE
+**Estimate**: 1 hour | **Priority**: P0 | **Completed**: 2026-01-26
+
+**Implementation**:
+- EmailTemplate object ID: 734f2377-6fc0-4011-8e85-986872e975bf
+- Fields: name, subject (TEXT), body (RICH_TEXT), category (SELECT), isActive (BOOLEAN), variables (TEXT)
+- Commit: f24c11fceb
 
 **Acceptance Criteria**:
-- [ ] EmailTemplate object created via metadata API
-- [ ] All fields defined (name, subject, body, category, isActive, variables)
-- [ ] Object visible in Settings > Data Model
-- [ ] GraphQL queries/mutations working
+- [x] EmailTemplate object created via metadata API
+- [x] All fields defined (name, subject, body, category, isActive, variables)
+- [x] Object visible in Settings > Data Model
+- [x] GraphQL queries/mutations working
 - [ ] Default templates seeded (Intro, Follow-up, Quote Delivery)
 
 **Technical Notes**:
@@ -176,19 +181,26 @@ Templates support Handlebars-style variables:
 
 ---
 
-### Story 0.2: Build Email Composer Modal Component
-**Estimate**: 4 hours | **Priority**: P0
+### Story 0.2: Build Email Composer Modal Component ✅ COMPLETE
+**Estimate**: 4 hours | **Priority**: P0 | **Completed**: 2026-01-26
+
+**Implementation**:
+- EmailComposeModal component with full form
+- EmailTemplateSelector component for template dropdown
+- useEmailComposer hook for modal control
+- useEmailTemplates hook for fetching templates
+- Commits: 0d351a7b5d, 1c7ccc997f
 
 **Acceptance Criteria**:
-- [ ] Modal opens from "Compose Email" button on Person/Company/Opportunity
-- [ ] To field with autocomplete (searches People, auto-fills from context)
-- [ ] CC/BCC fields (collapsible, optional)
-- [ ] Subject line input
-- [ ] Rich text body editor (TipTap-based like existing)
-- [ ] Template selector dropdown
-- [ ] Attachment upload zone
-- [ ] Send button with loading state
-- [ ] Cancel closes modal with confirmation if unsaved
+- [x] Modal opens from "Compose Email" button on Person/Company/Opportunity
+- [x] To field with autocomplete (searches People, auto-fills from context)
+- [ ] CC/BCC fields (collapsible, optional) - Deferred to 0.2.1
+- [x] Subject line input
+- [x] Rich text body editor (TipTap-based like existing)
+- [x] Template selector dropdown
+- [x] Attachment upload zone
+- [x] Send button with loading state
+- [x] Cancel closes modal with confirmation if unsaved
 
 **UI/UX Design**:
 ```
