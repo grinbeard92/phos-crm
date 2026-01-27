@@ -93,10 +93,20 @@ const StyledEditorContainer = styled.div`
   border-radius: ${({ theme }) => theme.border.radius.sm};
   min-height: 200px;
   max-height: 400px;
-  overflow: auto;
+  overflow: visible;
+  position: relative;
 
   & .editor {
     min-height: 180px !important;
+    padding: ${({ theme }) => theme.spacing(2, 3)} !important;
+  }
+
+  & .bn-editor {
+    padding-inline: ${({ theme }) => theme.spacing(2)} !important;
+  }
+
+  & .bn-block-outer {
+    margin: 0 !important;
   }
 `;
 

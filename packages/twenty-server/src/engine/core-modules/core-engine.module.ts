@@ -21,6 +21,7 @@ import { CloudflareModule } from 'src/engine/core-modules/cloudflare/cloudflare.
 import { codeInterpreterModuleFactory } from 'src/engine/core-modules/code-interpreter/code-interpreter-module.factory';
 import { CodeInterpreterModule } from 'src/engine/core-modules/code-interpreter/code-interpreter.module';
 import { DnsManagerModule } from 'src/engine/core-modules/dns-manager/dns-manager.module';
+import { EmailComposerModule } from 'src/engine/core-modules/email-composer/email-composer.module';
 import { EmailModule } from 'src/engine/core-modules/email/email.module';
 import { EmailingDomainModule } from 'src/engine/core-modules/emailing-domain/emailing-domain.module';
 import { ExceptionHandlerModule } from 'src/engine/core-modules/exception-handler/exception-handler.module';
@@ -156,6 +157,7 @@ import { FileModule } from './file/file.module';
     TrashCleanupModule,
     DashboardModule,
     RowLevelPermissionModule,
+    EmailComposerModule,
   ],
   exports: [
     AuditModule,

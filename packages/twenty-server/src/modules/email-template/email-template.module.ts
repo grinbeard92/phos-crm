@@ -1,14 +1,13 @@
 import { Module } from '@nestjs/common';
 
-import { ToolModule } from 'src/engine/core-modules/tool/tool.module';
-
-import { EmailTemplateResolver } from './email-template.resolver';
-
 import { EmailTemplateVariableService } from './services/email-template-variable.service';
 
+// Note: EmailComposerResolver (sendEmail mutation) is now in core-modules/email-composer
+// This module only provides the EmailTemplateVariableService for template variable expansion
+
 @Module({
-  imports: [ToolModule],
-  providers: [EmailTemplateVariableService, EmailTemplateResolver],
+  imports: [],
+  providers: [EmailTemplateVariableService],
   exports: [EmailTemplateVariableService],
 })
 export class EmailTemplateModule {}
