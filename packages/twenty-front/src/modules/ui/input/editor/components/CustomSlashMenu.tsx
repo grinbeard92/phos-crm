@@ -12,6 +12,7 @@ import type {
   CustomSlashMenuProps,
   SuggestionItem,
 } from '@/ui/input/editor/components/types';
+import { RootStackingContextZIndices } from '@/ui/layout/constants/RootStackingContextZIndices';
 import { DropdownContent } from '@/ui/layout/dropdown/components/DropdownContent';
 import { DropdownMenuItemsContainer } from '@/ui/layout/dropdown/components/DropdownMenuItemsContainer';
 import { OverlayContainer } from '@/ui/layout/overlay/components/OverlayContainer';
@@ -24,6 +25,10 @@ export type { SuggestionItem };
 const StyledContainer = styled.div`
   height: 1px;
   width: 1px;
+`;
+
+const StyledOverlayContainer = styled(OverlayContainer)`
+  z-index: ${RootStackingContextZIndices.DropdownPortalAboveModal};
 `;
 
 export const CustomSlashMenu = ({
@@ -79,7 +84,7 @@ export const CustomSlashMenu = ({
             animate={{ opacity: 1 }}
             transition={{ duration: 0.1 }}
           >
-            <OverlayContainer
+            <StyledOverlayContainer
               ref={refs.setFloating}
               style={floatingStyles}
               data-click-outside-id={SLASH_MENU_DROPDOWN_CLICK_OUTSIDE_ID}
@@ -97,7 +102,7 @@ export const CustomSlashMenu = ({
                   </SelectableList>
                 </DropdownMenuItemsContainer>
               </DropdownContent>
-            </OverlayContainer>
+            </StyledOverlayContainer>
           </motion.div>,
           document.body,
         )}
