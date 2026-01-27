@@ -4,7 +4,10 @@ import { WorkflowSendEmailAttachments } from '@/advanced-text-editor/components/
 import { currentWorkspaceMemberState } from '@/auth/states/currentWorkspaceMemberState';
 import { EmailTemplateSelector } from '@/email-composer/components/EmailTemplateSelector';
 import { useSendEmail } from '@/email-composer/hooks/useSendEmail';
-import { type EmailComposeContext, type EmailTemplateOption } from '@/email-composer/types/EmailComposerTypes';
+import {
+  type EmailComposeContext,
+  type EmailTemplateOption,
+} from '@/email-composer/types/EmailComposerTypes';
 import { CoreObjectNameSingular } from '@/object-metadata/types/CoreObjectNameSingular';
 import { useFindManyRecords } from '@/object-record/hooks/useFindManyRecords';
 import { FormAdvancedTextFieldInput } from '@/object-record/record-field/ui/form-types/components/FormAdvancedTextFieldInput';
@@ -21,9 +24,8 @@ import { useState, useCallback } from 'react';
 import { useRecoilValue } from 'recoil';
 import { ConnectedAccountProvider } from 'twenty-shared/types';
 import { isDefined } from 'twenty-shared/utils';
-import { Button } from 'twenty-ui/input';
 import { H2Title, IconMail, IconSend, IconX } from 'twenty-ui/display';
-import { type SelectOption } from 'twenty-ui/input';
+import { Button, type SelectOption } from 'twenty-ui/input';
 
 const EMAIL_EDITOR_MIN_HEIGHT = 280;
 const EMAIL_EDITOR_MAX_WIDTH = 560;
@@ -31,8 +33,8 @@ const EMAIL_EDITOR_MAX_WIDTH = 560;
 export const EMAIL_COMPOSE_MODAL_ID = 'email-compose-modal';
 
 const StyledModalHeader = styled(Modal.Header)`
-  justify-content: space-between;
   border-bottom: 1px solid ${({ theme }) => theme.border.color.light};
+  justify-content: space-between;
 `;
 
 const StyledHeaderLeft = styled.div`
@@ -95,9 +97,15 @@ export const EmailComposeModal = ({
   const { sendEmail } = useSendEmail();
   const currentWorkspaceMember = useRecoilValue(currentWorkspaceMemberState);
 
-  const [connectedAccountId, setConnectedAccountId] = useState<string | null>(null);
-  const [selectedTemplateId, setSelectedTemplateId] = useState<string | null>(null);
-  const [toEmail, setToEmail] = useState(defaultTo || context?.personEmail || '');
+  const [connectedAccountId, setConnectedAccountId] = useState<string | null>(
+    null,
+  );
+  const [selectedTemplateId, setSelectedTemplateId] = useState<string | null>(
+    null,
+  );
+  const [toEmail, setToEmail] = useState(
+    defaultTo || context?.personEmail || '',
+  );
   const [subject, setSubject] = useState(defaultSubject);
   const [body, setBody] = useState(defaultBody);
   const [attachments, setAttachments] = useState<EmailAttachmentFile[]>([]);
@@ -223,13 +231,15 @@ export const EmailComposeModal = ({
         handleClose();
       } else {
         enqueueErrorSnackBar({
-          message: t`Failed to send email: `.concat(result.error || 'Unknown error'),
+          message: t`Failed to send email: `.concat(
+            result.error || t`Unknown error`,
+          ),
         });
       }
     } catch (error) {
       enqueueErrorSnackBar({
         message: t`Failed to send email: `.concat(
-          error instanceof Error ? error.message : 'Unknown error',
+          error instanceof Error ? error.message : t`Unknown error`,
         ),
       });
     } finally {

@@ -2,6 +2,7 @@ import { useMutation } from '@apollo/client';
 import { useCallback } from 'react';
 
 import { SEND_EMAIL_MUTATION } from '@/email-composer/graphql/mutations/sendEmail';
+import { t } from '@lingui/core/macro';
 
 type SendEmailInput = {
   email: string;
@@ -34,8 +35,8 @@ export const useSendEmail = () => {
       if (!result.data?.sendEmail) {
         return {
           success: false,
-          message: 'Failed to send email',
-          error: 'No response from server',
+          message: t`Failed to send email`,
+          error: t`No response from server`,
         };
       }
 

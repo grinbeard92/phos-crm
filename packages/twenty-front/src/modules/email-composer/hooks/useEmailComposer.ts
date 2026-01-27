@@ -16,7 +16,7 @@ export const useEmailComposer = () => {
   const { openModal, closeModal } = useModal();
 
   const openEmailComposer = useCallback(
-    (options?: OpenEmailComposerOptions) => {
+    (_options?: OpenEmailComposerOptions) => {
       // Store options in a temporary state or context if needed
       // For now, the modal will receive props directly
       openModal(EMAIL_COMPOSE_MODAL_ID);
