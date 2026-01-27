@@ -111,6 +111,7 @@ describe('GmailGetMessageListService', () => {
           syncCursor: '',
           id: 'my-id',
           messageFolderImportPolicy: MessageFolderImportPolicy.SELECTED_FOLDERS,
+          syncHistoryDepthDays: 30,
         },
         connectedAccount: mockConnectedAccount,
         messageFolders: [
@@ -174,6 +175,7 @@ describe('GmailGetMessageListService', () => {
           syncCursor: '',
           id: 'my-id',
           messageFolderImportPolicy: MessageFolderImportPolicy.SELECTED_FOLDERS,
+          syncHistoryDepthDays: 30,
         },
         connectedAccount: mockConnectedAccount,
         messageFolders: [
@@ -237,6 +239,7 @@ describe('GmailGetMessageListService', () => {
           syncCursor: '',
           id: 'my-id',
           messageFolderImportPolicy: MessageFolderImportPolicy.SELECTED_FOLDERS,
+          syncHistoryDepthDays: 30,
         },
         connectedAccount: mockConnectedAccount,
         messageFolders: [
@@ -281,6 +284,7 @@ describe('GmailGetMessageListService', () => {
           syncCursor: '',
           id: 'my-id',
           messageFolderImportPolicy: MessageFolderImportPolicy.SELECTED_FOLDERS,
+          syncHistoryDepthDays: 30,
         },
         connectedAccount: mockConnectedAccount,
         messageFolders: [
@@ -316,6 +320,7 @@ describe('GmailGetMessageListService', () => {
           syncCursor: '',
           id: 'my-id',
           messageFolderImportPolicy: MessageFolderImportPolicy.SELECTED_FOLDERS,
+          syncHistoryDepthDays: 30,
         },
         connectedAccount: mockConnectedAccount,
         messageFolders: [
@@ -385,6 +390,7 @@ describe('GmailGetMessageListService', () => {
           syncCursor: '',
           id: 'channel-1',
           messageFolderImportPolicy: MessageFolderImportPolicy.SELECTED_FOLDERS,
+          syncHistoryDepthDays: 30,
         },
         connectedAccount: mockConnectedAccount,
         messageFolders,
@@ -426,6 +432,7 @@ describe('GmailGetMessageListService', () => {
           syncCursor: '',
           id: 'channel-1',
           messageFolderImportPolicy: MessageFolderImportPolicy.ALL_FOLDERS,
+          syncHistoryDepthDays: 30,
         },
         connectedAccount: mockConnectedAccount,
         messageFolders: [
@@ -514,6 +521,7 @@ describe('GmailGetMessageListService', () => {
           syncCursor: 'old-cursor',
           id: 'channel-1',
           messageFolderImportPolicy: MessageFolderImportPolicy.SELECTED_FOLDERS,
+          syncHistoryDepthDays: 30,
         },
         connectedAccount: mockConnectedAccount,
         messageFolders: [
@@ -596,6 +604,7 @@ describe('GmailGetMessageListService', () => {
           syncCursor: 'old-cursor',
           id: 'channel-1',
           messageFolderImportPolicy: MessageFolderImportPolicy.ALL_FOLDERS,
+          syncHistoryDepthDays: 30,
         },
         connectedAccount: mockConnectedAccount,
         messageFolders: [
