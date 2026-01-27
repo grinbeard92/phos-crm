@@ -44,7 +44,9 @@ export class OpportunityDaysInStageCronJob {
     });
 
     if (workspaces.length === 0) {
-      this.logger.log('No active workspaces found for days-in-stage calculation');
+      this.logger.log(
+        'No active workspaces found for days-in-stage calculation',
+      );
 
       return;
     }

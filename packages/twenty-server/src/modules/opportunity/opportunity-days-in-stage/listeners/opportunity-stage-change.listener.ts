@@ -26,7 +26,9 @@ export class OpportunityStageChangeListener {
 
     // Filter events where stage was updated
     const stageChangeEvents = events.filter((event) => {
-      const diff = event.properties?.diff as Record<string, any> | undefined;
+      const diff = event.properties?.diff as
+        | Record<string, unknown>
+        | undefined;
 
       return diff && 'stage' in diff;
     });
