@@ -846,12 +846,15 @@ When user clicks "Reply" from the email thread view:
 - [x] Hide template selector when in reply mode for cleaner UX
 - [x] Build quoted message HTML with theme colors and localized strings
 
-### Phase 4: Historical Email Sync (Section 15)
+### Phase 4: Historical Email Sync (Section 15) ✅ SUBSTANTIALLY COMPLETE (2026-01-27)
+- [x] Add `syncHistoryDepthDays` field to MessageChannel (default: 30 days)
+- [x] Gmail driver: Apply `after:YYYY/MM/DD` filter for initial sync
+- [x] Microsoft driver: Apply OData `$filter=receivedDateTime ge {date}` for initial sync
+- [x] IMAP driver: Apply SEARCH SINCE filter for initial sync
+- [x] Field configurable per channel (0 = sync all history)
 - [ ] Verify `messageFolderImportPolicy` defaults to `ALL_FOLDERS` or auto-enables Inbox + Sent
-- [ ] Test full sync flow: connect fresh account → verify all historical messages import
 - [ ] Add sync progress indicator UI in Settings > Accounts
 - [ ] Add manual "Re-sync" button for users to trigger full re-import
-- [ ] Test performance with large mailboxes (10k+ messages)
 - [ ] Add sync completion notification (toast when initial sync finishes)
 
 ### Phase 5: Testing & Documentation
