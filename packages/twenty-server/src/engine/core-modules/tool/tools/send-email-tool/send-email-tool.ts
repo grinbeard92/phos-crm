@@ -276,10 +276,12 @@ export class SendEmailTool implements Tool {
       if (isHtmlBody) {
         // Body is already HTML from frontend (BlockNote blocksToHTMLLossy)
         // Wrap it in a proper email template with styling
+        // Use 'professional' style by default for normal business emails
         const sanitizedContent = purify.sanitize(body);
         const reactMarkup = ComposedEmail({
           htmlContent: sanitizedContent,
           previewText: subject?.substring(0, 100),
+          style: 'professional',
         });
 
         htmlBody = await render(reactMarkup);

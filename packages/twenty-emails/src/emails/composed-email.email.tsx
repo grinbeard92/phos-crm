@@ -1,5 +1,7 @@
 import { Body, Container, Head, Html, Preview } from '@react-email/components';
 
+export type EmailStyle = 'professional' | 'marketing';
+
 type ComposedEmailProps = {
   /**
    * HTML content to render in the email body.
@@ -9,6 +11,12 @@ type ComposedEmailProps = {
    */
   htmlContent: string;
   previewText?: string;
+  /**
+   * Email style:
+   * - 'professional': Full-width, left-aligned, like a normal email (default)
+   * - 'marketing': Centered, max-width container, like a newsletter
+   */
+  style?: EmailStyle;
 };
 
 /**
@@ -31,7 +39,10 @@ type ComposedEmailProps = {
 export const ComposedEmail = ({
   htmlContent,
   previewText,
+  style = 'professional',
 }: ComposedEmailProps) => {
+  const isMarketing = style === 'marketing';
+
   return (
     <Html>
       <Head>
@@ -129,19 +140,36 @@ export const ComposedEmail = ({
           backgroundColor: '#ffffff',
         }}
       >
-        <Container
-          style={{
-            maxWidth: '600px',
-            margin: '0 auto',
-            padding: '20px',
-          }}
-        >
-          {/*
-            SECURITY: htmlContent is sanitized with DOMPurify on the backend
-            in SendEmailTool.ts before reaching this template.
-          */}
-          <div dangerouslySetInnerHTML={{ __html: htmlContent }} />
-        </Container>
+        {isMarketing ? (
+          // Marketing style: centered, max-width container
+          <Container
+            style={{
+              maxWidth: '600px',
+              margin: '0 auto',
+              padding: '20px',
+            }}
+          >
+            {/*
+              SECURITY: htmlContent is sanitized with DOMPurify on the backend
+              in SendEmailTool.ts before reaching this template.
+            */}
+            <div dangerouslySetInnerHTML={{ __html: htmlContent }} />
+          </Container>
+        ) : (
+          // Professional style: full-width, left-aligned like normal email
+          <div
+            style={{
+              padding: '12px 16px',
+              maxWidth: '100%',
+            }}
+          >
+            {/*
+              SECURITY: htmlContent is sanitized with DOMPurify on the backend
+              in SendEmailTool.ts before reaching this template.
+            */}
+            <div dangerouslySetInnerHTML={{ __html: htmlContent }} />
+          </div>
+        )}
       </Body>
     </Html>
   );
