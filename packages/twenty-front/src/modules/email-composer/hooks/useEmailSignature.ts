@@ -16,7 +16,9 @@ export const useEmailSignature = () => {
   const currentWorkspaceMember = useRecoilValue(currentWorkspaceMemberState);
   const memberId = currentWorkspaceMember?.id ?? 'default';
 
-  const [signature, setSignature] = useRecoilState(emailSignatureState(memberId));
+  const [signature, setSignature] = useRecoilState(
+    emailSignatureState(memberId),
+  );
   const [includeSignature, setIncludeSignature] = useRecoilState(
     includeSignatureState(memberId),
   );

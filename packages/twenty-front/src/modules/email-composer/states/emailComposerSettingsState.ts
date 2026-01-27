@@ -1,4 +1,4 @@
-import { atom, atomFamily } from 'recoil';
+import { atomFamily } from 'recoil';
 
 import { localStorageEffect } from '~/utils/recoil/localStorageEffect';
 
@@ -43,15 +43,16 @@ export type LocalEmailTemplate = {
  * Email templates stored locally per workspace.
  * This is a temporary solution until we have a proper custom object.
  */
-export const localEmailTemplatesState = atomFamily<LocalEmailTemplate[], string>(
-  {
-    key: 'localEmailTemplates',
-    default: [],
-    effects: (workspaceId) => [
-      localStorageEffect(`emailTemplates-${workspaceId}`),
-    ],
-  },
-);
+export const localEmailTemplatesState = atomFamily<
+  LocalEmailTemplate[],
+  string
+>({
+  key: 'localEmailTemplates',
+  default: [],
+  effects: (workspaceId) => [
+    localStorageEffect(`emailTemplates-${workspaceId}`),
+  ],
+});
 
 /**
  * Default templates that are pre-populated when the user first accesses templates.
