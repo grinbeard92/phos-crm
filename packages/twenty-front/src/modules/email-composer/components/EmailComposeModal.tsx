@@ -3,7 +3,8 @@ import { useUploadAttachmentFile } from '@/activities/files/hooks/useUploadAttac
 import { WorkflowSendEmailAttachments } from '@/advanced-text-editor/components/WorkflowSendEmailAttachments';
 import { currentWorkspaceMemberState } from '@/auth/states/currentWorkspaceMemberState';
 import { EmailTemplateSelector } from '@/email-composer/components/EmailTemplateSelector';
-import { type EmailComposeData, type EmailComposeContext, type EmailTemplateOption } from '@/email-composer/types/EmailComposerTypes';
+import { useSendEmail } from '@/email-composer/hooks/useSendEmail';
+import { type EmailComposeContext, type EmailTemplateOption } from '@/email-composer/types/EmailComposerTypes';
 import { CoreObjectNameSingular } from '@/object-metadata/types/CoreObjectNameSingular';
 import { useFindManyRecords } from '@/object-record/hooks/useFindManyRecords';
 import { FormAdvancedTextFieldInput } from '@/object-record/record-field/ui/form-types/components/FormAdvancedTextFieldInput';
@@ -74,8 +75,8 @@ type EmailComposeModalProps = {
   defaultBody?: string;
   threadId?: string;
   inReplyTo?: string;
-  onSend?: (data: EmailComposeData) => Promise<void>;
   onClose?: () => void;
+  onSendSuccess?: () => void;
 };
 
 export const EmailComposeModal = ({
@@ -84,14 +85,14 @@ export const EmailComposeModal = ({
   defaultSubject = '',
   defaultBody = '',
   threadId,
-  inReplyTo,
-  onSend,
   onClose,
+  onSendSuccess,
 }: EmailComposeModalProps) => {
   const theme = useTheme();
   const { closeModal } = useModal();
   const { enqueueErrorSnackBar, enqueueSuccessSnackBar } = useSnackBar();
   const { uploadAttachmentFile } = useUploadAttachmentFile();
+  const { sendEmail } = useSendEmail();
   const currentWorkspaceMember = useRecoilValue(currentWorkspaceMemberState);
 
   const [connectedAccountId, setConnectedAccountId] = useState<string | null>(null);
@@ -204,23 +205,27 @@ export const EmailComposeModal = ({
     setIsSending(true);
 
     try {
-      const emailData: EmailComposeData = {
-        to: [{ email: toEmail }],
+      const result = await sendEmail({
+        email: toEmail,
         subject,
         body,
-        attachments: attachments.map((f) => ({
+        connectedAccountId,
+        files: attachments.map((f) => ({
           id: f.id,
           name: f.name,
-          url: '',
-          size: f.size,
+          type: f.type,
         })),
-        threadId,
-        inReplyTo,
-      };
+      });
 
-      await onSend?.(emailData);
-      enqueueSuccessSnackBar({ message: t`Email sent successfully` });
-      handleClose();
+      if (result.success) {
+        enqueueSuccessSnackBar({ message: t`Email sent successfully` });
+        onSendSuccess?.();
+        handleClose();
+      } else {
+        enqueueErrorSnackBar({
+          message: t`Failed to send email: `.concat(result.error || 'Unknown error'),
+        });
+      }
     } catch (error) {
       enqueueErrorSnackBar({
         message: t`Failed to send email: `.concat(
