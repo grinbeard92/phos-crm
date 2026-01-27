@@ -35,7 +35,7 @@ import { useCreateBlockNote } from '@blocknote/react';
 import '@blocknote/core/fonts/inter.css';
 import '@blocknote/mantine/style.css';
 import '@blocknote/react/style.css';
-import { useState, useCallback, useMemo } from 'react';
+import { useState, useCallback, useMemo, useEffect } from 'react';
 import { useRecoilState, useRecoilValue, useSetRecoilState } from 'recoil';
 import { ConnectedAccountProvider } from 'twenty-shared/types';
 import { isDefined } from 'twenty-shared/utils';
@@ -351,6 +351,29 @@ export const EmailComposeModal = ({
   const [subject, setSubject] = useState(defaultSubject);
   const [attachments, setAttachments] = useState<EmailAttachmentFile[]>([]);
   const [isSending, setIsSending] = useState(false);
+
+  // Sync local state when Recoil modal options change (e.g., Reply button clicked)
+  // useState initializers only run once, so we need useEffect to update when options change
+  useEffect(() => {
+    const newTo =
+      emailComposeModalOptions.defaultTo ||
+      emailComposeModalOptions.context?.personEmail ||
+      '';
+    const newSubject = emailComposeModalOptions.defaultSubject || '';
+
+    // Only update if values have changed to avoid unnecessary re-renders
+    if (newTo !== '' || emailComposeModalOptions.isReply === true) {
+      setToEmail(newTo);
+    }
+    if (newSubject !== '' || emailComposeModalOptions.isReply === true) {
+      setSubject(newSubject);
+    }
+  }, [
+    emailComposeModalOptions.defaultTo,
+    emailComposeModalOptions.defaultSubject,
+    emailComposeModalOptions.context?.personEmail,
+    emailComposeModalOptions.isReply,
+  ]);
 
   // Sanitize signature for preview rendering
   const sanitizedSignature = useMemo(

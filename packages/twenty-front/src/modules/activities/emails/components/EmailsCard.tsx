@@ -54,6 +54,9 @@ const StyledEmailCount = styled.span`
 `;
 
 const StyledComposeButtonContainer = styled.div`
+  display: flex;
+  flex-direction: column;
+  align-items: center;
   margin-top: ${({ theme }) => theme.spacing(4)};
 `;
 
