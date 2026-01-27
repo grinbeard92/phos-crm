@@ -1,58 +1,73 @@
 import { UseGuards } from '@nestjs/common';
-import { Args, Mutation, Resolver } from '@nestjs/graphql';
+import { Args, Mutation, Query, Resolver } from '@nestjs/graphql';
 
-import { SendEmailTool } from 'src/engine/core-modules/tool/tools/send-email-tool/send-email-tool';
 import { WorkspaceEntity } from 'src/engine/core-modules/workspace/workspace.entity';
 import { AuthWorkspace } from 'src/engine/decorators/auth/auth-workspace.decorator';
 import { NoPermissionGuard } from 'src/engine/guards/no-permission.guard';
 import { WorkspaceAuthGuard } from 'src/engine/guards/workspace-auth.guard';
 import { SendEmailInput } from 'src/engine/core-modules/email-composer/dtos/send-email.input';
 import { SendEmailOutput } from 'src/engine/core-modules/email-composer/dtos/send-email.output';
+import { EmailComposerService } from 'src/engine/core-modules/email-composer/services/email-composer.service';
+import {
+  ValidateTemplateInput,
+  ValidateTemplateOutput,
+} from 'src/engine/core-modules/email-composer/dtos/validate-template.dto';
 
-type SendEmailResult = {
-  recipient?: string;
-  connectedAccountId?: string;
-};
-
+/**
+ * GraphQL resolver for email composition operations.
+ * Uses EmailComposerService for all business logic.
+ */
 @Resolver()
 export class EmailComposerResolver {
-  constructor(private readonly sendEmailTool: SendEmailTool) {}
+  constructor(private readonly emailComposerService: EmailComposerService) {}
 
+  /**
+   * Sends an email with optional template variable resolution.
+   */
   @Mutation(() => SendEmailOutput)
   @UseGuards(WorkspaceAuthGuard, NoPermissionGuard)
   async sendEmail(
     @Args('input') input: SendEmailInput,
     @AuthWorkspace() workspace: WorkspaceEntity,
   ): Promise<SendEmailOutput> {
-    const files = (input.files ?? []).map((file) => ({
-      id: file.id,
-      name: file.name,
-      type: file.type,
-      size: 0,
-      createdAt: new Date().toISOString(),
-    }));
-
-    const result = await this.sendEmailTool.execute(
+    const result = await this.emailComposerService.sendEmail(
       {
         email: input.email,
         subject: input.subject,
         body: input.body,
         connectedAccountId: input.connectedAccountId,
-        files,
+        files: input.files,
+        templateContext: input.templateContext,
       },
-      {
-        workspaceId: workspace.id,
-      },
+      { workspaceId: workspace.id },
     );
-
-    const resultData = result.result as SendEmailResult | undefined;
 
     return {
       success: result.success,
       message: result.message,
       error: result.error,
-      recipient: resultData?.recipient,
-      connectedAccountId: resultData?.connectedAccountId,
+      recipient: result.recipient,
+      connectedAccountId: result.connectedAccountId,
+    };
+  }
+
+  /**
+   * Validates a template and returns extracted variables.
+   */
+  @Query(() => ValidateTemplateOutput)
+  @UseGuards(WorkspaceAuthGuard, NoPermissionGuard)
+  validateEmailTemplate(
+    @Args('input') input: ValidateTemplateInput,
+  ): ValidateTemplateOutput {
+    const result = this.emailComposerService.validateTemplate(
+      input.subject,
+      input.body,
+    );
+
+    return {
+      valid: result.valid,
+      variables: result.variables,
+      invalidVariables: result.invalidVariables,
     };
   }
 }

@@ -1,5 +1,6 @@
 import { Field, InputType } from '@nestjs/graphql';
 
+import GraphQLJSON from 'graphql-type-json';
 import {
   IsEmail,
   IsNotEmpty,
@@ -8,6 +9,9 @@ import {
   IsUUID,
 } from 'class-validator';
 
+/**
+ * Input for file attachments in emails.
+ */
 @InputType()
 export class EmailFileInput {
   @Field()
@@ -23,6 +27,59 @@ export class EmailFileInput {
   type: string;
 }
 
+/**
+ * Template context for variable substitution.
+ * Supports person, company, sender, and custom variables.
+ *
+ * @example
+ * ```json
+ * {
+ *   "person": { "firstName": "John", "email": "john@example.com" },
+ *   "company": { "name": "Acme Corp" },
+ *   "sender": { "firstName": "Jane" }
+ * }
+ * ```
+ */
+@InputType()
+export class EmailTemplateContextInput {
+  @Field(() => GraphQLJSON, { nullable: true })
+  @IsOptional()
+  person?: {
+    id?: string;
+    firstName?: string;
+    lastName?: string;
+    email?: string;
+    phone?: string;
+    jobTitle?: string;
+    city?: string;
+  };
+
+  @Field(() => GraphQLJSON, { nullable: true })
+  @IsOptional()
+  company?: {
+    id?: string;
+    name?: string;
+    domainName?: string;
+    address?: string;
+    employees?: number;
+  };
+
+  @Field(() => GraphQLJSON, { nullable: true })
+  @IsOptional()
+  sender?: {
+    firstName?: string;
+    lastName?: string;
+    email?: string;
+  };
+
+  @Field(() => GraphQLJSON, { nullable: true })
+  @IsOptional()
+  custom?: Record<string, unknown>;
+}
+
+/**
+ * Input for sending an email through the composer.
+ */
 @InputType()
 export class SendEmailInput {
   @Field()
@@ -48,4 +105,8 @@ export class SendEmailInput {
   @Field(() => [EmailFileInput], { nullable: true })
   @IsOptional()
   files?: EmailFileInput[];
+
+  @Field(() => EmailTemplateContextInput, { nullable: true })
+  @IsOptional()
+  templateContext?: EmailTemplateContextInput;
 }
