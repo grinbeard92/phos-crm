@@ -1,3 +1,4 @@
+import { useTheme } from '@emotion/react';
 import styled from '@emotion/styled';
 import { useEffect, useMemo } from 'react';
 
@@ -8,11 +9,12 @@ import { EmailThreadMessage } from '@/activities/emails/components/EmailThreadMe
 import { CommandMenuMessageThreadIntermediaryMessages } from '@/command-menu/pages/message-thread/components/CommandMenuMessageThreadIntermediaryMessages';
 import { useEmailThreadInCommandMenu } from '@/command-menu/pages/message-thread/hooks/useEmailThreadInCommandMenu';
 import { messageThreadComponentState } from '@/command-menu/pages/message-thread/states/messageThreadComponentState';
+import { useEmailComposer } from '@/email-composer/hooks/useEmailComposer';
 import { useIsMobile } from '@/ui/utilities/responsive/hooks/useIsMobile';
 import { useSetRecoilComponentState } from '@/ui/utilities/state/component-state/hooks/useSetRecoilComponentState';
 import { t } from '@lingui/core/macro';
 import { ConnectedAccountProvider } from 'twenty-shared/types';
-import { assertUnreachable, isDefined } from 'twenty-shared/utils';
+import { isDefined } from 'twenty-shared/utils';
 import { IconArrowBackUp } from 'twenty-ui/display';
 import { Button } from 'twenty-ui/input';
 
@@ -54,17 +56,19 @@ export const CommandMenuMessageThreadPage = () => {
   );
 
   const isMobile = useIsMobile();
+  const theme = useTheme();
+  const { openEmailComposer } = useEmailComposer();
 
   const {
     thread,
     messages,
     fetchMoreMessages,
     threadLoading,
-    messageThreadExternalId,
     connectedAccountHandle,
     messageChannelLoading,
     connectedAccountProvider,
-    lastMessageExternalId,
+    lastMessageHeaderId,
+    threadReferences,
     connectedAccountConnectionParameters,
   } = useEmailThreadInCommandMenu();
 
@@ -94,39 +98,57 @@ export const CommandMenuMessageThreadPage = () => {
       ALLOWED_REPLY_PROVIDERS.includes(connectedAccountProvider) &&
       (connectedAccountProvider !== ConnectedAccountProvider.IMAP_SMTP_CALDAV ||
         isDefined(connectedAccountConnectionParameters?.SMTP)) &&
-      lastMessage &&
-      messageThreadExternalId != null
+      lastMessage
     );
   }, [
     connectedAccountConnectionParameters,
     connectedAccountHandle,
     connectedAccountProvider,
     lastMessage,
-    messageThreadExternalId,
   ]);
 
   const handleReplyClick = () => {
-    if (!canReply) {
+    if (!canReply || !lastMessage) {
       return;
     }
 
-    let url: string;
-    switch (connectedAccountProvider) {
-      case ConnectedAccountProvider.MICROSOFT:
-        url = `https://outlook.office.com/mail/deeplink?ItemID=${lastMessageExternalId}`;
-        window.open(url, '_blank');
-        break;
-      case ConnectedAccountProvider.GOOGLE:
-        url = `https://mail.google.com/mail/?authuser=${connectedAccountHandle}#all/${messageThreadExternalId}`;
-        window.open(url, '_blank');
-        break;
-      case ConnectedAccountProvider.IMAP_SMTP_CALDAV:
-        throw new Error('Account provider not supported');
-      case null:
-        throw new Error('Account provider not provided');
-      default:
-        assertUnreachable(connectedAccountProvider);
-    }
+    // Get sender email from last message to use as recipient
+    const senderHandle = lastMessage.sender?.handle;
+    const replyTo = senderHandle ?? '';
+
+    // Build subject with "Re:" prefix if not already present
+    const originalSubject = subject ?? '';
+    const rePrefix = t`Re:`;
+    const replySubject = originalSubject.toLowerCase().startsWith('re:')
+      ? originalSubject
+      : `${rePrefix} ${originalSubject}`;
+
+    // Build quoted message HTML for reply context
+    const senderName =
+      lastMessage.sender?.displayName ??
+      lastMessage.sender?.handle ??
+      t`Unknown`;
+    const sentDate = new Date(lastMessage.receivedAt).toLocaleString();
+    const borderColor = theme.border.color.medium;
+    const textColor = theme.font.color.tertiary;
+    const quotedHtml = `
+      <br/><br/>
+      <div style="border-left: 2px solid ${borderColor}; padding-left: 10px; margin-left: 5px; color: ${textColor};">
+        <p>${t`On`} ${sentDate}, ${senderName} ${t`wrote`}:</p>
+        <blockquote>${lastMessage.text}</blockquote>
+      </div>
+    `;
+
+    // Open compose modal in reply mode
+    openEmailComposer({
+      isReply: true,
+      threadId: thread?.id,
+      defaultTo: replyTo,
+      defaultSubject: replySubject,
+      inReplyTo: lastMessageHeaderId ?? undefined,
+      references: threadReferences,
+      quotedMessageHtml: quotedHtml,
+    });
   };
   if (!thread || !messages.length) {
     return null;

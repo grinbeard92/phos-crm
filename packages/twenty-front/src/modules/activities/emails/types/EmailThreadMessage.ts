@@ -12,6 +12,8 @@ export type EmailThreadMessage = {
   receivedAt: string;
   subject: string;
   messageThreadId: string;
+  /** RFC 5322 Message-ID header for threading */
+  headerMessageId?: string;
   messageParticipants: EmailThreadMessageParticipant[];
   messageThread: MessageThread;
   messageChannelMessageAssociations?: EmailThreadMessageChannelAssociation[];

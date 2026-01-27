@@ -157,6 +157,15 @@ export const useEmailThreadInCommandMenu = () => {
   const connectedAccountHandle =
     messageChannelData.length > 0 ? messageChannelData[0].handle : null;
 
+  // Get headerMessageId from the last message for Reply-To threading
+  const lastMessageHeaderId =
+    messages.length > 0 ? messages[messages.length - 1].headerMessageId : null;
+
+  // Build references chain from all message headerMessageIds for proper threading
+  const threadReferences = messages
+    .map((msg) => msg.headerMessageId)
+    .filter(isDefined);
+
   const messagesWithSender: EmailThreadMessageWithSender[] = messages
     .map((message) => {
       const sender = messageSenders.find(
@@ -190,6 +199,8 @@ export const useEmailThreadInCommandMenu = () => {
     threadLoading: messagesLoading,
     messageChannelLoading,
     lastMessageExternalId,
+    lastMessageHeaderId,
+    threadReferences,
     fetchMoreMessages,
   };
 };

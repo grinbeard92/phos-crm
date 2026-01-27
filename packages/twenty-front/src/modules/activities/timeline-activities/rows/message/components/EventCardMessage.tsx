@@ -58,8 +58,8 @@ const StyledDirectionBadge = styled.span<{ isOutgoing: boolean }>`
 `;
 
 const StyledEmailTitleRow = styled.div`
-  display: flex;
   align-items: center;
+  display: flex;
 `;
 
 const StyledEmailBody = styled.div`

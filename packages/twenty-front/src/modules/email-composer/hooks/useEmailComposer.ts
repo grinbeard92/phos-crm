@@ -1,32 +1,30 @@
 import { EMAIL_COMPOSE_MODAL_ID } from '@/email-composer/components/EmailComposeModal';
-import { type EmailComposeContext } from '@/email-composer/types/EmailComposerTypes';
+import {
+  emailComposeModalOptionsState,
+  type EmailComposeModalOptions,
+} from '@/email-composer/states/emailComposerSettingsState';
 import { useModal } from '@/ui/layout/modal/hooks/useModal';
 import { useCallback } from 'react';
-
-type OpenEmailComposerOptions = {
-  context?: EmailComposeContext;
-  defaultTo?: string;
-  defaultSubject?: string;
-  defaultBody?: string;
-  threadId?: string;
-  inReplyTo?: string;
-};
+import { useSetRecoilState } from 'recoil';
 
 export const useEmailComposer = () => {
   const { openModal, closeModal } = useModal();
+  const setModalOptions = useSetRecoilState(emailComposeModalOptionsState);
 
   const openEmailComposer = useCallback(
-    (_options?: OpenEmailComposerOptions) => {
-      // Store options in a temporary state or context if needed
-      // For now, the modal will receive props directly
+    (options?: EmailComposeModalOptions) => {
+      // Store options in recoil state for the modal to read
+      setModalOptions(options ?? {});
       openModal(EMAIL_COMPOSE_MODAL_ID);
     },
-    [openModal],
+    [openModal, setModalOptions],
   );
 
   const closeEmailComposer = useCallback(() => {
     closeModal(EMAIL_COMPOSE_MODAL_ID);
-  }, [closeModal]);
+    // Clear options when closing
+    setModalOptions({});
+  }, [closeModal, setModalOptions]);
 
   return {
     openEmailComposer,

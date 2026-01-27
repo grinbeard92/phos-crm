@@ -15,6 +15,7 @@ import {
 import {
   customTemplateVariablesState,
   defaultEditorModeState,
+  emailComposeModalOptionsState,
   type EditorMode,
 } from '@/email-composer/states/emailComposerSettingsState';
 import { useFindManyRecords } from '@/object-record/hooks/useFindManyRecords';
@@ -255,21 +256,49 @@ type EmailComposeModalProps = {
   inReplyTo?: string;
   /** Previous message content for replies (HTML) */
   quotedMessageHtml?: string;
+  /** When true, hides template selector and optimizes UI for direct replies */
+  isReply?: boolean;
+  /** References header for email threading (chain of Message-IDs) */
+  references?: string[];
   onClose?: () => void;
   onSendSuccess?: () => void;
 };
 
 export const EmailComposeModal = ({
-  context,
-  defaultTo = '',
-  defaultSubject = '',
-  defaultBody = '',
-  threadId,
-  inReplyTo,
-  quotedMessageHtml,
-  onClose,
-  onSendSuccess,
+  context: propsContext,
+  defaultTo: propsDefaultTo,
+  defaultSubject: propsDefaultSubject,
+  defaultBody: propsDefaultBody,
+  threadId: propsThreadId,
+  inReplyTo: propsInReplyTo,
+  quotedMessageHtml: propsQuotedMessageHtml,
+  isReply: propsIsReply,
+  references: propsReferences,
+  onClose: propsOnClose,
+  onSendSuccess: propsOnSendSuccess,
 }: EmailComposeModalProps) => {
+  // Read options from recoil state (set by useEmailComposer hook)
+  const emailComposeModalOptions = useRecoilValue(
+    emailComposeModalOptionsState,
+  );
+
+  // Merge props with modal options (props take precedence)
+  const context = propsContext ?? emailComposeModalOptions.context;
+  const defaultTo = propsDefaultTo ?? emailComposeModalOptions.defaultTo ?? '';
+  const defaultSubject =
+    propsDefaultSubject ?? emailComposeModalOptions.defaultSubject ?? '';
+  const defaultBody =
+    propsDefaultBody ?? emailComposeModalOptions.defaultBody ?? '';
+  const threadId = propsThreadId ?? emailComposeModalOptions.threadId;
+  const inReplyTo = propsInReplyTo ?? emailComposeModalOptions.inReplyTo;
+  const quotedMessageHtml =
+    propsQuotedMessageHtml ?? emailComposeModalOptions.quotedMessageHtml;
+  const isReply = propsIsReply ?? emailComposeModalOptions.isReply ?? false;
+  const references = propsReferences ?? emailComposeModalOptions.references;
+  const onClose = propsOnClose ?? emailComposeModalOptions.onClose;
+  const onSendSuccess =
+    propsOnSendSuccess ?? emailComposeModalOptions.onSendSuccess;
+
   const theme = useTheme();
   const { closeModal } = useModal();
   const { enqueueErrorSnackBar, enqueueSuccessSnackBar } = useSnackBar();
@@ -553,6 +582,8 @@ export const EmailComposeModal = ({
         })),
         // Threading support for email replies
         ...(inReplyTo !== undefined && { inReplyTo }),
+        ...(references !== undefined &&
+          references.length > 0 && { references }),
         ...(threadId !== undefined && { messageThreadId: threadId }),
         // Additional recipients
         ...(ccEmail !== '' && { cc: ccEmail }),
@@ -619,10 +650,12 @@ export const EmailComposeModal = ({
               isDropdownInModal
             />
 
-            <EmailTemplateSelector
-              value={selectedTemplateId}
-              onChange={handleTemplateSelect}
-            />
+            {!isReply && (
+              <EmailTemplateSelector
+                value={selectedTemplateId}
+                onChange={handleTemplateSelect}
+              />
+            )}
 
             <FormTextFieldInput
               label={t`To`}

@@ -1,6 +1,33 @@
 import { atom, atomFamily } from 'recoil';
 
+import { type EmailComposeContext } from '@/email-composer/types/EmailComposerTypes';
 import { localStorageEffect } from '~/utils/recoil/localStorageEffect';
+
+/**
+ * Options for opening the email compose modal.
+ */
+export type EmailComposeModalOptions = {
+  context?: EmailComposeContext;
+  defaultTo?: string;
+  defaultSubject?: string;
+  defaultBody?: string;
+  threadId?: string;
+  inReplyTo?: string;
+  quotedMessageHtml?: string;
+  isReply?: boolean;
+  references?: string[];
+  onClose?: () => void;
+  onSendSuccess?: () => void;
+};
+
+/**
+ * State to hold options passed to the email compose modal.
+ * Set before opening the modal, read by the modal component.
+ */
+export const emailComposeModalOptionsState = atom<EmailComposeModalOptions>({
+  key: 'emailComposeModalOptions',
+  default: {},
+});
 
 /**
  * Email signature state - stored per workspace member.
