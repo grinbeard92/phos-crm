@@ -1,13 +1,24 @@
 import styled from '@emotion/styled';
+import { useTheme } from '@emotion/react';
 import { t } from '@lingui/core/macro';
 import { Trans } from '@lingui/react/macro';
 import { useCallback, useState } from 'react';
 
 import { useEmailTemplates } from '@/email-composer/hooks/useEmailTemplates';
-import { type LocalEmailTemplate } from '@/email-composer/states/emailComposerSettingsState';
+import {
+  type EditorMode,
+  type LocalEmailTemplate,
+} from '@/email-composer/states/emailComposerSettingsState';
 import { Select } from '@/ui/input/components/Select';
 import { TextInput } from '@/ui/input/components/TextInput';
-import { H2Title, IconPencil, IconPlus, IconTrash } from 'twenty-ui/display';
+import {
+  H2Title,
+  IconCode,
+  IconPencil,
+  IconPlus,
+  IconTextSize,
+  IconTrash,
+} from 'twenty-ui/display';
 import { Button, type SelectOption } from 'twenty-ui/input';
 import { Section } from 'twenty-ui/layout';
 
@@ -124,6 +135,34 @@ const StyledVariablesHelp = styled.div`
   padding: ${({ theme }) => theme.spacing(2)};
 `;
 
+const StyledFormatToggle = styled.div`
+  display: flex;
+  gap: ${({ theme }) => theme.spacing(1)};
+  margin-bottom: ${({ theme }) => theme.spacing(2)};
+`;
+
+const StyledFormatButton = styled.button<{ isActive: boolean }>`
+  display: flex;
+  align-items: center;
+  gap: ${({ theme }) => theme.spacing(1)};
+  background: ${({ theme, isActive }) =>
+    isActive ? theme.background.tertiary : 'transparent'};
+  border: 1px solid
+    ${({ theme, isActive }) =>
+      isActive ? theme.border.color.medium : 'transparent'};
+  border-radius: ${({ theme }) => theme.border.radius.sm};
+  color: ${({ theme, isActive }) =>
+    isActive ? theme.font.color.primary : theme.font.color.tertiary};
+  cursor: pointer;
+  font-size: ${({ theme }) => theme.font.size.xs};
+  padding: ${({ theme }) => theme.spacing(1, 2)};
+
+  &:hover {
+    background: ${({ theme }) => theme.background.tertiary};
+    color: ${({ theme }) => theme.font.color.primary};
+  }
+`;
+
 type TemplateEditorProps = {
   template?: LocalEmailTemplate;
   onSave: (
@@ -137,9 +176,13 @@ const TemplateEditor = ({
   onSave,
   onCancel,
 }: TemplateEditorProps) => {
+  const theme = useTheme();
   const [name, setName] = useState(template?.name ?? '');
   const [subject, setSubject] = useState(template?.subject ?? '');
   const [body, setBody] = useState(template?.body ?? '');
+  const [bodyFormat, setBodyFormat] = useState<EditorMode>(
+    template?.bodyFormat ?? 'html',
+  );
   const [category, setCategory] = useState<LocalEmailTemplate['category']>(
     template?.category ?? 'GENERAL',
   );
@@ -159,6 +202,7 @@ const TemplateEditor = ({
       name: name.trim(),
       subject: subject.trim(),
       body: body.trim(),
+      bodyFormat,
       category,
       isActive: template?.isActive ?? true,
     });
@@ -202,11 +246,39 @@ const TemplateEditor = ({
       </StyledFormRow>
 
       <StyledFormRow>
-        <StyledLabel>{t`Email Body (HTML)`}</StyledLabel>
+        <StyledLabel>{t`Body Format`}</StyledLabel>
+        <StyledFormatToggle>
+          <StyledFormatButton
+            type="button"
+            isActive={bodyFormat === 'html'}
+            onClick={() => setBodyFormat('html')}
+          >
+            <IconCode size={theme.icon.size.sm} />
+            <Trans>Raw HTML</Trans>
+          </StyledFormatButton>
+          <StyledFormatButton
+            type="button"
+            isActive={bodyFormat === 'rich'}
+            onClick={() => setBodyFormat('rich')}
+          >
+            <IconTextSize size={theme.icon.size.sm} />
+            <Trans>Rich Text (JSON)</Trans>
+          </StyledFormatButton>
+        </StyledFormatToggle>
+      </StyledFormRow>
+
+      <StyledFormRow>
+        <StyledLabel>
+          {bodyFormat === 'html' ? t`Email Body (HTML)` : t`Email Body (JSON)`}
+        </StyledLabel>
         <StyledTextArea
           value={body}
           onChange={(e) => setBody(e.target.value)}
-          placeholder={t`<p>Hi {{person.firstName}},</p>\n<p>Your email content here...</p>`}
+          placeholder={
+            bodyFormat === 'html'
+              ? t`<p>Hi {{person.firstName}},</p>\n<p>Your email content here...</p>`
+              : t`[{"type":"paragraph","content":"Hi {{person.firstName}},"}]`
+          }
         />
         <StyledVariablesHelp>
           <Trans>

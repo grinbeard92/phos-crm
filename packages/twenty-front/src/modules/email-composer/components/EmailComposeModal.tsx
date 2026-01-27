@@ -11,6 +11,10 @@ import {
   type EmailComposeContext,
   type EmailTemplateOption,
 } from '@/email-composer/types/EmailComposerTypes';
+import {
+  defaultEditorModeState,
+  type EditorMode,
+} from '@/email-composer/states/emailComposerSettingsState';
 import { useFindManyRecords } from '@/object-record/hooks/useFindManyRecords';
 import { FormTextFieldInput } from '@/object-record/record-field/ui/form-types/components/FormTextFieldInput';
 import { useSnackBar } from '@/ui/feedback/snack-bar-manager/hooks/useSnackBar';
@@ -28,15 +32,17 @@ import '@blocknote/core/fonts/inter.css';
 import '@blocknote/mantine/style.css';
 import '@blocknote/react/style.css';
 import { useState, useCallback, useMemo } from 'react';
-import { useRecoilValue } from 'recoil';
+import { useRecoilState, useRecoilValue } from 'recoil';
 import { ConnectedAccountProvider } from 'twenty-shared/types';
 import { isDefined } from 'twenty-shared/utils';
 import {
   H2Title,
   IconChevronDown,
   IconChevronUp,
+  IconCode,
   IconMail,
   IconSend,
+  IconTextSize,
   IconX,
 } from 'twenty-ui/display';
 import { Button, type SelectOption } from 'twenty-ui/input';
@@ -141,6 +147,94 @@ const StyledSignatureContent = styled.div`
   }
 `;
 
+const StyledEditorModeToggle = styled.div`
+  display: flex;
+  align-items: center;
+  gap: ${({ theme }) => theme.spacing(1)};
+  margin-bottom: ${({ theme }) => theme.spacing(1)};
+`;
+
+const StyledModeButton = styled.button<{ isActive: boolean }>`
+  display: flex;
+  align-items: center;
+  gap: ${({ theme }) => theme.spacing(1)};
+  background: ${({ theme, isActive }) =>
+    isActive ? theme.background.tertiary : 'transparent'};
+  border: 1px solid
+    ${({ theme, isActive }) =>
+      isActive ? theme.border.color.medium : 'transparent'};
+  border-radius: ${({ theme }) => theme.border.radius.sm};
+  color: ${({ theme, isActive }) =>
+    isActive ? theme.font.color.primary : theme.font.color.tertiary};
+  cursor: pointer;
+  font-size: ${({ theme }) => theme.font.size.xs};
+  padding: ${({ theme }) => theme.spacing(1, 2)};
+
+  &:hover {
+    background: ${({ theme }) => theme.background.tertiary};
+    color: ${({ theme }) => theme.font.color.primary};
+  }
+`;
+
+const StyledHtmlTextArea = styled.textarea`
+  background: ${({ theme }) => theme.background.secondary};
+  border: 1px solid ${({ theme }) => theme.border.color.medium};
+  border-radius: ${({ theme }) => theme.border.radius.sm};
+  color: ${({ theme }) => theme.font.color.primary};
+  font-family: 'Fira Code', 'Monaco', 'Consolas', monospace;
+  font-size: ${({ theme }) => theme.font.size.sm};
+  min-height: 200px;
+  padding: ${({ theme }) => theme.spacing(2)};
+  resize: vertical;
+  width: 100%;
+
+  &:focus {
+    border-color: ${({ theme }) => theme.color.blue};
+    outline: none;
+  }
+`;
+
+const StyledMessageHistory = styled.div`
+  background: ${({ theme }) => theme.background.tertiary};
+  border: 1px solid ${({ theme }) => theme.border.color.light};
+  border-radius: ${({ theme }) => theme.border.radius.sm};
+  margin-top: ${({ theme }) => theme.spacing(3)};
+`;
+
+const StyledMessageHistoryHeader = styled.button`
+  align-items: center;
+  background: none;
+  border: none;
+  color: ${({ theme }) => theme.font.color.tertiary};
+  cursor: pointer;
+  display: flex;
+  font-size: ${({ theme }) => theme.font.size.sm};
+  gap: ${({ theme }) => theme.spacing(1)};
+  padding: ${({ theme }) => theme.spacing(2, 3)};
+  width: 100%;
+
+  &:hover {
+    color: ${({ theme }) => theme.font.color.secondary};
+  }
+`;
+
+const StyledMessageHistoryContent = styled.div`
+  border-top: 1px solid ${({ theme }) => theme.border.color.light};
+  color: ${({ theme }) => theme.font.color.secondary};
+  font-size: ${({ theme }) => theme.font.size.sm};
+  line-height: 1.6;
+  max-height: 300px;
+  overflow-y: auto;
+  padding: ${({ theme }) => theme.spacing(3)};
+
+  blockquote {
+    border-left: 2px solid ${({ theme }) => theme.border.color.medium};
+    color: ${({ theme }) => theme.font.color.tertiary};
+    margin: ${({ theme }) => theme.spacing(2, 0)};
+    padding-left: ${({ theme }) => theme.spacing(2)};
+  }
+`;
+
 type EmailAttachmentFile = {
   id: string;
   name: string;
@@ -156,6 +250,8 @@ type EmailComposeModalProps = {
   defaultBody?: string;
   threadId?: string;
   inReplyTo?: string;
+  /** Previous message content for replies (HTML) */
+  quotedMessageHtml?: string;
   onClose?: () => void;
   onSendSuccess?: () => void;
 };
@@ -166,6 +262,7 @@ export const EmailComposeModal = ({
   defaultSubject = '',
   defaultBody = '',
   threadId,
+  quotedMessageHtml,
   onClose,
   onSendSuccess,
 }: EmailComposeModalProps) => {
@@ -181,6 +278,15 @@ export const EmailComposeModal = ({
     getSignatureForEmail,
   } = useEmailSignature();
   const currentWorkspaceMember = useRecoilValue(currentWorkspaceMemberState);
+  const memberId = currentWorkspaceMember?.id ?? 'default';
+
+  // Editor mode preference
+  const [defaultEditorMode, setDefaultEditorMode] = useRecoilState(
+    defaultEditorModeState(memberId),
+  );
+  const [editorMode, setEditorMode] = useState<EditorMode>(defaultEditorMode);
+  const [htmlContent, setHtmlContent] = useState('');
+  const [showMessageHistory, setShowMessageHistory] = useState(false);
 
   const [connectedAccountId, setConnectedAccountId] = useState<string | null>(
     null,
@@ -264,19 +370,53 @@ export const EmailComposeModal = ({
 
       setSubject(resolvedSubject);
 
-      // Try to parse and set body content in editor
-      try {
-        const bodyContent = JSON.parse(resolvedBody);
-        if (Array.isArray(bodyContent)) {
-          editor.replaceBlocks(editor.document, bodyContent);
+      // Apply body to current editor mode
+      if (editorMode === 'html') {
+        setHtmlContent(resolvedBody);
+      } else {
+        // Try to parse and set body content in editor
+        try {
+          const bodyContent = JSON.parse(resolvedBody);
+          if (Array.isArray(bodyContent)) {
+            editor.replaceBlocks(editor.document, bodyContent);
+          }
+        } catch {
+          // If not JSON, it's HTML - parse it to blocks
+          const blocks = await editor.tryParseHTMLToBlocks(resolvedBody);
+          editor.replaceBlocks(editor.document, blocks);
         }
-      } catch {
-        // If not JSON, it's HTML - parse it to blocks
-        const blocks = await editor.tryParseHTMLToBlocks(resolvedBody);
-        editor.replaceBlocks(editor.document, blocks);
       }
     },
-    [context, editor],
+    [context, editor, editorMode],
+  );
+
+  // Handle switching between editor modes
+  const handleEditorModeChange = useCallback(
+    async (newMode: EditorMode) => {
+      if (newMode === editorMode) return;
+
+      if (newMode === 'html') {
+        // Convert rich editor content to HTML
+        const html = await editor.blocksToHTMLLossy(editor.document);
+        setHtmlContent(html);
+      } else {
+        // Convert HTML to rich editor blocks
+        if (htmlContent !== '') {
+          const blocks = await editor.tryParseHTMLToBlocks(htmlContent);
+          editor.replaceBlocks(editor.document, blocks);
+        }
+      }
+
+      setEditorMode(newMode);
+      setDefaultEditorMode(newMode);
+    },
+    [editor, editorMode, htmlContent, setDefaultEditorMode],
+  );
+
+  // Sanitize quoted message for safe rendering
+  const sanitizedQuotedMessage = useMemo(
+    () => (quotedMessageHtml ? DOMPurify.sanitize(quotedMessageHtml) : ''),
+    [quotedMessageHtml],
   );
 
   const { records: accounts, loading } = useFindManyRecords<ConnectedAccount>({
@@ -340,14 +480,33 @@ export const EmailComposeModal = ({
     setIsSending(true);
 
     try {
-      // Convert BlockNote content to HTML for email rendering
-      // blocksToHTMLLossy() produces standard HTML that works well in email clients
-      let htmlBody = await editor.blocksToHTMLLossy(editor.document);
+      // Get email body based on editor mode
+      let htmlBody: string;
+      if (editorMode === 'html') {
+        htmlBody = htmlContent;
+      } else {
+        // Convert BlockNote content to HTML for email rendering
+        htmlBody = await editor.blocksToHTMLLossy(editor.document);
+      }
 
       // Append email signature if enabled
       const signatureHtml = getSignatureForEmail();
       if (signatureHtml !== '') {
         htmlBody = htmlBody + signatureHtml;
+      }
+
+      // For replies, include quoted message after signature
+      if (isDefined(threadId) && isDefined(quotedMessageHtml)) {
+        // Email HTML requires inline styles for compatibility across email clients
+        /* eslint-disable twenty/no-hardcoded-colors, lingui/no-unlocalized-strings */
+        const quoteStyle =
+          'border-left: 2px solid rgb(204, 204, 204); padding-left: 12px; margin-left: 0; color: rgb(102, 102, 102);';
+        /* eslint-enable twenty/no-hardcoded-colors, lingui/no-unlocalized-strings */
+        htmlBody =
+          htmlBody +
+          `<br><br><blockquote style="${quoteStyle}">` +
+          quotedMessageHtml +
+          '</blockquote>';
       }
 
       const result = await sendEmail({
@@ -477,12 +636,39 @@ export const EmailComposeModal = ({
             />
 
             <div>
-              <StyledEditorLabel>
-                <Trans>Message</Trans>
-              </StyledEditorLabel>
-              <StyledEditorContainer>
-                <BlockEditor editor={editor} />
-              </StyledEditorContainer>
+              <StyledEditorModeToggle>
+                <StyledEditorLabel>
+                  <Trans>Message</Trans>
+                </StyledEditorLabel>
+                <StyledModeButton
+                  type="button"
+                  isActive={editorMode === 'rich'}
+                  onClick={() => handleEditorModeChange('rich')}
+                >
+                  <IconTextSize size={theme.icon.size.sm} />
+                  <Trans>Rich Editor</Trans>
+                </StyledModeButton>
+                <StyledModeButton
+                  type="button"
+                  isActive={editorMode === 'html'}
+                  onClick={() => handleEditorModeChange('html')}
+                >
+                  <IconCode size={theme.icon.size.sm} />
+                  <Trans>Raw HTML</Trans>
+                </StyledModeButton>
+              </StyledEditorModeToggle>
+
+              {editorMode === 'rich' ? (
+                <StyledEditorContainer>
+                  <BlockEditor editor={editor} />
+                </StyledEditorContainer>
+              ) : (
+                <StyledHtmlTextArea
+                  value={htmlContent}
+                  onChange={(e) => setHtmlContent(e.target.value)}
+                  placeholder={t`<p>Enter your HTML content here...</p>`}
+                />
+              )}
               {showSignaturePreview &&
                 includeSignature &&
                 sanitizedSignature !== '' && (
@@ -499,6 +685,33 @@ export const EmailComposeModal = ({
                     </StyledSignatureContent>
                   </StyledSignaturePreview>
                 )}
+
+              {/* Message history for replies */}
+              {threadId && sanitizedQuotedMessage !== '' && (
+                <StyledMessageHistory>
+                  <StyledMessageHistoryHeader
+                    type="button"
+                    onClick={() => setShowMessageHistory(!showMessageHistory)}
+                  >
+                    {showMessageHistory ? (
+                      <IconChevronUp size={theme.icon.size.sm} />
+                    ) : (
+                      <IconChevronDown size={theme.icon.size.sm} />
+                    )}
+                    <Trans>Previous Message</Trans>
+                  </StyledMessageHistoryHeader>
+                  {showMessageHistory && (
+                    <StyledMessageHistoryContent>
+                      {/* Quoted message is sanitized with DOMPurify above */}
+                      <div
+                        dangerouslySetInnerHTML={{
+                          __html: sanitizedQuotedMessage,
+                        }}
+                      />
+                    </StyledMessageHistoryContent>
+                  )}
+                </StyledMessageHistory>
+              )}
             </div>
 
             <WorkflowSendEmailAttachments
