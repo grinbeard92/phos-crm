@@ -165,8 +165,38 @@ mutation CreateOneField($input: CreateOneFieldMetadataInput!) {
    const isFeatureEnabled = useIsFeatureEnabled(FeatureFlagKey.IS_MY_FEATURE_ENABLED);
    ```
 
-### Enabling Feature Flags
-Feature flags are enabled per-workspace in the database. Use the admin panel or direct DB query.
+### Enabling Feature Flags via Lab UI
+To make a feature flag appear in the Settings → Lab UI toggle:
+1. Add to `PUBLIC_FEATURE_FLAGS` in `packages/twenty-server/src/engine/core-modules/feature-flag/constants/public-feature-flag.const.ts`:
+   ```typescript
+   {
+     key: FeatureFlagKey.IS_MY_FEATURE_ENABLED,
+     metadata: {
+       label: 'My Feature',
+       description: 'Description shown in Lab UI',
+       imagePath: 'https://twenty.com/images/lab/my-feature.png',
+     },
+   },
+   ```
+
+### GraphQL Resolver Guards (REQUIRED)
+All GraphQL resolvers MUST have guards or lint will fail:
+```typescript
+import { UseGuards } from '@nestjs/common';
+import { NoPermissionGuard } from 'src/engine/guards/no-permission.guard';
+import { WorkspaceAuthGuard } from 'src/engine/guards/workspace-auth.guard';
+
+@Mutation(() => MyOutput)
+@UseGuards(WorkspaceAuthGuard, NoPermissionGuard)  // REQUIRED
+async myMutation() { ... }
+```
+
+### Adding Settings Pages
+To add a new settings page:
+1. Add path to `SettingsPath` enum in `packages/twenty-shared/src/types/SettingsPath.ts`
+2. Create page component in `packages/twenty-front/src/pages/settings/`
+3. Add lazy import and Route in `packages/twenty-front/src/modules/app/components/SettingsRoutes.tsx`
+4. Build twenty-shared to export new path: `npx nx build twenty-shared`
 
 ## Twenty Type Patterns (CRITICAL REFERENCE)
 
