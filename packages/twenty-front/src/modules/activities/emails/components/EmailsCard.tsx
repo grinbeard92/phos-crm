@@ -60,6 +60,13 @@ const StyledComposeButtonContainer = styled.div`
   margin-top: ${({ theme }) => theme.spacing(4)};
 `;
 
+const StyledNoEmailNote = styled.div`
+  color: ${({ theme }) => theme.font.color.tertiary};
+  font-size: ${({ theme }) => theme.font.size.sm};
+  text-align: center;
+  margin-top: ${({ theme }) => theme.spacing(2)};
+`;
+
 type PersonRecord = ObjectRecord & {
   name: { firstName: string; lastName: string };
   emails: { primaryEmail: string } | null;
@@ -158,20 +165,25 @@ export const EmailsCard = () => {
               </Trans>
             </AnimatedPlaceholderEmptySubTitle>
           </AnimatedPlaceholderEmptyTextContainer>
-          {isEmailComposerEnabled &&
-            isPerson &&
-            personRecord?.emails?.primaryEmail && (
-              <StyledComposeButtonContainer>
-                <Button
-                  Icon={IconSend}
-                  title={t`Compose Email`}
-                  variant="secondary"
-                  accent="default"
-                  size="medium"
-                  onClick={handleComposeClick}
-                />
-              </StyledComposeButtonContainer>
-            )}
+          {isEmailComposerEnabled && isPerson && (
+            <StyledComposeButtonContainer>
+              <Button
+                Icon={IconSend}
+                title={t`Compose Email`}
+                variant="secondary"
+                accent="default"
+                size="medium"
+                onClick={handleComposeClick}
+              />
+              {!personRecord?.emails?.primaryEmail && (
+                <StyledNoEmailNote>
+                  <Trans>
+                    Add an email address to this person to send emails directly.
+                  </Trans>
+                </StyledNoEmailNote>
+              )}
+            </StyledComposeButtonContainer>
+          )}
         </AnimatedPlaceholderEmptyContainer>
         {isEmailComposerEnabled && (
           <EmailComposeModal

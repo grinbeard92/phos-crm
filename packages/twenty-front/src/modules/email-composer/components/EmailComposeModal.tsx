@@ -1,5 +1,6 @@
 import { type ConnectedAccount } from '@/accounts/types/ConnectedAccount';
 import { useUploadAttachmentFile } from '@/activities/files/hooks/useUploadAttachmentFile';
+import { BLOCK_SCHEMA } from '@/activities/blocks/constants/Schema';
 import { WorkflowSendEmailAttachments } from '@/advanced-text-editor/components/WorkflowSendEmailAttachments';
 import { currentWorkspaceMemberState } from '@/auth/states/currentWorkspaceMemberState';
 import { EmailTemplateSelector } from '@/email-composer/components/EmailTemplateSelector';
@@ -10,25 +11,34 @@ import {
 } from '@/email-composer/types/EmailComposerTypes';
 import { CoreObjectNameSingular } from '@/object-metadata/types/CoreObjectNameSingular';
 import { useFindManyRecords } from '@/object-record/hooks/useFindManyRecords';
-import { FormAdvancedTextFieldInput } from '@/object-record/record-field/ui/form-types/components/FormAdvancedTextFieldInput';
 import { FormTextFieldInput } from '@/object-record/record-field/ui/form-types/components/FormTextFieldInput';
 import { useSnackBar } from '@/ui/feedback/snack-bar-manager/hooks/useSnackBar';
 import { Select } from '@/ui/input/components/Select';
+import { BlockEditor } from '@/ui/input/editor/components/BlockEditor';
 import { GenericDropdownContentWidth } from '@/ui/layout/dropdown/constants/GenericDropdownContentWidth';
 import { Modal } from '@/ui/layout/modal/components/Modal';
 import { useModal } from '@/ui/layout/modal/hooks/useModal';
 import styled from '@emotion/styled';
 import { useTheme } from '@emotion/react';
 import { t } from '@lingui/core/macro';
-import { useState, useCallback } from 'react';
+import { Trans } from '@lingui/react/macro';
+import { useCreateBlockNote } from '@blocknote/react';
+import '@blocknote/core/fonts/inter.css';
+import '@blocknote/mantine/style.css';
+import '@blocknote/react/style.css';
+import { useState, useCallback, useMemo } from 'react';
 import { useRecoilValue } from 'recoil';
 import { ConnectedAccountProvider } from 'twenty-shared/types';
 import { isDefined } from 'twenty-shared/utils';
-import { H2Title, IconMail, IconSend, IconX } from 'twenty-ui/display';
+import {
+  H2Title,
+  IconChevronDown,
+  IconChevronUp,
+  IconMail,
+  IconSend,
+  IconX,
+} from 'twenty-ui/display';
 import { Button, type SelectOption } from 'twenty-ui/input';
-
-const EMAIL_EDITOR_MIN_HEIGHT = 280;
-const EMAIL_EDITOR_MAX_WIDTH = 560;
 
 export const EMAIL_COMPOSE_MODAL_ID = 'email-compose-modal';
 
@@ -60,6 +70,41 @@ const StyledFieldGroup = styled.div`
   display: flex;
   flex-direction: column;
   gap: ${({ theme }) => theme.spacing(3)};
+`;
+
+const StyledCcBccToggle = styled.button`
+  display: flex;
+  align-items: center;
+  gap: ${({ theme }) => theme.spacing(1)};
+  background: none;
+  border: none;
+  color: ${({ theme }) => theme.font.color.tertiary};
+  font-size: ${({ theme }) => theme.font.size.sm};
+  cursor: pointer;
+  padding: 0;
+
+  &:hover {
+    color: ${({ theme }) => theme.font.color.secondary};
+  }
+`;
+
+const StyledEditorContainer = styled.div`
+  border: 1px solid ${({ theme }) => theme.border.color.medium};
+  border-radius: ${({ theme }) => theme.border.radius.sm};
+  min-height: 200px;
+  max-height: 400px;
+  overflow: auto;
+
+  & .editor {
+    min-height: 180px !important;
+  }
+`;
+
+const StyledEditorLabel = styled.div`
+  font-size: ${({ theme }) => theme.font.size.xs};
+  font-weight: ${({ theme }) => theme.font.weight.medium};
+  color: ${({ theme }) => theme.font.color.tertiary};
+  margin-bottom: ${({ theme }) => theme.spacing(1)};
 `;
 
 type EmailAttachmentFile = {
@@ -106,10 +151,46 @@ export const EmailComposeModal = ({
   const [toEmail, setToEmail] = useState(
     defaultTo || context?.personEmail || '',
   );
+  const [ccEmail, setCcEmail] = useState('');
+  const [bccEmail, setBccEmail] = useState('');
+  const [showCcBcc, setShowCcBcc] = useState(false);
   const [subject, setSubject] = useState(defaultSubject);
-  const [body, setBody] = useState(defaultBody);
   const [attachments, setAttachments] = useState<EmailAttachmentFile[]>([]);
   const [isSending, setIsSending] = useState(false);
+
+  // Initialize BlockNote editor
+  const initialContent = useMemo(() => {
+    if (defaultBody !== '') {
+      try {
+        return JSON.parse(defaultBody);
+      } catch {
+        return undefined;
+      }
+    }
+    return undefined;
+  }, [defaultBody]);
+
+  const handleEditorUploadFile = async (file: File) => {
+    try {
+      const { attachmentAbsoluteURL } = await uploadAttachmentFile(file, {
+        id: crypto.randomUUID(),
+        targetObjectNameSingular: CoreObjectNameSingular.Message,
+      });
+      return attachmentAbsoluteURL;
+    } catch {
+      enqueueErrorSnackBar({
+        message: t`Failed to upload image: `.concat(file.name),
+      });
+      return '';
+    }
+  };
+
+  const editor = useCreateBlockNote({
+    initialContent,
+    domAttributes: { editor: { class: 'editor' } },
+    schema: BLOCK_SCHEMA,
+    uploadFile: handleEditorUploadFile,
+  });
 
   const handleTemplateSelect = useCallback(
     (template: EmailTemplateOption | null) => {
@@ -139,9 +220,24 @@ export const EmailComposeModal = ({
       });
 
       setSubject(resolvedSubject);
-      setBody(resolvedBody);
+
+      // Try to parse and set body content in editor
+      try {
+        const bodyContent = JSON.parse(resolvedBody);
+        if (Array.isArray(bodyContent)) {
+          editor.replaceBlocks(editor.document, bodyContent);
+        }
+      } catch {
+        // If not JSON, create a simple paragraph block
+        editor.replaceBlocks(editor.document, [
+          {
+            type: 'paragraph',
+            content: resolvedBody,
+          },
+        ]);
+      }
     },
-    [context],
+    [context, editor],
   );
 
   const { records: accounts, loading } = useFindManyRecords<ConnectedAccount>({
@@ -173,31 +269,23 @@ export const EmailComposeModal = ({
       value: account.id,
     }));
 
+  // Auto-select first account if only one is available
+  const shouldAutoSelect =
+    !loading &&
+    connectedAccountOptions.length === 1 &&
+    connectedAccountId === null;
+  if (
+    shouldAutoSelect &&
+    connectedAccountOptions[0]?.value !== null &&
+    connectedAccountOptions[0]?.value !== undefined
+  ) {
+    setConnectedAccountId(connectedAccountOptions[0].value);
+  }
+
   const handleClose = useCallback(() => {
     onClose?.();
     closeModal(EMAIL_COMPOSE_MODAL_ID);
   }, [onClose, closeModal]);
-
-  const handleImageUpload = async (file: File) => {
-    try {
-      const { attachmentAbsoluteURL } = await uploadAttachmentFile(file, {
-        id: crypto.randomUUID(),
-        targetObjectNameSingular: CoreObjectNameSingular.Message,
-      });
-      return attachmentAbsoluteURL;
-    } catch {
-      enqueueErrorSnackBar({
-        message: t`Failed to upload image: `.concat(file.name),
-      });
-      return undefined;
-    }
-  };
-
-  const handleImageUploadError = (_: Error, file: File) => {
-    enqueueErrorSnackBar({
-      message: t`Failed to upload image: `.concat(file.name),
-    });
-  };
 
   const handleSend = async () => {
     if (!connectedAccountId) {
@@ -213,10 +301,13 @@ export const EmailComposeModal = ({
     setIsSending(true);
 
     try {
+      // Get body content from editor
+      const bodyContent = JSON.stringify(editor.document);
+
       const result = await sendEmail({
         email: toEmail,
         subject,
-        body,
+        body: bodyContent,
         connectedAccountId,
         files: attachments.map((f) => ({
           id: f.id,
@@ -295,6 +386,41 @@ export const EmailComposeModal = ({
               onChange={setToEmail}
             />
 
+            <StyledCcBccToggle
+              type="button"
+              onClick={() => setShowCcBcc(!showCcBcc)}
+            >
+              {showCcBcc ? (
+                <>
+                  <IconChevronUp size={theme.icon.size.sm} />
+                  <Trans>Hide CC/BCC</Trans>
+                </>
+              ) : (
+                <>
+                  <IconChevronDown size={theme.icon.size.sm} />
+                  <Trans>Add CC/BCC</Trans>
+                </>
+              )}
+            </StyledCcBccToggle>
+
+            {showCcBcc && (
+              <>
+                <FormTextFieldInput
+                  label={t`CC`}
+                  placeholder={t`Enter CC emails (comma-separated)`}
+                  defaultValue={ccEmail}
+                  onChange={setCcEmail}
+                />
+
+                <FormTextFieldInput
+                  label={t`BCC`}
+                  placeholder={t`Enter BCC emails (comma-separated)`}
+                  defaultValue={bccEmail}
+                  onChange={setBccEmail}
+                />
+              </>
+            )}
+
             <FormTextFieldInput
               label={t`Subject`}
               placeholder={t`Enter email subject`}
@@ -302,16 +428,14 @@ export const EmailComposeModal = ({
               onChange={setSubject}
             />
 
-            <FormAdvancedTextFieldInput
-              label={t`Message`}
-              placeholder={t`Write your message...`}
-              defaultValue={body}
-              onChange={setBody}
-              onImageUpload={handleImageUpload}
-              onImageUploadError={handleImageUploadError}
-              minHeight={EMAIL_EDITOR_MIN_HEIGHT}
-              maxWidth={EMAIL_EDITOR_MAX_WIDTH}
-            />
+            <div>
+              <StyledEditorLabel>
+                <Trans>Message</Trans>
+              </StyledEditorLabel>
+              <StyledEditorContainer>
+                <BlockEditor editor={editor} />
+              </StyledEditorContainer>
+            </div>
 
             <WorkflowSendEmailAttachments
               label={t`Attachments`}

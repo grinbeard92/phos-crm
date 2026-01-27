@@ -6,7 +6,9 @@ import { type ObjectRecord } from '@/object-record/types/ObjectRecord';
 import { SettingsAccountsToggleSettingCard } from '@/settings/accounts/components/SettingsAccountsToggleSettingCard';
 import { useLingui } from '@lingui/react/macro';
 import { useRecoilValue } from 'recoil';
-import { H2Title } from 'twenty-ui/display';
+import { Link } from 'react-router-dom';
+import { H2Title, IconFileText } from 'twenty-ui/display';
+import { Button } from 'twenty-ui/input';
 import { Section } from 'twenty-ui/layout';
 
 const StyledSettingsContainer = styled.div`
@@ -19,6 +21,41 @@ const StyledEmptyState = styled.div`
   color: ${({ theme }) => theme.font.color.tertiary};
   font-size: ${({ theme }) => theme.font.size.sm};
   padding: ${({ theme }) => theme.spacing(4)};
+`;
+
+const StyledTemplateInfo = styled.div`
+  background: ${({ theme }) => theme.background.secondary};
+  border-radius: ${({ theme }) => theme.border.radius.md};
+  display: flex;
+  flex-direction: column;
+  gap: ${({ theme }) => theme.spacing(3)};
+  padding: ${({ theme }) => theme.spacing(4)};
+`;
+
+const StyledLinkWrapper = styled(Link)`
+  text-decoration: none;
+`;
+
+const StyledInfoText = styled.p`
+  color: ${({ theme }) => theme.font.color.secondary};
+  font-size: ${({ theme }) => theme.font.size.sm};
+  margin: 0;
+  line-height: 1.5;
+`;
+
+const StyledVariablesList = styled.ul`
+  color: ${({ theme }) => theme.font.color.tertiary};
+  font-size: ${({ theme }) => theme.font.size.sm};
+  margin: ${({ theme }) => theme.spacing(2)} 0;
+  padding-left: ${({ theme }) => theme.spacing(4)};
+`;
+
+const StyledCode = styled.code`
+  background: ${({ theme }) => theme.background.tertiary};
+  padding: ${({ theme }) => theme.spacing(0.5, 1)};
+  border-radius: ${({ theme }) => theme.border.radius.xs};
+  font-family: monospace;
+  font-size: ${({ theme }) => theme.font.size.xs};
 `;
 
 type EmailTemplateRecord = ObjectRecord & {
@@ -73,13 +110,51 @@ export const SettingsAccountsEmailComposerSettings = () => {
       <Section>
         <H2Title
           title={t`Email Templates`}
-          description={t`Manage your email templates for quick composition.`}
+          description={t`Create and manage reusable email templates with dynamic variables.`}
         />
+
+        <StyledTemplateInfo>
+          <StyledInfoText>
+            {t`Email templates allow you to create reusable email content with dynamic variables that get replaced with actual values when composing emails. This helps maintain consistency and saves time when sending similar emails.`}
+          </StyledInfoText>
+
+          <StyledInfoText>
+            <strong>{t`Available variables:`}</strong>
+          </StyledInfoText>
+          <StyledVariablesList>
+            <li>
+              <StyledCode>{'{{person.firstName}}'}</StyledCode> -{' '}
+              {t`Recipient's first name`}
+            </li>
+            <li>
+              <StyledCode>{'{{person.lastName}}'}</StyledCode> -{' '}
+              {t`Recipient's last name`}
+            </li>
+            <li>
+              <StyledCode>{'{{person.email}}'}</StyledCode> -{' '}
+              {t`Recipient's email`}
+            </li>
+            <li>
+              <StyledCode>{'{{company.name}}'}</StyledCode> - {t`Company name`}
+            </li>
+          </StyledVariablesList>
+
+          <StyledLinkWrapper to="/objects/emailTemplates">
+            <Button
+              Icon={IconFileText}
+              title={t`Customize Email Templates`}
+              variant="secondary"
+              accent="default"
+              size="medium"
+            />
+          </StyledLinkWrapper>
+        </StyledTemplateInfo>
+
         {loading ? (
           <StyledEmptyState>{t`Loading templates...`}</StyledEmptyState>
         ) : templates.length === 0 ? (
           <StyledEmptyState>
-            {t`No email templates found. Create templates in the Email Templates section.`}
+            {t`No email templates found. Click "Customize Email Templates" to create your first template.`}
           </StyledEmptyState>
         ) : (
           <SettingsAccountsToggleSettingCard
