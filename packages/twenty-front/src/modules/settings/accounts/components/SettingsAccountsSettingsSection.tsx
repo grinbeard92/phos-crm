@@ -1,14 +1,21 @@
 import styled from '@emotion/styled';
 
 import { SettingsCard } from '@/settings/components/SettingsCard';
+import { useIsFeatureEnabled } from '@/workspace/hooks/useIsFeatureEnabled';
 import { useTheme } from '@emotion/react';
 import { useLingui } from '@lingui/react/macro';
 import { SettingsPath } from 'twenty-shared/types';
 import { getSettingsPath } from 'twenty-shared/utils';
-import { H2Title, IconCalendarEvent, IconMailCog } from 'twenty-ui/display';
+import {
+  H2Title,
+  IconCalendarEvent,
+  IconMailCog,
+  IconPencil,
+} from 'twenty-ui/display';
 import { Section } from 'twenty-ui/layout';
 import { UndecoratedLink } from 'twenty-ui/navigation';
 import { MOBILE_VIEWPORT } from 'twenty-ui/theme';
+import { FeatureFlagKey } from '~/generated/graphql';
 
 const StyledCardsContainer = styled.div`
   display: flex;
@@ -23,6 +30,10 @@ const StyledCardsContainer = styled.div`
 export const SettingsAccountsSettingsSection = () => {
   const { t } = useLingui();
   const theme = useTheme();
+  const isEmailComposerEnabled = useIsFeatureEnabled(
+    FeatureFlagKey.IS_EMAIL_COMPOSER_ENABLED,
+  );
+
   return (
     <Section>
       <H2Title
@@ -54,6 +65,22 @@ export const SettingsAccountsSettingsSection = () => {
             description={t`Configure and customize your calendar preferences.`}
           />
         </UndecoratedLink>
+        {isEmailComposerEnabled && (
+          <UndecoratedLink
+            to={getSettingsPath(SettingsPath.AccountsEmailComposer)}
+          >
+            <SettingsCard
+              Icon={
+                <IconPencil
+                  size={theme.icon.size.lg}
+                  stroke={theme.icon.stroke.sm}
+                />
+              }
+              title={t`Email Composer`}
+              description={t`Configure email composer settings and templates.`}
+            />
+          </UndecoratedLink>
+        )}
       </StyledCardsContainer>
     </Section>
   );

@@ -30,6 +30,15 @@ export const PUBLIC_FEATURE_FLAGS: PublicFeatureFlag[] = [
         'https://twenty.com/images/lab/is-row-level-permission-predicates-enabled.png',
     },
   },
+  {
+    key: FeatureFlagKey.IS_EMAIL_COMPOSER_ENABLED,
+    metadata: {
+      label: 'Email Composer',
+      description:
+        'Enable the email composer with template support for composing emails directly from person records',
+      imagePath: 'https://twenty.com/images/lab/is-email-composer-enabled.png',
+    },
+  },
   ...(process.env.CLOUDFLARE_API_KEY
     ? [
         // {
