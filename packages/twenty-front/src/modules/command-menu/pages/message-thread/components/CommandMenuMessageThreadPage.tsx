@@ -14,7 +14,10 @@ import { useIsMobile } from '@/ui/utilities/responsive/hooks/useIsMobile';
 import { useSetRecoilComponentState } from '@/ui/utilities/state/component-state/hooks/useSetRecoilComponentState';
 import { useIsFeatureEnabled } from '@/workspace/hooks/useIsFeatureEnabled';
 import { t } from '@lingui/core/macro';
-import { ConnectedAccountProvider } from 'twenty-shared/types';
+import {
+  ConnectedAccountProvider,
+  MessageParticipantRole,
+} from 'twenty-shared/types';
 import { isDefined } from 'twenty-shared/utils';
 import { IconArrowBackUp } from 'twenty-ui/display';
 import { Button } from 'twenty-ui/input';
@@ -116,9 +119,35 @@ export const CommandMenuMessageThreadPage = () => {
       return;
     }
 
-    // Get sender email from last message to use as recipient
+    // Get connected account email (the user's email) to exclude from CC
+    const myEmail = connectedAccountHandle?.toLowerCase() ?? '';
+
+    // Get sender email from last message to use as primary recipient
     const senderHandle = lastMessage.sender?.handle;
     const replyTo = senderHandle ?? '';
+
+    // Extract other recipients to include in CC for "Reply All" behavior
+    // Include: original TO recipients (except myself) and original CC recipients
+    const participants = lastMessage.messageParticipants ?? [];
+    const ccRecipients: string[] = [];
+
+    for (const participant of participants) {
+      const email = participant.handle?.toLowerCase();
+      if (!email || email === myEmail) {
+        // Skip empty emails and my own email
+        continue;
+      }
+      if (email === replyTo.toLowerCase()) {
+        // Skip the sender (they're already in To field)
+        continue;
+      }
+      if (
+        participant.role === MessageParticipantRole.TO ||
+        participant.role === MessageParticipantRole.CC
+      ) {
+        ccRecipients.push(participant.handle);
+      }
+    }
 
     // Build subject with "Re:" prefix if not already present
     const originalSubject = subject ?? '';
@@ -156,11 +185,12 @@ export const CommandMenuMessageThreadPage = () => {
       <blockquote>${quotedTextHtml}</blockquote>
     `;
 
-    // Open compose modal in reply mode
+    // Open compose modal in reply mode with CC recipients
     openEmailComposer({
       isReply: true,
       threadId: thread?.id,
       defaultTo: replyTo,
+      defaultCc: ccRecipients.join(', '),
       defaultSubject: replySubject,
       inReplyTo: lastMessageHeaderId ?? undefined,
       references: threadReferences,

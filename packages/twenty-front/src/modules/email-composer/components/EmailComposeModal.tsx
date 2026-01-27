@@ -255,6 +255,8 @@ type EmailAttachmentFile = {
 type EmailComposeModalProps = {
   context?: EmailComposeContext;
   defaultTo?: string;
+  defaultCc?: string;
+  defaultBcc?: string;
   defaultSubject?: string;
   defaultBody?: string;
   threadId?: string;
@@ -272,6 +274,8 @@ type EmailComposeModalProps = {
 export const EmailComposeModal = ({
   context: propsContext,
   defaultTo: propsDefaultTo,
+  defaultCc: propsDefaultCc,
+  defaultBcc: propsDefaultBcc,
   defaultSubject: propsDefaultSubject,
   defaultBody: propsDefaultBody,
   threadId: propsThreadId,
@@ -293,6 +297,9 @@ export const EmailComposeModal = ({
   // Merge props with modal options (props take precedence)
   const context = propsContext ?? emailComposeModalOptions.context;
   const defaultTo = propsDefaultTo ?? emailComposeModalOptions.defaultTo ?? '';
+  const defaultCc = propsDefaultCc ?? emailComposeModalOptions.defaultCc ?? '';
+  const defaultBcc =
+    propsDefaultBcc ?? emailComposeModalOptions.defaultBcc ?? '';
   const defaultSubject =
     propsDefaultSubject ?? emailComposeModalOptions.defaultSubject ?? '';
   const defaultBody =
@@ -345,9 +352,12 @@ export const EmailComposeModal = ({
   const [toEmail, setToEmail] = useState(
     defaultTo || context?.personEmail || '',
   );
-  const [ccEmail, setCcEmail] = useState('');
-  const [bccEmail, setBccEmail] = useState('');
-  const [showCcBcc, setShowCcBcc] = useState(false);
+  const [ccEmail, setCcEmail] = useState(defaultCc);
+  const [bccEmail, setBccEmail] = useState(defaultBcc);
+  // Auto-show CC/BCC fields if they have default values
+  const [showCcBcc, setShowCcBcc] = useState(
+    defaultCc !== '' || defaultBcc !== '',
+  );
   const [subject, setSubject] = useState(defaultSubject);
   const [attachments, setAttachments] = useState<EmailAttachmentFile[]>([]);
   const [isSending, setIsSending] = useState(false);
@@ -360,6 +370,8 @@ export const EmailComposeModal = ({
       emailComposeModalOptions.context?.personEmail ||
       '';
     const newSubject = emailComposeModalOptions.defaultSubject || '';
+    const newCc = emailComposeModalOptions.defaultCc || '';
+    const newBcc = emailComposeModalOptions.defaultBcc || '';
 
     // Only update if values have changed to avoid unnecessary re-renders
     if (newTo !== '' || emailComposeModalOptions.isReply === true) {
@@ -368,9 +380,20 @@ export const EmailComposeModal = ({
     if (newSubject !== '' || emailComposeModalOptions.isReply === true) {
       setSubject(newSubject);
     }
+    // Always update CC/BCC for replies (may be empty intentionally)
+    if (emailComposeModalOptions.isReply === true) {
+      setCcEmail(newCc);
+      setBccEmail(newBcc);
+      // Show CC/BCC fields if they have values
+      if (newCc !== '' || newBcc !== '') {
+        setShowCcBcc(true);
+      }
+    }
   }, [
     emailComposeModalOptions.defaultTo,
     emailComposeModalOptions.defaultSubject,
+    emailComposeModalOptions.defaultCc,
+    emailComposeModalOptions.defaultBcc,
     emailComposeModalOptions.context?.personEmail,
     emailComposeModalOptions.isReply,
   ]);

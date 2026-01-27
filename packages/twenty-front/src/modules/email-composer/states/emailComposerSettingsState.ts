@@ -9,6 +9,8 @@ import { localStorageEffect } from '~/utils/recoil/localStorageEffect';
 export type EmailComposeModalOptions = {
   context?: EmailComposeContext;
   defaultTo?: string;
+  defaultCc?: string;
+  defaultBcc?: string;
   defaultSubject?: string;
   defaultBody?: string;
   threadId?: string;
