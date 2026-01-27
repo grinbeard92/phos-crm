@@ -32,15 +32,10 @@ export const useEmailTemplates = () => {
     const shouldInitialize =
       localTemplates.length === 0 &&
       workspaceId !== '' &&
+      workspaceId !== 'default' &&
       emailTemplatesInitialized[workspaceId] !== true;
 
     if (shouldInitialize) {
-      // Mark as initialized before setting to prevent duplicate calls
-      setEmailTemplatesInitialized((prev) => ({
-        ...prev,
-        [workspaceId]: true,
-      }));
-
       const now = new Date().toISOString();
       const defaultTemplates: LocalEmailTemplate[] =
         DEFAULT_EMAIL_TEMPLATES.map((tmpl, index) => ({
@@ -49,7 +44,13 @@ export const useEmailTemplates = () => {
           createdAt: now,
           updatedAt: now,
         }));
+
+      // Set templates first, then mark as initialized
       setLocalTemplates(defaultTemplates);
+      setEmailTemplatesInitialized((prev) => ({
+        ...prev,
+        [workspaceId]: true,
+      }));
     }
   }, [
     localTemplates.length,
@@ -115,10 +116,13 @@ export const useEmailTemplates = () => {
 
   const getAllTemplates = useCallback(() => localTemplates, [localTemplates]);
 
+  // Loading state: true if workspace is not ready yet
+  const isLoading = workspaceId === 'default' || workspaceId === '';
+
   return {
     templates,
     allTemplates: localTemplates,
-    loading: false,
+    loading: isLoading,
     error: undefined,
     createTemplate,
     updateTemplate,

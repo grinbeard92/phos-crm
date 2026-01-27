@@ -395,6 +395,7 @@ export const EmailComposeModal = ({
       padding="none"
       isClosable
       onClose={handleClose}
+      ignoreContainer
     >
       <StyledModalHeader>
         <StyledHeaderLeft>
