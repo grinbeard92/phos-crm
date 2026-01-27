@@ -9,10 +9,20 @@ import { getTimelineThreadsFromCompanyId } from '@/activities/emails/graphql/que
 import { getTimelineThreadsFromOpportunityId } from '@/activities/emails/graphql/queries/getTimelineThreadsFromOpportunityId';
 import { getTimelineThreadsFromPersonId } from '@/activities/emails/graphql/queries/getTimelineThreadsFromPersonId';
 import { useCustomResolver } from '@/activities/hooks/useCustomResolver';
+import {
+  EMAIL_COMPOSE_MODAL_ID,
+  EmailComposeModal,
+} from '@/email-composer/components/EmailComposeModal';
 import { CoreObjectNameSingular } from '@/object-metadata/types/CoreObjectNameSingular';
+import { useFindOneRecord } from '@/object-record/hooks/useFindOneRecord';
+import { type ObjectRecord } from '@/object-record/types/ObjectRecord';
+import { useModal } from '@/ui/layout/modal/hooks/useModal';
 import { useTargetRecord } from '@/ui/layout/contexts/useTargetRecord';
+import { useIsFeatureEnabled } from '@/workspace/hooks/useIsFeatureEnabled';
+import { t } from '@lingui/core/macro';
 import { Trans } from '@lingui/react/macro';
-import { H1Title, H1TitleFontColor } from 'twenty-ui/display';
+import { H1Title, H1TitleFontColor, IconSend } from 'twenty-ui/display';
+import { Button } from 'twenty-ui/input';
 import {
   AnimatedPlaceholder,
   AnimatedPlaceholderEmptyContainer,
@@ -23,6 +33,7 @@ import {
   Section,
 } from 'twenty-ui/layout';
 import {
+  FeatureFlagKey,
   type TimelineThread,
   type TimelineThreadsWithTotal,
 } from '~/generated/graphql';
@@ -45,8 +56,43 @@ const StyledEmailCount = styled.span`
   color: ${({ theme }) => theme.font.color.light};
 `;
 
+const StyledComposeButtonContainer = styled.div`
+  margin-top: ${({ theme }) => theme.spacing(4)};
+`;
+
+type PersonRecord = ObjectRecord & {
+  name: { firstName: string; lastName: string };
+  emails: { primaryEmail: string } | null;
+  company?: { name: string } | null;
+};
+
 export const EmailsCard = () => {
   const targetRecord = useTargetRecord();
+  const { openModal } = useModal();
+  const isEmailComposerEnabled = useIsFeatureEnabled(
+    FeatureFlagKey.IS_EMAIL_COMPOSER_ENABLED,
+  );
+
+  const isPerson =
+    targetRecord.targetObjectNameSingular === CoreObjectNameSingular.Person;
+
+  const { record: personRecord } = useFindOneRecord<PersonRecord>({
+    objectNameSingular: CoreObjectNameSingular.Person,
+    objectRecordId: isPerson ? targetRecord.id : undefined,
+    recordGqlFields: {
+      id: true,
+      name: true,
+      emails: true,
+      company: {
+        name: true,
+      },
+    },
+    skip: !isPerson || !isEmailComposerEnabled,
+  });
+
+  const handleComposeClick = () => {
+    openModal(EMAIL_COMPOSE_MODAL_ID);
+  };
 
   const [query, queryName] =
     targetRecord.targetObjectNameSingular === CoreObjectNameSingular.Person
@@ -84,21 +130,56 @@ export const EmailsCard = () => {
   }
 
   if (!firstQueryLoading && !timelineThreads?.length) {
+    const emailContext =
+      isPerson && personRecord
+        ? {
+            personId: personRecord.id,
+            personFirstName: personRecord.name?.firstName || '',
+            personLastName: personRecord.name?.lastName || '',
+            personEmail: personRecord.emails?.primaryEmail || '',
+            companyName: personRecord.company?.name || '',
+          }
+        : undefined;
+
     return (
-      <AnimatedPlaceholderEmptyContainer
-        // eslint-disable-next-line react/jsx-props-no-spreading
-        {...EMPTY_PLACEHOLDER_TRANSITION_PROPS}
-      >
-        <AnimatedPlaceholder type="emptyInbox" />
-        <AnimatedPlaceholderEmptyTextContainer>
-          <AnimatedPlaceholderEmptyTitle>
-            <Trans>Empty Inbox</Trans>
-          </AnimatedPlaceholderEmptyTitle>
-          <AnimatedPlaceholderEmptySubTitle>
-            <Trans>No email exchange has occurred with this record yet.</Trans>
-          </AnimatedPlaceholderEmptySubTitle>
-        </AnimatedPlaceholderEmptyTextContainer>
-      </AnimatedPlaceholderEmptyContainer>
+      <>
+        <AnimatedPlaceholderEmptyContainer
+          // eslint-disable-next-line react/jsx-props-no-spreading
+          {...EMPTY_PLACEHOLDER_TRANSITION_PROPS}
+        >
+          <AnimatedPlaceholder type="emptyInbox" />
+          <AnimatedPlaceholderEmptyTextContainer>
+            <AnimatedPlaceholderEmptyTitle>
+              <Trans>Empty Inbox</Trans>
+            </AnimatedPlaceholderEmptyTitle>
+            <AnimatedPlaceholderEmptySubTitle>
+              <Trans>
+                No email exchange has occurred with this record yet.
+              </Trans>
+            </AnimatedPlaceholderEmptySubTitle>
+          </AnimatedPlaceholderEmptyTextContainer>
+          {isEmailComposerEnabled &&
+            isPerson &&
+            personRecord?.emails?.primaryEmail && (
+              <StyledComposeButtonContainer>
+                <Button
+                  Icon={IconSend}
+                  title={t`Compose Email`}
+                  variant="secondary"
+                  accent="default"
+                  size="medium"
+                  onClick={handleComposeClick}
+                />
+              </StyledComposeButtonContainer>
+            )}
+        </AnimatedPlaceholderEmptyContainer>
+        {isEmailComposerEnabled && (
+          <EmailComposeModal
+            context={emailContext}
+            defaultTo={personRecord?.emails?.primaryEmail || ''}
+          />
+        )}
+      </>
     );
   }
 
