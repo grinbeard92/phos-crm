@@ -1,16 +1,15 @@
 import { type ConnectedAccount } from '@/accounts/types/ConnectedAccount';
-import { useUploadAttachmentFile } from '@/activities/files/hooks/useUploadAttachmentFile';
 import { BLOCK_SCHEMA } from '@/activities/blocks/constants/Schema';
 import { WorkflowSendEmailAttachments } from '@/advanced-text-editor/components/WorkflowSendEmailAttachments';
 import { currentWorkspaceMemberState } from '@/auth/states/currentWorkspaceMemberState';
 import { EmailTemplateSelector } from '@/email-composer/components/EmailTemplateSelector';
 import { useEmailSignature } from '@/email-composer/hooks/useEmailSignature';
 import { useSendEmail } from '@/email-composer/hooks/useSendEmail';
+import { useUploadEmailImage } from '@/email-composer/hooks/useUploadEmailImage';
 import {
   type EmailComposeContext,
   type EmailTemplateOption,
 } from '@/email-composer/types/EmailComposerTypes';
-import { CoreObjectNameSingular } from '@/object-metadata/types/CoreObjectNameSingular';
 import { useFindManyRecords } from '@/object-record/hooks/useFindManyRecords';
 import { FormTextFieldInput } from '@/object-record/record-field/ui/form-types/components/FormTextFieldInput';
 import { useSnackBar } from '@/ui/feedback/snack-bar-manager/hooks/useSnackBar';
@@ -149,7 +148,7 @@ export const EmailComposeModal = ({
   const theme = useTheme();
   const { closeModal } = useModal();
   const { enqueueErrorSnackBar, enqueueSuccessSnackBar } = useSnackBar();
-  const { uploadAttachmentFile } = useUploadAttachmentFile();
+  const { uploadEmailImage } = useUploadEmailImage();
   const { sendEmail } = useSendEmail();
   const { getSignatureForEmail } = useEmailSignature();
   const currentWorkspaceMember = useRecoilValue(currentWorkspaceMemberState);
@@ -184,11 +183,8 @@ export const EmailComposeModal = ({
 
   const handleEditorUploadFile = async (file: File) => {
     try {
-      const { attachmentAbsoluteURL } = await uploadAttachmentFile(file, {
-        id: crypto.randomUUID(),
-        targetObjectNameSingular: CoreObjectNameSingular.Message,
-      });
-      return attachmentAbsoluteURL;
+      const imageUrl = await uploadEmailImage(file);
+      return imageUrl;
     } catch {
       enqueueErrorSnackBar({
         message: t`Failed to upload image: `.concat(file.name),
