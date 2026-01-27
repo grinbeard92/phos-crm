@@ -2,6 +2,7 @@ import { type ConnectedAccount } from '@/accounts/types/ConnectedAccount';
 import { BLOCK_SCHEMA } from '@/activities/blocks/constants/Schema';
 import { WorkflowSendEmailAttachments } from '@/advanced-text-editor/components/WorkflowSendEmailAttachments';
 import { currentWorkspaceMemberState } from '@/auth/states/currentWorkspaceMemberState';
+import { currentWorkspaceState } from '@/auth/states/currentWorkspaceState';
 import { EmailTemplateSelector } from '@/email-composer/components/EmailTemplateSelector';
 import { useEmailSignature } from '@/email-composer/hooks/useEmailSignature';
 import DOMPurify from 'dompurify';
@@ -12,6 +13,7 @@ import {
   type EmailTemplateOption,
 } from '@/email-composer/types/EmailComposerTypes';
 import {
+  customTemplateVariablesState,
   defaultEditorModeState,
   type EditorMode,
 } from '@/email-composer/states/emailComposerSettingsState';
@@ -279,7 +281,14 @@ export const EmailComposeModal = ({
     getSignatureForEmail,
   } = useEmailSignature();
   const currentWorkspaceMember = useRecoilValue(currentWorkspaceMemberState);
+  const currentWorkspace = useRecoilValue(currentWorkspaceState);
   const memberId = currentWorkspaceMember?.id ?? 'default';
+  const workspaceId = currentWorkspace?.id ?? 'default';
+
+  // Custom template variables
+  const customVariables = useRecoilValue(
+    customTemplateVariablesState(workspaceId),
+  );
 
   // Editor mode preference
   const [defaultEditorMode, setDefaultEditorMode] = useRecoilState(
@@ -355,13 +364,25 @@ export const EmailComposeModal = ({
       let resolvedSubject = template.subject;
       let resolvedBody = template.body;
 
-      // Simple variable substitution from context
+      // Build variables map with built-in and custom variables
       const variables: Record<string, string> = {
-        'person.firstName': context?.personFirstName || '',
-        'person.lastName': context?.personLastName || '',
-        'person.email': context?.personEmail || '',
-        'company.name': context?.companyName || '',
+        // Recipient info from context
+        'person.firstName': context?.personFirstName ?? '',
+        'person.lastName': context?.personLastName ?? '',
+        'person.email': context?.personEmail ?? '',
+        'company.name': context?.companyName ?? '',
+        // Sender's company (workspace name)
+        'myCompany.name': currentWorkspace?.displayName ?? '',
+        // Sender info
+        'sender.firstName': currentWorkspaceMember?.name?.firstName ?? '',
+        'sender.lastName': currentWorkspaceMember?.name?.lastName ?? '',
+        'sender.email': currentWorkspaceMember?.userEmail ?? '',
       };
+
+      // Add custom variables with their default values
+      for (const customVar of customVariables) {
+        variables[`custom.${customVar.key}`] = customVar.defaultValue;
+      }
 
       Object.entries(variables).forEach(([key, value]) => {
         const regex = new RegExp(`\\{\\{${key}\\}\\}`, 'g');
@@ -388,7 +409,16 @@ export const EmailComposeModal = ({
         }
       }
     },
-    [context, editor, editorMode],
+    [
+      context,
+      currentWorkspace?.displayName,
+      currentWorkspaceMember?.name?.firstName,
+      currentWorkspaceMember?.name?.lastName,
+      currentWorkspaceMember?.userEmail,
+      customVariables,
+      editor,
+      editorMode,
+    ],
   );
 
   // Handle switching between editor modes

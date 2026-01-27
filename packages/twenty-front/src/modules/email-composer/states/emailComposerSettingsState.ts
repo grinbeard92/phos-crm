@@ -93,6 +93,80 @@ export const localEmailTemplatesState = atomFamily<
 });
 
 /**
+ * Custom template variable definition.
+ */
+export type CustomTemplateVariable = {
+  id: string;
+  /** Variable key used in templates, e.g., "customField" for {{custom.customField}} */
+  key: string;
+  /** Human-readable label shown in UI */
+  label: string;
+  /** Default value if not overridden at send time */
+  defaultValue: string;
+};
+
+/**
+ * Custom template variables stored per workspace.
+ * Users can define their own variables to use in templates.
+ */
+export const customTemplateVariablesState = atomFamily<
+  CustomTemplateVariable[],
+  string
+>({
+  key: 'customTemplateVariables',
+  default: [],
+  effects: (workspaceId) => [
+    localStorageEffect(`customTemplateVariables-${workspaceId}`),
+  ],
+});
+
+/**
+ * Built-in template variables that are always available.
+ */
+export const BUILT_IN_VARIABLES = [
+  {
+    key: 'person.firstName',
+    label: 'Recipient First Name',
+    description: 'First name of the person being emailed',
+  },
+  {
+    key: 'person.lastName',
+    label: 'Recipient Last Name',
+    description: 'Last name of the person being emailed',
+  },
+  {
+    key: 'person.email',
+    label: 'Recipient Email',
+    description: 'Email address of the person being emailed',
+  },
+  {
+    key: 'company.name',
+    label: 'Recipient Company',
+    description: "Name of the recipient's company",
+  },
+  {
+    key: 'myCompany.name',
+    label: 'My Company Name',
+    description: 'Your workspace/company name',
+  },
+  {
+    key: 'sender.firstName',
+    label: 'Sender First Name',
+    description: 'Your first name',
+  },
+  {
+    key: 'sender.lastName',
+    label: 'Sender Last Name',
+    description: 'Your last name',
+  },
+  {
+    key: 'sender.email',
+    label: 'Sender Email',
+    description: 'Your email address',
+  },
+] as const;
+
+/**
  * Default templates that are pre-populated when the user first accesses templates.
  */
 export const DEFAULT_EMAIL_TEMPLATES: Omit<
@@ -102,7 +176,7 @@ export const DEFAULT_EMAIL_TEMPLATES: Omit<
   {
     name: 'Introduction',
     subject: 'Nice to meet you, {{person.firstName}}!',
-    body: '<p>Hi {{person.firstName}},</p><p>It was great connecting with you. I wanted to follow up and introduce myself properly.</p><p>I work at {{company.name}} and I think we could help you with...</p><p>Would you be open to a quick call this week?</p><p>Best regards</p>',
+    body: '<p>Hi {{person.firstName}},</p><p>It was great connecting with you. I wanted to follow up and introduce myself properly.</p><p>I work at {{myCompany.name}} and I think we could help you with...</p><p>Would you be open to a quick call this week?</p><p>Best regards,</p><p>{{sender.firstName}}</p>',
     bodyFormat: 'html',
     category: 'GENERAL',
     isActive: true,

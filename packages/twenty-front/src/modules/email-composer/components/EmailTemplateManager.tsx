@@ -6,6 +6,7 @@ import { useCallback, useState } from 'react';
 
 import { useEmailTemplates } from '@/email-composer/hooks/useEmailTemplates';
 import {
+  BUILT_IN_VARIABLES,
   type EditorMode,
   type LocalEmailTemplate,
 } from '@/email-composer/states/emailComposerSettingsState';
@@ -281,9 +282,11 @@ const TemplateEditor = ({
           }
         />
         <StyledVariablesHelp>
+          <Trans>Available variables:</Trans>{' '}
+          {BUILT_IN_VARIABLES.map((v) => `{{${v.key}}}`).join(', ')}
+          <br />
           <Trans>
-            Available variables: {'{{person.firstName}}'},{' '}
-            {'{{person.lastName}}'}, {'{{person.email}}'}, {'{{company.name}}'}
+            Custom variables use the format: {'{{custom.variableName}}'}
           </Trans>
         </StyledVariablesHelp>
       </StyledFormRow>
