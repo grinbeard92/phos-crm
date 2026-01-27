@@ -11,6 +11,7 @@ import {
   type CustomTemplateVariable,
   customTemplateVariablesState,
 } from '@/email-composer/states/emailComposerSettingsState';
+import { useSnackBar } from '@/ui/feedback/snack-bar-manager/hooks/useSnackBar';
 import { TextInput } from '@/ui/input/components/TextInput';
 import { H2Title, IconPlus, IconTrash, IconVariable } from 'twenty-ui/display';
 import { Button } from 'twenty-ui/input';
@@ -130,15 +131,16 @@ const StyledEmptyIcon = styled.div`
 `;
 
 const StyledCustomVariableRow = styled.div`
+  align-items: end;
   display: grid;
   gap: ${({ theme }) => theme.spacing(2)};
   grid-template-columns: 1fr 1fr 1fr auto;
-  align-items: end;
 `;
 
 export const EmailTemplateVariablesManager = () => {
   const currentWorkspace = useRecoilValue(currentWorkspaceState);
   const workspaceId = currentWorkspace?.id ?? 'default';
+  const { enqueueSuccessSnackBar } = useSnackBar();
 
   const [customVariables, setCustomVariables] = useRecoilState(
     customTemplateVariablesState(workspaceId),
@@ -172,8 +174,10 @@ export const EmailTemplateVariablesManager = () => {
     setNewLabel('');
     setNewDefaultValue('');
     setIsAdding(false);
+    enqueueSuccessSnackBar({ message: t`Variable added` });
   }, [
     customVariables,
+    enqueueSuccessSnackBar,
     newDefaultValue,
     newKey,
     newLabel,
@@ -183,8 +187,9 @@ export const EmailTemplateVariablesManager = () => {
   const handleDeleteVariable = useCallback(
     (id: string) => {
       setCustomVariables(customVariables.filter((v) => v.id !== id));
+      enqueueSuccessSnackBar({ message: t`Variable deleted` });
     },
-    [customVariables, setCustomVariables],
+    [customVariables, enqueueSuccessSnackBar, setCustomVariables],
   );
 
   const handleUpdateVariable = useCallback(

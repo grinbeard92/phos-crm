@@ -5,6 +5,7 @@ import { Trans } from '@lingui/react/macro';
 import { useCallback, useState } from 'react';
 
 import { useEmailTemplates } from '@/email-composer/hooks/useEmailTemplates';
+import { useSnackBar } from '@/ui/feedback/snack-bar-manager/hooks/useSnackBar';
 import {
   BUILT_IN_VARIABLES,
   type EditorMode,
@@ -314,6 +315,7 @@ const TemplateEditor = ({
 export const EmailTemplateManager = () => {
   const { allTemplates, createTemplate, updateTemplate, deleteTemplate } =
     useEmailTemplates();
+  const { enqueueSuccessSnackBar } = useSnackBar();
 
   const [isEditing, setIsEditing] = useState(false);
   const [editingTemplate, setEditingTemplate] = useState<
@@ -334,9 +336,10 @@ export const EmailTemplateManager = () => {
     (id: string) => {
       if (window.confirm(t`Are you sure you want to delete this template?`)) {
         deleteTemplate(id);
+        enqueueSuccessSnackBar({ message: t`Template deleted` });
       }
     },
-    [deleteTemplate],
+    [deleteTemplate, enqueueSuccessSnackBar],
   );
 
   const handleSave = useCallback(
@@ -345,13 +348,15 @@ export const EmailTemplateManager = () => {
     ) => {
       if (editingTemplate !== undefined) {
         updateTemplate(editingTemplate.id, templateData);
+        enqueueSuccessSnackBar({ message: t`Template updated` });
       } else {
         createTemplate(templateData);
+        enqueueSuccessSnackBar({ message: t`Template created` });
       }
       setIsEditing(false);
       setEditingTemplate(undefined);
     },
-    [editingTemplate, createTemplate, updateTemplate],
+    [editingTemplate, createTemplate, updateTemplate, enqueueSuccessSnackBar],
   );
 
   const handleCancel = useCallback(() => {
@@ -362,8 +367,11 @@ export const EmailTemplateManager = () => {
   const handleToggleActive = useCallback(
     (template: LocalEmailTemplate) => {
       updateTemplate(template.id, { isActive: !template.isActive });
+      enqueueSuccessSnackBar({
+        message: template.isActive ? t`Template disabled` : t`Template enabled`,
+      });
     },
-    [updateTemplate],
+    [updateTemplate, enqueueSuccessSnackBar],
   );
 
   return (
