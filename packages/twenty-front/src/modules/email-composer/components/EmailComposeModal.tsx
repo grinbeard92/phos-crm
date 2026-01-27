@@ -236,7 +236,7 @@ export const EmailComposeModal = ({
   });
 
   const handleTemplateSelect = useCallback(
-    (template: EmailTemplateOption | null) => {
+    async (template: EmailTemplateOption | null) => {
       if (!template) {
         setSelectedTemplateId(null);
         return;
@@ -271,13 +271,9 @@ export const EmailComposeModal = ({
           editor.replaceBlocks(editor.document, bodyContent);
         }
       } catch {
-        // If not JSON, create a simple paragraph block
-        editor.replaceBlocks(editor.document, [
-          {
-            type: 'paragraph',
-            content: resolvedBody,
-          },
-        ]);
+        // If not JSON, it's HTML - parse it to blocks
+        const blocks = await editor.tryParseHTMLToBlocks(resolvedBody);
+        editor.replaceBlocks(editor.document, blocks);
       }
     },
     [context, editor],
