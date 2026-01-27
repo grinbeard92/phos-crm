@@ -2,7 +2,8 @@ import { type ConnectedAccount } from '@/accounts/types/ConnectedAccount';
 import { useUploadAttachmentFile } from '@/activities/files/hooks/useUploadAttachmentFile';
 import { WorkflowSendEmailAttachments } from '@/advanced-text-editor/components/WorkflowSendEmailAttachments';
 import { currentWorkspaceMemberState } from '@/auth/states/currentWorkspaceMemberState';
-import { type EmailComposeData, type EmailComposeContext } from '@/email-composer/types/EmailComposerTypes';
+import { EmailTemplateSelector } from '@/email-composer/components/EmailTemplateSelector';
+import { type EmailComposeData, type EmailComposeContext, type EmailTemplateOption } from '@/email-composer/types/EmailComposerTypes';
 import { CoreObjectNameSingular } from '@/object-metadata/types/CoreObjectNameSingular';
 import { useFindManyRecords } from '@/object-record/hooks/useFindManyRecords';
 import { FormAdvancedTextFieldInput } from '@/object-record/record-field/ui/form-types/components/FormAdvancedTextFieldInput';
@@ -94,11 +95,45 @@ export const EmailComposeModal = ({
   const currentWorkspaceMember = useRecoilValue(currentWorkspaceMemberState);
 
   const [connectedAccountId, setConnectedAccountId] = useState<string | null>(null);
+  const [selectedTemplateId, setSelectedTemplateId] = useState<string | null>(null);
   const [toEmail, setToEmail] = useState(defaultTo || context?.personEmail || '');
   const [subject, setSubject] = useState(defaultSubject);
   const [body, setBody] = useState(defaultBody);
   const [attachments, setAttachments] = useState<EmailAttachmentFile[]>([]);
   const [isSending, setIsSending] = useState(false);
+
+  const handleTemplateSelect = useCallback(
+    (template: EmailTemplateOption | null) => {
+      if (!template) {
+        setSelectedTemplateId(null);
+        return;
+      }
+
+      setSelectedTemplateId(template.id);
+
+      // Apply template with variable substitution
+      let resolvedSubject = template.subject;
+      let resolvedBody = template.body;
+
+      // Simple variable substitution from context
+      const variables: Record<string, string> = {
+        'person.firstName': context?.personFirstName || '',
+        'person.lastName': context?.personLastName || '',
+        'person.email': context?.personEmail || '',
+        'company.name': context?.companyName || '',
+      };
+
+      Object.entries(variables).forEach(([key, value]) => {
+        const regex = new RegExp(`\\{\\{${key}\\}\\}`, 'g');
+        resolvedSubject = resolvedSubject.replace(regex, value);
+        resolvedBody = resolvedBody.replace(regex, value);
+      });
+
+      setSubject(resolvedSubject);
+      setBody(resolvedBody);
+    },
+    [context],
+  );
 
   const { records: accounts, loading } = useFindManyRecords<ConnectedAccount>({
     objectNameSingular: 'connectedAccount',
@@ -231,6 +266,11 @@ export const EmailComposeModal = ({
               onChange={setConnectedAccountId}
               dropdownOffset={{ y: parseInt(theme.spacing(1), 10) }}
               dropdownWidth={GenericDropdownContentWidth.ExtraLarge}
+            />
+
+            <EmailTemplateSelector
+              value={selectedTemplateId}
+              onChange={handleTemplateSelect}
             />
 
             <FormTextFieldInput
