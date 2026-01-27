@@ -816,18 +816,19 @@ When user clicks "Reply" from the email thread view:
 
 ## 13. Implementation Checklist
 
-### Phase 1: Full-Stack Threading Support (Section 10)
-- [ ] **Backend DTO**: Add `inReplyTo`, `references`, `messageThreadId`, `cc`, `bcc` to `SendEmailInput`
-- [ ] **Backend Resolver**: Forward threading params to `MessagingSendMessageService`
-- [ ] **Frontend Hook**: Update `useSendEmail` type with threading fields
-- [ ] **Frontend Mutation**: Update GraphQL mutation to pass threading variables
-- [ ] **Frontend Modal**: Wire `handleSend()` to include `inReplyTo`/`references` from props
+### Phase 1: Full-Stack Threading Support (Section 10) ✅ COMPLETE (2026-01-27)
+- [x] **Backend DTO**: Add `inReplyTo`, `references`, `messageThreadId`, `cc`, `bcc` to `SendEmailInput`
+- [x] **Backend Resolver**: Forward threading params to `MessagingSendMessageService`
+- [x] **Frontend Hook**: Update `useSendEmail` type with threading fields
+- [x] **Frontend Mutation**: Update GraphQL mutation to pass threading variables
+- [x] **Frontend Modal**: Wire `handleSend()` to include `inReplyTo`/`references` from props
 
-### Phase 2: Sent Message Persistence (Sections 3-4)
-- [ ] Create `SentMessagePersistenceService`
-- [ ] Update `SendEmailTool` to call persistence service after successful send
-- [ ] Update `SendEmailInputZodSchema` with all new fields
-- [ ] Handle thread lookup via `inReplyTo` → find existing thread
+### Phase 2: Sent Message Persistence (Sections 3-4) ✅ COMPLETE (2026-01-27)
+- [x] Create `MessagingSentMessagePersistenceService` in `/packages/twenty-server/src/modules/messaging/message-import-manager/services/`
+- [x] Update `SendEmailTool` to call persistence service after successful send
+- [x] Update `SendEmailInputZodSchema` with all new fields (inReplyTo, references, messageThreadId, cc, bcc)
+- [x] Handle thread lookup via `inReplyTo` → find existing thread, or via `messageThreadId`
+- [x] Integrate `MatchParticipantService` for person/workspace member matching
 
 ### Phase 3: UI & Timeline (Sections 5-6)
 - [ ] Update timeline queries to include `direction = 'OUTGOING'`

@@ -49,4 +49,30 @@ export class SendEmailInput {
   @Field(() => [EmailFileInput], { nullable: true })
   @IsOptional()
   files?: EmailFileInput[];
+
+  // Threading support
+  @Field({ nullable: true })
+  @IsString()
+  @IsOptional()
+  inReplyTo?: string; // RFC 5322 Message-ID of email being replied to
+
+  @Field(() => [String], { nullable: true })
+  @IsOptional()
+  references?: string[]; // Chain of Message-IDs for threading
+
+  @Field({ nullable: true })
+  @IsUUID()
+  @IsOptional()
+  messageThreadId?: string; // Twenty's internal thread ID for persistence
+
+  // Additional recipients
+  @Field({ nullable: true })
+  @IsString()
+  @IsOptional()
+  cc?: string; // CC recipients (comma-separated)
+
+  @Field({ nullable: true })
+  @IsString()
+  @IsOptional()
+  bcc?: string; // BCC recipients (comma-separated)
 }
