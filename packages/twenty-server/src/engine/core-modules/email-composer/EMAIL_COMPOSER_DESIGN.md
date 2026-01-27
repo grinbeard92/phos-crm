@@ -1,7 +1,7 @@
 # Email Composer Module - High-Level Design Document
 
-> **Version:** 1.1.0
-> **Status:** In Development (Services Wired)
+> **Version:** 1.2.0
+> **Status:** In Development (Email Rendering + Threading)
 > **Feature Flag:** `IS_EMAIL_COMPOSER_ENABLED`
 
 ## Overview
@@ -107,8 +107,11 @@ Select Template     ──►  useEmailTemplates.templates
                               ▼
 Edit Content        ──►  BlockEditor state
                               │
-Click "Send"        ──►  useSendEmail.sendEmail({
-                           email, subject, body,
+Click "Send"        ──►  editor.blocksToHTMLLossy()
+                              │ (Convert to HTML)
+                              ▼
+                         useSendEmail.sendEmail({
+                           email, subject, body (HTML),
                            connectedAccountId, files
                          })
                               │
@@ -119,15 +122,20 @@ Click "Send"        ──►  useSendEmail.sendEmail({
                          EmailComposerService.send()
                               │
                               ├── Resolve template variables
-                              ├── Parse BlockNote → HTML
-                              ├── Sanitize content
+                              ├── Detect HTML vs JSON body
+                              ├── Wrap in ComposedEmail template
+                              ├── DOMPurify sanitize
                               └── SendEmailTool.execute()
                                        │
                                        ▼
                               MessagingSendMessageService
                                        │
+                                       ├── Generate Message-ID
+                                       ├── Set In-Reply-To (if reply)
+                                       ├── Set References (threading)
+                                       │
                                        ▼
-                              SMTP / Gmail API
+                              Gmail API / Microsoft Graph / SMTP
 ```
 
 ### 2. Template Resolution
@@ -279,8 +287,11 @@ export class AppModule {}
 - [x] Backend template variable resolution (v1.1.0)
 - [x] Decoupled service architecture (v1.1.0)
 - [x] Template validation query (v1.1.0)
-- [ ] CC/BCC support (frontend ready, backend pending)
+- [x] react-email HTML rendering (v1.2.0) - ComposedEmail template
+- [x] Email threading headers (v1.2.0) - Message-ID, In-Reply-To, References
+- [x] CC/BCC support in providers (v1.2.0)
+- [ ] CC/BCC UI (frontend fields exist, GraphQL pending)
+- [ ] Create sent message DB record after send (threading visibility)
 - [ ] Template CRUD operations
 - [ ] Email scheduling/queue
 - [ ] Delivery tracking
-- [ ] react-email HTML rendering
