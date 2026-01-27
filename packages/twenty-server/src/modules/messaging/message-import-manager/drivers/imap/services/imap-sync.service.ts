@@ -23,6 +23,7 @@ export class ImapSyncService {
     folderPath: string,
     previousCursor: ImapSyncCursor | null,
     mailboxState: MailboxState,
+    sinceDate?: Date,
   ): Promise<SyncResult> {
     this.validateUidValidity(previousCursor, mailboxState, folderPath);
 
@@ -31,6 +32,7 @@ export class ImapSyncService {
       previousCursor,
       mailboxState,
       folderPath,
+      sinceDate,
     );
 
     return { messageUids };
@@ -61,9 +63,21 @@ export class ImapSyncService {
     previousCursor: ImapSyncCursor | null,
     mailboxState: MailboxState,
     folderPath: string,
+    sinceDate?: Date,
   ): Promise<number[]> {
     const lastSyncedUid = previousCursor?.highestUid ?? 0;
     const { maxUid } = mailboxState;
+
+    // For initial sync (no previous cursor), apply date filter if specified
+    const isInitialSync = previousCursor === null || lastSyncedUid === 0;
+
+    if (isInitialSync && sinceDate !== undefined) {
+      this.logger.log(
+        `Using date-filtered search for initial sync in folder ${folderPath}`,
+      );
+
+      return this.fetchWithDateFilter(client, sinceDate);
+    }
 
     if (canUseQresync(client, previousCursor, mailboxState)) {
       this.logger.log(`Using QRESYNC for folder ${folderPath}`);
@@ -84,6 +98,22 @@ export class ImapSyncService {
     this.logger.log(`Using UID range fetch for folder ${folderPath}`);
 
     return this.fetchWithUidRange(client, lastSyncedUid, maxUid);
+  }
+
+  private async fetchWithDateFilter(
+    client: ImapFlow,
+    sinceDate: Date,
+  ): Promise<number[]> {
+    // IMAP SINCE search uses date without time (DD-Mon-YYYY format)
+    const uids = await client.search({ since: sinceDate }, { uid: true });
+
+    if (!uids || !Array.isArray(uids)) {
+      return [];
+    }
+
+    this.logger.log(`Date filter search found ${uids.length} messages`);
+
+    return uids;
   }
 
   private async fetchWithUidRange(

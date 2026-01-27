@@ -98,6 +98,8 @@ export class MessageChannelWorkspaceEntity extends BaseWorkspaceEntity {
   syncStage: MessageChannelSyncStage;
   syncStageStartedAt: string | null;
   throttleFailureCount: number;
+  /** Number of days of email history to sync on initial import (default: 30, 0 = all) */
+  syncHistoryDepthDays: number;
   connectedAccount: EntityRelation<ConnectedAccountWorkspaceEntity>;
   connectedAccountId: string;
   messageChannelMessageAssociations: EntityRelation<

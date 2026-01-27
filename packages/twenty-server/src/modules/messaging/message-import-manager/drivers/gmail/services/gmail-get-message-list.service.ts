@@ -46,7 +46,7 @@ export class GmailGetMessageListService {
     >[],
     messageChannel: Pick<
       MessageChannelWorkspaceEntity,
-      'messageFolderImportPolicy'
+      'messageFolderImportPolicy' | 'syncHistoryDepthDays'
     >,
   ): Promise<GetMessageListsResponse> {
     const oAuth2Client =
@@ -68,13 +68,36 @@ export class GmailGetMessageListService {
       messageChannel.messageFolderImportPolicy,
     );
 
+    // Build date filter for initial sync based on syncHistoryDepthDays
+    // 0 = sync all history, positive number = only sync last N days
+    let dateFilter = '';
+    const syncHistoryDepthDays = messageChannel.syncHistoryDepthDays ?? 30;
+
+    if (syncHistoryDepthDays > 0) {
+      const afterDate = new Date();
+
+      afterDate.setDate(afterDate.getDate() - syncHistoryDepthDays);
+      // Gmail uses YYYY/MM/DD format for after: queries
+      const formattedDate = `${afterDate.getFullYear()}/${String(afterDate.getMonth() + 1).padStart(2, '0')}/${String(afterDate.getDate()).padStart(2, '0')}`;
+
+      dateFilter = `after:${formattedDate}`;
+      this.logger.log(
+        `Connected account ${connectedAccount.id}: Applying date filter for initial sync: ${dateFilter}`,
+      );
+    }
+
+    // Combine folder filter and date filter
+    const combinedFilter = [excludedSearchFilter, dateFilter]
+      .filter(Boolean)
+      .join(' ');
+
     while (hasMoreMessages) {
       const messageList = await gmailClient.users.messages
         .list({
           userId: 'me',
           maxResults: MESSAGING_GMAIL_USERS_MESSAGES_LIST_MAX_RESULT,
           pageToken,
-          q: excludedSearchFilter,
+          q: combinedFilter,
         })
         .catch((error) => {
           this.logger.error(

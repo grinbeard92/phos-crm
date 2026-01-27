@@ -1,7 +1,6 @@
 import { Injectable, Logger } from '@nestjs/common';
 
 import { MessageParticipantRole } from 'twenty-shared/types';
-import { isDefined } from 'twenty-shared/utils';
 import { v4 } from 'uuid';
 
 import { type WorkspaceEntityManager } from 'src/engine/twenty-orm/entity-manager/workspace-entity-manager';

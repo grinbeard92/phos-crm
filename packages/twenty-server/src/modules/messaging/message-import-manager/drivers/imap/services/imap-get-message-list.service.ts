@@ -52,13 +52,25 @@ export class ImapGetMessageListService {
       return [];
     }
 
+    // Calculate date filter for initial sync based on syncHistoryDepthDays
+    const syncHistoryDepthDays = messageChannel.syncHistoryDepthDays ?? 30;
+    let sinceDate: Date | undefined;
+
+    if (syncHistoryDepthDays > 0) {
+      sinceDate = new Date();
+      sinceDate.setDate(sinceDate.getDate() - syncHistoryDepthDays);
+      this.logger.log(
+        `Connected account ${connectedAccount.id}: Applying date filter for initial sync: SINCE ${sinceDate.toISOString()}`,
+      );
+    }
+
     const client = await this.imapClientProvider.getClient(connectedAccount);
 
     try {
       const results: GetMessageListsResponse = [];
 
       for (const folder of foldersToProcess) {
-        const response = await this.getMessageList(client, folder);
+        const response = await this.getMessageList(client, folder, sinceDate);
 
         results.push({ ...response, folderId: folder.id });
       }
@@ -78,6 +90,7 @@ export class ImapGetMessageListService {
   private async getMessageList(
     client: ImapFlow,
     folder: MessageFolder,
+    sinceDate?: Date,
   ): Promise<GetOneMessageListResponse> {
     const folderPath = parseMessageId(folder.externalId ?? '')?.folder;
 
@@ -123,6 +136,7 @@ export class ImapGetMessageListService {
         folderPath,
         previousCursor,
         mailboxState,
+        sinceDate,
       );
 
       const nextCursor = createSyncCursor(

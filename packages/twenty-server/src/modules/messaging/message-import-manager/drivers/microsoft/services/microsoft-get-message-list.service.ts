@@ -52,12 +52,31 @@ export class MicrosoftGetMessageListService {
       return [];
     }
 
+    // Calculate date filter for initial sync based on syncHistoryDepthDays
+    const syncHistoryDepthDays = messageChannel.syncHistoryDepthDays ?? 30;
+    let dateFilter: string | undefined;
+
+    if (syncHistoryDepthDays > 0) {
+      const afterDate = new Date();
+
+      afterDate.setDate(afterDate.getDate() - syncHistoryDepthDays);
+      // Microsoft Graph uses ISO 8601 format for date filters
+      dateFilter = afterDate.toISOString();
+      this.logger.log(
+        `Connected account ${connectedAccount.id}: Applying date filter for initial sync: receivedDateTime ge ${dateFilter}`,
+      );
+    }
+
     const limit = pLimit(FOLDER_PROCESSING_CONCURRENCY);
 
     const results = await Promise.all(
       foldersToProcess.map((folder) =>
         limit(async () => {
-          const response = await this.getMessageList(connectedAccount, folder);
+          const response = await this.getMessageList(
+            connectedAccount,
+            folder,
+            dateFilter,
+          );
 
           return {
             ...response,
@@ -79,6 +98,7 @@ export class MicrosoftGetMessageListService {
       MessageFolderWorkspaceEntity,
       'name' | 'syncCursor' | 'externalId'
     >,
+    dateFilter?: string,
   ): Promise<GetOneMessageListResponse> {
     const messageExternalIds: string[] = [];
     const messageExternalIdsToDelete: string[] = [];
@@ -89,9 +109,22 @@ export class MicrosoftGetMessageListService {
       );
 
     const folderId = messageFolder.externalId || messageFolder.name;
-    const apiUrl = isNonEmptyString(messageFolder.syncCursor)
-      ? messageFolder.syncCursor
-      : `/me/mailfolders/${folderId}/messages/delta?$select=id`;
+
+    // Build API URL with optional date filter for initial sync
+    let apiUrl: string;
+
+    if (isNonEmptyString(messageFolder.syncCursor)) {
+      // Incremental sync - use cursor
+      apiUrl = messageFolder.syncCursor;
+    } else {
+      // Initial sync - apply date filter if specified
+      const baseUrl = `/me/mailfolders/${folderId}/messages/delta?$select=id`;
+
+      apiUrl =
+        dateFilter !== undefined
+          ? `${baseUrl}&$filter=receivedDateTime ge ${dateFilter}`
+          : baseUrl;
+    }
 
     const response: PageCollection = await microsoftClient
       .api(apiUrl)
