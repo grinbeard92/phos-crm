@@ -40,7 +40,6 @@ import { useRecoilState, useRecoilValue, useSetRecoilState } from 'recoil';
 import { ConnectedAccountProvider } from 'twenty-shared/types';
 import { isDefined } from 'twenty-shared/utils';
 import {
-  H2Title,
   IconChevronDown,
   IconChevronUp,
   IconCode,
@@ -62,6 +61,12 @@ const StyledHeaderLeft = styled.div`
   display: flex;
   align-items: center;
   gap: ${({ theme }) => theme.spacing(2)};
+`;
+
+const StyledHeaderTitle = styled.span`
+  color: ${({ theme }) => theme.font.color.primary};
+  font-size: ${({ theme }) => theme.font.size.md};
+  font-weight: ${({ theme }) => theme.font.weight.semiBold};
 `;
 
 const StyledModalContent = styled(Modal.Content)`
@@ -629,7 +634,9 @@ export const EmailComposeModal = ({
       <StyledModalHeader>
         <StyledHeaderLeft>
           <IconMail size={theme.icon.size.md} />
-          <H2Title title={threadId ? t`Reply` : t`New Email`} />
+          <StyledHeaderTitle>
+            {threadId ? t`Reply` : t`New Email`}
+          </StyledHeaderTitle>
         </StyledHeaderLeft>
         <Button
           Icon={IconX}

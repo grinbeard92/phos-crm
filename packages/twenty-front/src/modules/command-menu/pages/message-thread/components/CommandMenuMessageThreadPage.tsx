@@ -8,14 +8,17 @@ import { EmailThreadMessage } from '@/activities/emails/components/EmailThreadMe
 import { CommandMenuMessageThreadIntermediaryMessages } from '@/command-menu/pages/message-thread/components/CommandMenuMessageThreadIntermediaryMessages';
 import { useEmailThreadInCommandMenu } from '@/command-menu/pages/message-thread/hooks/useEmailThreadInCommandMenu';
 import { messageThreadComponentState } from '@/command-menu/pages/message-thread/states/messageThreadComponentState';
+import { EmailComposeModal } from '@/email-composer/components/EmailComposeModal';
 import { useEmailComposer } from '@/email-composer/hooks/useEmailComposer';
 import { useIsMobile } from '@/ui/utilities/responsive/hooks/useIsMobile';
 import { useSetRecoilComponentState } from '@/ui/utilities/state/component-state/hooks/useSetRecoilComponentState';
+import { useIsFeatureEnabled } from '@/workspace/hooks/useIsFeatureEnabled';
 import { t } from '@lingui/core/macro';
 import { ConnectedAccountProvider } from 'twenty-shared/types';
 import { isDefined } from 'twenty-shared/utils';
 import { IconArrowBackUp } from 'twenty-ui/display';
 import { Button } from 'twenty-ui/input';
+import { FeatureFlagKey } from '~/generated/graphql';
 
 const StyledWrapper = styled.div`
   display: flex;
@@ -56,6 +59,9 @@ export const CommandMenuMessageThreadPage = () => {
 
   const isMobile = useIsMobile();
   const { openEmailComposer } = useEmailComposer();
+  const isEmailComposerEnabled = useIsFeatureEnabled(
+    FeatureFlagKey.IS_EMAIL_COMPOSER_ENABLED,
+  );
 
   const {
     thread,
@@ -213,6 +219,8 @@ export const CommandMenuMessageThreadPage = () => {
           />
         </StyledButtonContainer>
       )}
+      {/* Modal for email reply - reads state from Recoil */}
+      {isEmailComposerEnabled && <EmailComposeModal />}
     </StyledWrapper>
   );
 };

@@ -57,6 +57,12 @@ const StyledComposeButtonContainer = styled.div`
   margin-top: ${({ theme }) => theme.spacing(4)};
 `;
 
+const StyledInboxComposeButton = styled.div`
+  display: flex;
+  justify-content: center;
+  padding: ${({ theme }) => theme.spacing(4, 0)};
+`;
+
 const StyledNoEmailNote = styled.div`
   color: ${({ theme }) => theme.font.color.tertiary};
   font-size: ${({ theme }) => theme.font.size.sm};
@@ -217,6 +223,18 @@ export const EmailsCard = () => {
             loading={isFetchingMore || firstQueryLoading}
             onLastRowVisible={handleLastRowVisible}
           />
+          {isEmailComposerEnabled && isPerson && (
+            <StyledInboxComposeButton>
+              <Button
+                Icon={IconSend}
+                title={t`Compose New Message`}
+                variant="secondary"
+                accent="default"
+                size="small"
+                onClick={handleComposeClick}
+              />
+            </StyledInboxComposeButton>
+          )}
         </Section>
       </StyledContainer>
       {/* Modal reads state from Recoil - no props needed */}
