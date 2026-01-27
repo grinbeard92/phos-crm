@@ -82,7 +82,9 @@ export class EmailComposerService {
     const { email, subject, body, connectedAccountId, files, templateContext } =
       params;
 
-    this.logger.log(`Sending email to ${email} in workspace ${context.workspaceId}`);
+    this.logger.log(
+      `Sending email to ${email} in workspace ${context.workspaceId}`,
+    );
 
     try {
       // Resolve template variables if context is provided
@@ -95,6 +97,7 @@ export class EmailComposerService {
           body,
           templateContext,
         );
+
         resolvedSubject = resolved.subject;
         resolvedBody = resolved.body;
       }

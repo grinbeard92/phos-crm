@@ -311,13 +311,14 @@ export const EmailComposeModal = ({
     setIsSending(true);
 
     try {
-      // Get body content from editor
-      const bodyContent = JSON.stringify(editor.document);
+      // Convert BlockNote content to HTML for email rendering
+      // blocksToHTMLLossy() produces standard HTML that works well in email clients
+      const htmlBody = await editor.blocksToHTMLLossy(editor.document);
 
       const result = await sendEmail({
         email: toEmail,
         subject,
-        body: bodyContent,
+        body: htmlBody,
         connectedAccountId,
         files: attachments.map((f) => ({
           id: f.id,
