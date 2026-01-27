@@ -45,6 +45,23 @@ const StyledEmailParticipants = styled.div`
   font-size: ${({ theme }) => theme.font.size.sm};
 `;
 
+const StyledDirectionBadge = styled.span<{ isOutgoing: boolean }>`
+  background-color: ${({ theme, isOutgoing }) =>
+    isOutgoing ? theme.color.blue10 : theme.color.green10};
+  color: ${({ theme, isOutgoing }) =>
+    isOutgoing ? theme.color.blue : theme.color.green};
+  font-size: ${({ theme }) => theme.font.size.xs};
+  font-weight: ${({ theme }) => theme.font.weight.medium};
+  padding: ${({ theme }) => `${theme.spacing(0.5)} ${theme.spacing(1)}`};
+  border-radius: ${({ theme }) => theme.border.radius.xs};
+  margin-left: ${({ theme }) => theme.spacing(2)};
+`;
+
+const StyledEmailTitleRow = styled.div`
+  display: flex;
+  align-items: center;
+`;
+
 const StyledEmailBody = styled.div`
   cursor: pointer;
   overflow: hidden;
@@ -67,17 +84,23 @@ export const EventCardMessage = ({
     record: message,
     loading,
     error,
-  } = useFindOneRecord<EmailThreadMessage>({
+  } = useFindOneRecord<
+    EmailThreadMessage & {
+      messageChannelMessageAssociations?: Array<{ direction: string }>;
+    }
+  >({
     objectNameSingular: CoreObjectNameSingular.Message,
     objectRecordId: messageId,
     recordGqlFields: {
       id: true,
       text: true,
       subject: true,
-      direction: true,
       messageThreadId: true,
       messageParticipants: {
         handle: true,
+      },
+      messageChannelMessageAssociations: {
+        direction: true,
       },
     },
     onCompleted: (data) => {
@@ -126,6 +149,11 @@ export const EventCardMessage = ({
     .filter((handle) => isDefined(handle) && handle !== '')
     .join(', ');
 
+  // Determine direction from the first association (most emails have one)
+  const direction =
+    message.messageChannelMessageAssociations?.[0]?.direction ?? 'INCOMING';
+  const isOutgoing = direction === 'OUTGOING';
+
   const canOpen =
     message.subject !== FIELD_RESTRICTED_ADDITIONAL_PERMISSIONS_REQUIRED;
 
@@ -139,12 +167,17 @@ export const EventCardMessage = ({
     <StyledEventCardMessageContainer canOpen={canOpen} onClick={handleClick}>
       <StyledEmailContent>
         <StyledEmailTop>
-          <StyledEmailTitle>
-            {message.subject !==
-            FIELD_RESTRICTED_ADDITIONAL_PERMISSIONS_REQUIRED
-              ? message.subject
-              : t`Subject not shared`}
-          </StyledEmailTitle>
+          <StyledEmailTitleRow>
+            <StyledEmailTitle>
+              {message.subject !==
+              FIELD_RESTRICTED_ADDITIONAL_PERMISSIONS_REQUIRED
+                ? message.subject
+                : t`Subject not shared`}
+            </StyledEmailTitle>
+            <StyledDirectionBadge isOutgoing={isOutgoing}>
+              {isOutgoing ? t`Sent` : t`Received`}
+            </StyledDirectionBadge>
+          </StyledEmailTitleRow>
           <StyledEmailParticipants>
             <OverflowingTextWithTooltip text={messageParticipantHandles} />
           </StyledEmailParticipants>

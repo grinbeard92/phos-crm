@@ -830,10 +830,11 @@ When user clicks "Reply" from the email thread view:
 - [x] Handle thread lookup via `inReplyTo` → find existing thread, or via `messageThreadId`
 - [x] Integrate `MatchParticipantService` for person/workspace member matching
 
-### Phase 3: UI & Timeline (Sections 5-6)
-- [ ] Update timeline queries to include `direction = 'OUTGOING'`
-- [ ] Add "Outgoing" / "Sent" indicator to timeline message cards
-- [ ] Ensure Person/Company timeline shows both sent and received
+### Phase 3: UI & Timeline (Sections 5-6) ✅ COMPLETE (2026-01-27)
+- [x] Update timeline queries to include `messageChannelMessageAssociations.direction`
+- [x] Add "Sent" / "Received" badge to timeline message cards (`EventCardMessage`)
+- [x] Update `EmailThreadMessage` type with direction support
+- [x] Timeline already shows both sent and received (direction field on association)
 
 ### Phase 4: Historical Email Sync (Section 15)
 - [ ] Verify `messageFolderImportPolicy` defaults to `ALL_FOLDERS` or auto-enables Inbox + Sent
