@@ -11,6 +11,7 @@ import { ConnectedAccountModule } from 'src/modules/connected-account/connected-
 import { EmailAliasManagerModule } from 'src/modules/connected-account/email-alias-manager/email-alias-manager.module';
 import { OAuth2ClientManagerModule } from 'src/modules/connected-account/oauth2-client-manager/oauth2-client-manager.module';
 import { RefreshTokensManagerModule } from 'src/modules/connected-account/refresh-tokens-manager/connected-account-refresh-tokens-manager.module';
+import { MatchParticipantModule } from 'src/modules/match-participant/match-participant.module';
 import { MessagingCommonModule } from 'src/modules/messaging/common/messaging-common.module';
 import { MessagingMessageCleanerModule } from 'src/modules/messaging/message-cleaner/messaging-message-cleaner.module';
 import { MessagingFolderSyncManagerModule } from 'src/modules/messaging/message-folder-manager/messaging-folder-sync-manager.module';
@@ -49,6 +50,7 @@ import { MessagingProcessFolderActionsService } from 'src/modules/messaging/mess
 import { MessagingProcessGroupEmailActionsService } from 'src/modules/messaging/message-import-manager/services/messaging-process-group-email-actions.service';
 import { MessagingSaveMessagesAndEnqueueContactCreationService } from 'src/modules/messaging/message-import-manager/services/messaging-save-messages-and-enqueue-contact-creation.service';
 import { MessagingSendMessageService } from 'src/modules/messaging/message-import-manager/services/messaging-send-message.service';
+import { MessagingSentMessagePersistenceService } from 'src/modules/messaging/message-import-manager/services/messaging-sent-message-persistence.service';
 import { MessageParticipantManagerModule } from 'src/modules/messaging/message-participant-manager/message-participant-manager.module';
 import { MessagingMonitoringModule } from 'src/modules/messaging/monitoring/messaging-monitoring.module';
 @Module({
@@ -74,6 +76,7 @@ import { MessagingMonitoringModule } from 'src/modules/messaging/monitoring/mess
     MessagingMessageCleanerModule,
     WorkspaceEventEmitterModule,
     ConnectedAccountModule,
+    MatchParticipantModule,
   ],
   providers: [
     MessagingMessageListFetchCronCommand,
@@ -102,6 +105,7 @@ import { MessagingMonitoringModule } from 'src/modules/messaging/monitoring/mess
     MessageImportExceptionHandlerService,
     MessagingCursorService,
     MessagingSendMessageService,
+    MessagingSentMessagePersistenceService,
     MessagingAccountAuthenticationService,
     MessagingProcessFolderActionsService,
     MessagingProcessGroupEmailActionsService,
@@ -110,6 +114,7 @@ import { MessagingMonitoringModule } from 'src/modules/messaging/monitoring/mess
   ],
   exports: [
     MessagingSendMessageService,
+    MessagingSentMessagePersistenceService,
     MessagingAccountAuthenticationService,
     MessagingMessageListFetchCronCommand,
     MessagingMessagesImportCronCommand,

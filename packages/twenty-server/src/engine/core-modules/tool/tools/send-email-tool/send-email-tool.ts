@@ -30,6 +30,7 @@ import { buildSystemAuthContext } from 'src/engine/twenty-orm/utils/build-system
 import { type ConnectedAccountWorkspaceEntity } from 'src/modules/connected-account/standard-objects/connected-account.workspace-entity';
 import { MessagingAccountAuthenticationService } from 'src/modules/messaging/message-import-manager/services/messaging-account-authentication.service';
 import { MessagingSendMessageService } from 'src/modules/messaging/message-import-manager/services/messaging-send-message.service';
+import { MessagingSentMessagePersistenceService } from 'src/modules/messaging/message-import-manager/services/messaging-sent-message-persistence.service';
 import { type MessageAttachment } from 'src/modules/messaging/message-import-manager/types/message';
 import { parseEmailBody } from 'src/utils/parse-email-body';
 import { streamToBuffer } from 'src/utils/stream-to-buffer';
@@ -45,6 +46,7 @@ export class SendEmailTool implements Tool {
   constructor(
     private readonly globalWorkspaceOrmManager: GlobalWorkspaceOrmManager,
     private readonly sendMessageService: MessagingSendMessageService,
+    private readonly sentMessagePersistenceService: MessagingSentMessagePersistenceService,
     private readonly messagingAccountAuthenticationService: MessagingAccountAuthenticationService,
     @InjectRepository(FileEntity)
     private readonly fileRepository: Repository<FileEntity>,
@@ -305,9 +307,12 @@ export class SendEmailTool implements Tool {
           body: textBody,
           html: safeHtmlBody,
           attachments,
-          // TODO: Add threading support when replying
-          // inReplyTo: parameters.inReplyTo,
-          // references: parameters.references,
+          // Threading support for email replies
+          inReplyTo: parameters.inReplyTo,
+          references: parameters.references,
+          // Additional recipients
+          cc: parameters.cc,
+          bcc: parameters.bcc,
         },
         connectedAccountWithFreshTokens,
       );
@@ -315,6 +320,41 @@ export class SendEmailTool implements Tool {
       this.logger.log(
         `Email sent successfully to ${email}${attachments.length > 0 ? ` with ${attachments.length} attachments` : ''} (messageId: ${sendResult.messageId})`,
       );
+
+      // Persist the sent message to Twenty's database for immediate availability
+      let persistedMessageThreadId = parameters.messageThreadId;
+
+      try {
+        const persistResult =
+          await this.sentMessagePersistenceService.persistSentMessage(
+            {
+              headerMessageId: sendResult.messageId,
+              subject: safeSubject,
+              text: textBody,
+              to: email,
+              cc: parameters.cc,
+              bcc: parameters.bcc,
+              externalMessageId: sendResult.externalMessageId,
+              threadExternalId: sendResult.threadExternalId,
+              inReplyTo: parameters.inReplyTo,
+              messageThreadId: parameters.messageThreadId,
+              sentAt: new Date(),
+            },
+            connectedAccount,
+            workspaceId,
+          );
+
+        persistedMessageThreadId = persistResult.messageThreadId;
+
+        this.logger.log(
+          `Persisted sent message ${persistResult.messageId} in thread ${persistResult.messageThreadId} (isNewThread: ${persistResult.isNewThread})`,
+        );
+      } catch (persistError) {
+        // Log but don't fail the operation - email was sent successfully
+        this.logger.error(
+          `Failed to persist sent message to database: ${persistError}`,
+        );
+      }
 
       return {
         success: true,
@@ -325,6 +365,7 @@ export class SendEmailTool implements Tool {
           messageId: sendResult.messageId,
           externalMessageId: sendResult.externalMessageId,
           threadExternalId: sendResult.threadExternalId,
+          messageThreadId: persistedMessageThreadId,
           connectedAccountId,
           attachmentCount: attachments.length,
         },
