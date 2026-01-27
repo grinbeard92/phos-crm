@@ -36,7 +36,7 @@ import '@blocknote/core/fonts/inter.css';
 import '@blocknote/mantine/style.css';
 import '@blocknote/react/style.css';
 import { useState, useCallback, useMemo } from 'react';
-import { useRecoilState, useRecoilValue } from 'recoil';
+import { useRecoilState, useRecoilValue, useSetRecoilState } from 'recoil';
 import { ConnectedAccountProvider } from 'twenty-shared/types';
 import { isDefined } from 'twenty-shared/utils';
 import {
@@ -279,6 +279,9 @@ export const EmailComposeModal = ({
 }: EmailComposeModalProps) => {
   // Read options from recoil state (set by useEmailComposer hook)
   const emailComposeModalOptions = useRecoilValue(
+    emailComposeModalOptionsState,
+  );
+  const setEmailComposeModalOptions = useSetRecoilState(
     emailComposeModalOptionsState,
   );
 
@@ -524,8 +527,10 @@ export const EmailComposeModal = ({
 
   const handleClose = useCallback(() => {
     onClose?.();
+    // Clear modal options state to prevent stale data on next open
+    setEmailComposeModalOptions({});
     closeModal(EMAIL_COMPOSE_MODAL_ID);
-  }, [onClose, closeModal]);
+  }, [onClose, closeModal, setEmailComposeModalOptions]);
 
   const handleSend = async () => {
     if (!connectedAccountId) {

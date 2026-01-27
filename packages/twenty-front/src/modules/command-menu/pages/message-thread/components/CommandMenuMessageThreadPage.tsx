@@ -1,4 +1,3 @@
-import { useTheme } from '@emotion/react';
 import styled from '@emotion/styled';
 import { useEffect, useMemo } from 'react';
 
@@ -56,7 +55,6 @@ export const CommandMenuMessageThreadPage = () => {
   );
 
   const isMobile = useIsMobile();
-  const theme = useTheme();
   const { openEmailComposer } = useEmailComposer();
 
   const {
@@ -129,14 +127,27 @@ export const CommandMenuMessageThreadPage = () => {
       lastMessage.sender?.handle ??
       t`Unknown`;
     const sentDate = new Date(lastMessage.receivedAt).toLocaleString();
-    const borderColor = theme.border.color.medium;
-    const textColor = theme.font.color.tertiary;
+
+    // Convert plain text to HTML preserving line breaks and basic formatting
+    // Escape HTML entities first, then convert newlines to <br> tags
+    const escapeHtml = (text: string) =>
+      text
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;');
+    const textToHtml = (text: string | null) => {
+      if (!text) return '';
+      return escapeHtml(text)
+        .split('\n')
+        .map((line) => (line.trim() === '' ? '<br>' : `<p>${line}</p>`))
+        .join('');
+    };
+
+    const quotedTextHtml = textToHtml(lastMessage.text);
     const quotedHtml = `
-      <br/><br/>
-      <div style="border-left: 2px solid ${borderColor}; padding-left: 10px; margin-left: 5px; color: ${textColor};">
-        <p>${t`On`} ${sentDate}, ${senderName} ${t`wrote`}:</p>
-        <blockquote>${lastMessage.text}</blockquote>
-      </div>
+      <p>${t`On`} ${sentDate}, ${senderName} ${t`wrote`}:</p>
+      <blockquote>${quotedTextHtml}</blockquote>
     `;
 
     // Open compose modal in reply mode

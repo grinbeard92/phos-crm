@@ -9,14 +9,11 @@ import { getTimelineThreadsFromCompanyId } from '@/activities/emails/graphql/que
 import { getTimelineThreadsFromOpportunityId } from '@/activities/emails/graphql/queries/getTimelineThreadsFromOpportunityId';
 import { getTimelineThreadsFromPersonId } from '@/activities/emails/graphql/queries/getTimelineThreadsFromPersonId';
 import { useCustomResolver } from '@/activities/hooks/useCustomResolver';
-import {
-  EMAIL_COMPOSE_MODAL_ID,
-  EmailComposeModal,
-} from '@/email-composer/components/EmailComposeModal';
+import { EmailComposeModal } from '@/email-composer/components/EmailComposeModal';
+import { useEmailComposer } from '@/email-composer/hooks/useEmailComposer';
 import { CoreObjectNameSingular } from '@/object-metadata/types/CoreObjectNameSingular';
 import { useFindOneRecord } from '@/object-record/hooks/useFindOneRecord';
 import { type ObjectRecord } from '@/object-record/types/ObjectRecord';
-import { useModal } from '@/ui/layout/modal/hooks/useModal';
 import { useTargetRecord } from '@/ui/layout/contexts/useTargetRecord';
 import { useIsFeatureEnabled } from '@/workspace/hooks/useIsFeatureEnabled';
 import { t } from '@lingui/core/macro';
@@ -75,7 +72,7 @@ type PersonRecord = ObjectRecord & {
 
 export const EmailsCard = () => {
   const targetRecord = useTargetRecord();
-  const { openModal } = useModal();
+  const { openEmailComposer } = useEmailComposer();
   const isEmailComposerEnabled = useIsFeatureEnabled(
     FeatureFlagKey.IS_EMAIL_COMPOSER_ENABLED,
   );
@@ -98,7 +95,23 @@ export const EmailsCard = () => {
   });
 
   const handleComposeClick = () => {
-    openModal(EMAIL_COMPOSE_MODAL_ID);
+    // Build context from current person record for compose mode
+    const emailContext =
+      isPerson && personRecord
+        ? {
+            personId: personRecord.id,
+            personFirstName: personRecord.name?.firstName || '',
+            personLastName: personRecord.name?.lastName || '',
+            personEmail: personRecord.emails?.primaryEmail || '',
+            companyName: personRecord.company?.name || '',
+          }
+        : undefined;
+
+    openEmailComposer({
+      isReply: false,
+      context: emailContext,
+      defaultTo: personRecord?.emails?.primaryEmail || '',
+    });
   };
 
   const [query, queryName] =
@@ -137,17 +150,6 @@ export const EmailsCard = () => {
   }
 
   if (!firstQueryLoading && !timelineThreads?.length) {
-    const emailContext =
-      isPerson && personRecord
-        ? {
-            personId: personRecord.id,
-            personFirstName: personRecord.name?.firstName || '',
-            personLastName: personRecord.name?.lastName || '',
-            personEmail: personRecord.emails?.primaryEmail || '',
-            companyName: personRecord.company?.name || '',
-          }
-        : undefined;
-
     return (
       <>
         <AnimatedPlaceholderEmptyContainer
@@ -185,40 +187,40 @@ export const EmailsCard = () => {
             </StyledComposeButtonContainer>
           )}
         </AnimatedPlaceholderEmptyContainer>
-        {isEmailComposerEnabled && (
-          <EmailComposeModal
-            context={emailContext}
-            defaultTo={personRecord?.emails?.primaryEmail || ''}
-          />
-        )}
+        {/* Modal reads state from Recoil - no props needed */}
+        {isEmailComposerEnabled && <EmailComposeModal />}
       </>
     );
   }
 
   return (
-    <StyledContainer>
-      <Section>
-        <StyledH1Title
-          title={
-            <>
-              <Trans>Inbox</Trans>{' '}
-              <StyledEmailCount>{totalNumberOfThreads}</StyledEmailCount>
-            </>
-          }
-          fontColor={H1TitleFontColor.Primary}
-        />
-        {!firstQueryLoading && (
-          <ActivityList>
-            {timelineThreads?.map((thread: TimelineThread) => (
-              <EmailThreadPreview key={thread.id} thread={thread} />
-            ))}
-          </ActivityList>
-        )}
-        <CustomResolverFetchMoreLoader
-          loading={isFetchingMore || firstQueryLoading}
-          onLastRowVisible={handleLastRowVisible}
-        />
-      </Section>
-    </StyledContainer>
+    <>
+      <StyledContainer>
+        <Section>
+          <StyledH1Title
+            title={
+              <>
+                <Trans>Inbox</Trans>{' '}
+                <StyledEmailCount>{totalNumberOfThreads}</StyledEmailCount>
+              </>
+            }
+            fontColor={H1TitleFontColor.Primary}
+          />
+          {!firstQueryLoading && (
+            <ActivityList>
+              {timelineThreads?.map((thread: TimelineThread) => (
+                <EmailThreadPreview key={thread.id} thread={thread} />
+              ))}
+            </ActivityList>
+          )}
+          <CustomResolverFetchMoreLoader
+            loading={isFetchingMore || firstQueryLoading}
+            onLastRowVisible={handleLastRowVisible}
+          />
+        </Section>
+      </StyledContainer>
+      {/* Modal reads state from Recoil - no props needed */}
+      {isEmailComposerEnabled && <EmailComposeModal />}
+    </>
   );
 };
