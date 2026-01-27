@@ -122,35 +122,61 @@ export const CommandMenuMessageThreadPage = () => {
     // Get connected account email (the user's email) to exclude from recipients
     const myEmail = connectedAccountHandle?.toLowerCase() ?? '';
 
-    // Get sender email from last message to use as primary recipient (Reply To)
-    // The sender comes from the separate messageSenders query with role=FROM
+    // Get sender email from last message
     const senderHandle = lastMessage.sender?.handle ?? '';
-    const replyTo = senderHandle;
+    const senderIsMe = senderHandle.toLowerCase() === myEmail;
 
-    // Extract other recipients to include in CC for "Reply All" behavior
-    // Include: original TO recipients (except myself and the sender) and original CC recipients
+    // Get all participants from the last message
     const participants = lastMessage.messageParticipants ?? [];
+
+    // Determine the reply-to address:
+    // - If someone else sent the message: reply to them (the FROM)
+    // - If I sent the message: reply to the original TO recipient(s)
+    let replyTo = '';
     const ccRecipients: string[] = [];
 
-    for (const participant of participants) {
-      const email = participant.handle?.toLowerCase() ?? '';
-      if (email === '' || email === myEmail) {
-        // Skip empty emails and my own email
-        continue;
+    if (senderIsMe) {
+      // I sent this message - find the TO recipients to reply to
+      for (const participant of participants) {
+        const email = participant.handle?.toLowerCase() ?? '';
+        if (email === '' || email === myEmail) {
+          continue;
+        }
+        if (participant.role === MessageParticipantRole.TO) {
+          if (replyTo === '') {
+            // First TO recipient becomes the primary reply-to
+            replyTo = participant.handle;
+          } else {
+            // Additional TO recipients go to CC
+            ccRecipients.push(participant.handle);
+          }
+        } else if (participant.role === MessageParticipantRole.CC) {
+          ccRecipients.push(participant.handle);
+        }
       }
-      // Skip the sender - they go in the To field, not CC
-      // Check both by email comparison and by role (FROM)
-      if (
-        participant.role === MessageParticipantRole.FROM ||
-        email === replyTo.toLowerCase()
-      ) {
-        continue;
-      }
-      if (
-        participant.role === MessageParticipantRole.TO ||
-        participant.role === MessageParticipantRole.CC
-      ) {
-        ccRecipients.push(participant.handle);
+    } else {
+      // Someone else sent this - reply to them
+      replyTo = senderHandle;
+
+      // Add other recipients (TO and CC) to CC, excluding myself and the sender
+      for (const participant of participants) {
+        const email = participant.handle?.toLowerCase() ?? '';
+        if (email === '' || email === myEmail) {
+          continue;
+        }
+        // Skip the sender - they're already in the To field
+        if (
+          participant.role === MessageParticipantRole.FROM ||
+          email === replyTo.toLowerCase()
+        ) {
+          continue;
+        }
+        if (
+          participant.role === MessageParticipantRole.TO ||
+          participant.role === MessageParticipantRole.CC
+        ) {
+          ccRecipients.push(participant.handle);
+        }
       }
     }
 
