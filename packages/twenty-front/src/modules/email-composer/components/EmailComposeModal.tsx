@@ -19,6 +19,7 @@ import { useFindManyRecords } from '@/object-record/hooks/useFindManyRecords';
 import { FormTextFieldInput } from '@/object-record/record-field/ui/form-types/components/FormTextFieldInput';
 import { useSnackBar } from '@/ui/feedback/snack-bar-manager/hooks/useSnackBar';
 import { Select } from '@/ui/input/components/Select';
+import { TextInput } from '@/ui/input/components/TextInput';
 import { BlockEditor } from '@/ui/input/editor/components/BlockEditor';
 import { GenericDropdownContentWidth } from '@/ui/layout/dropdown/constants/GenericDropdownContentWidth';
 import { Modal } from '@/ui/layout/modal/components/Modal';
@@ -628,11 +629,12 @@ export const EmailComposeModal = ({
               </>
             )}
 
-            <FormTextFieldInput
+            <TextInput
               label={t`Subject`}
               placeholder={t`Enter email subject`}
-              defaultValue={subject}
+              value={subject}
               onChange={setSubject}
+              fullWidth
             />
 
             <div>
