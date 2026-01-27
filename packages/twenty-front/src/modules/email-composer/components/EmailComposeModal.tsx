@@ -265,6 +265,7 @@ export const EmailComposeModal = ({
   defaultSubject = '',
   defaultBody = '',
   threadId,
+  inReplyTo,
   quotedMessageHtml,
   onClose,
   onSendSuccess,
@@ -550,6 +551,12 @@ export const EmailComposeModal = ({
           name: f.name,
           type: f.type,
         })),
+        // Threading support for email replies
+        ...(inReplyTo !== undefined && { inReplyTo }),
+        ...(threadId !== undefined && { messageThreadId: threadId }),
+        // Additional recipients
+        ...(ccEmail !== '' && { cc: ccEmail }),
+        ...(bccEmail !== '' && { bcc: bccEmail }),
       });
 
       if (result.success) {

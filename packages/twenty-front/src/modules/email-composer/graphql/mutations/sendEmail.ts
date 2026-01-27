@@ -8,6 +8,8 @@ export const SEND_EMAIL_MUTATION = gql`
       error
       recipient
       connectedAccountId
+      messageId
+      messageThreadId
     }
   }
 `;

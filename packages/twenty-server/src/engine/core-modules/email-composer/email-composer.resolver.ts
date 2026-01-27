@@ -38,6 +38,13 @@ export class EmailComposerResolver {
         connectedAccountId: input.connectedAccountId,
         files: input.files,
         templateContext: input.templateContext,
+        // Threading support
+        inReplyTo: input.inReplyTo,
+        references: input.references,
+        messageThreadId: input.messageThreadId,
+        // Additional recipients
+        cc: input.cc,
+        bcc: input.bcc,
       },
       { workspaceId: workspace.id },
     );
@@ -48,6 +55,8 @@ export class EmailComposerResolver {
       error: result.error,
       recipient: result.recipient,
       connectedAccountId: result.connectedAccountId,
+      messageId: result.messageId,
+      messageThreadId: result.messageThreadId,
     };
   }
 

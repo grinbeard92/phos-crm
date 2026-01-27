@@ -26,6 +26,16 @@ export interface SendEmailParams {
   }>;
   /** Template context for variable substitution (optional) */
   templateContext?: EmailTemplateContext;
+  /** RFC 5322 Message-ID of email being replied to (for threading) */
+  inReplyTo?: string;
+  /** Chain of Message-IDs for threading */
+  references?: string[];
+  /** Twenty's internal thread ID for persistence */
+  messageThreadId?: string;
+  /** CC recipients (comma-separated) */
+  cc?: string;
+  /** BCC recipients (comma-separated) */
+  bcc?: string;
 }
 
 /**
@@ -37,6 +47,10 @@ export interface SendEmailResult {
   error?: string;
   recipient?: string;
   connectedAccountId?: string;
+  /** RFC 5322 Message-ID we generated */
+  messageId?: string;
+  /** Twenty's internal thread ID */
+  messageThreadId?: string;
 }
 
 /**
@@ -79,11 +93,22 @@ export class EmailComposerService {
     params: SendEmailParams,
     context: { workspaceId: string },
   ): Promise<SendEmailResult> {
-    const { email, subject, body, connectedAccountId, files, templateContext } =
-      params;
+    const {
+      email,
+      subject,
+      body,
+      connectedAccountId,
+      files,
+      templateContext,
+      inReplyTo,
+      references,
+      messageThreadId,
+      cc,
+      bcc,
+    } = params;
 
     this.logger.log(
-      `Sending email to ${email} in workspace ${context.workspaceId}`,
+      `Sending email to ${email} in workspace ${context.workspaceId}${inReplyTo ? ` (reply to ${inReplyTo})` : ''}`,
     );
 
     try {
@@ -111,7 +136,7 @@ export class EmailComposerService {
         createdAt: new Date().toISOString(),
       }));
 
-      // Execute the send email tool
+      // Execute the send email tool with threading support
       const result = await this.sendEmailTool.execute(
         {
           email,
@@ -119,12 +144,22 @@ export class EmailComposerService {
           body: resolvedBody,
           connectedAccountId,
           files: preparedFiles,
+          inReplyTo,
+          references,
+          messageThreadId,
+          cc,
+          bcc,
         },
         context,
       );
 
       const resultData = result.result as
-        | { recipient?: string; connectedAccountId?: string }
+        | {
+            recipient?: string;
+            connectedAccountId?: string;
+            messageId?: string;
+            messageThreadId?: string;
+          }
         | undefined;
 
       return {
@@ -133,6 +168,8 @@ export class EmailComposerService {
         error: result.error,
         recipient: resultData?.recipient,
         connectedAccountId: resultData?.connectedAccountId,
+        messageId: resultData?.messageId,
+        messageThreadId: resultData?.messageThreadId,
       };
     } catch (error) {
       this.logger.error(`Failed to send email to ${email}`, error);

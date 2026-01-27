@@ -16,4 +16,11 @@ export class SendEmailOutput {
 
   @Field({ nullable: true })
   connectedAccountId?: string;
+
+  // Threading information for future replies
+  @Field({ nullable: true })
+  messageId?: string; // RFC 5322 Message-ID we generated
+
+  @Field({ nullable: true })
+  messageThreadId?: string; // Twenty's internal thread ID
 }

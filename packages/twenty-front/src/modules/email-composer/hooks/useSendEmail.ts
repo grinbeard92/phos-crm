@@ -10,6 +10,13 @@ type SendEmailInput = {
   body: string;
   connectedAccountId?: string;
   files?: Array<{ id: string; name: string; type: string }>;
+  // Threading support for email replies
+  inReplyTo?: string;
+  references?: string[];
+  messageThreadId?: string;
+  // Additional recipients
+  cc?: string;
+  bcc?: string;
 };
 
 type SendEmailResult = {
@@ -18,6 +25,9 @@ type SendEmailResult = {
   error?: string;
   recipient?: string;
   connectedAccountId?: string;
+  // Threading information for future replies
+  messageId?: string;
+  messageThreadId?: string;
 };
 
 export const useSendEmail = () => {
