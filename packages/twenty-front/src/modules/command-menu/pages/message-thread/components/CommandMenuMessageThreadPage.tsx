@@ -119,26 +119,31 @@ export const CommandMenuMessageThreadPage = () => {
       return;
     }
 
-    // Get connected account email (the user's email) to exclude from CC
+    // Get connected account email (the user's email) to exclude from recipients
     const myEmail = connectedAccountHandle?.toLowerCase() ?? '';
 
-    // Get sender email from last message to use as primary recipient
-    const senderHandle = lastMessage.sender?.handle;
-    const replyTo = senderHandle ?? '';
+    // Get sender email from last message to use as primary recipient (Reply To)
+    // The sender comes from the separate messageSenders query with role=FROM
+    const senderHandle = lastMessage.sender?.handle ?? '';
+    const replyTo = senderHandle;
 
     // Extract other recipients to include in CC for "Reply All" behavior
-    // Include: original TO recipients (except myself) and original CC recipients
+    // Include: original TO recipients (except myself and the sender) and original CC recipients
     const participants = lastMessage.messageParticipants ?? [];
     const ccRecipients: string[] = [];
 
     for (const participant of participants) {
-      const email = participant.handle?.toLowerCase();
-      if (!email || email === myEmail) {
+      const email = participant.handle?.toLowerCase() ?? '';
+      if (email === '' || email === myEmail) {
         // Skip empty emails and my own email
         continue;
       }
-      if (email === replyTo.toLowerCase()) {
-        // Skip the sender (they're already in To field)
+      // Skip the sender - they go in the To field, not CC
+      // Check both by email comparison and by role (FROM)
+      if (
+        participant.role === MessageParticipantRole.FROM ||
+        email === replyTo.toLowerCase()
+      ) {
         continue;
       }
       if (
