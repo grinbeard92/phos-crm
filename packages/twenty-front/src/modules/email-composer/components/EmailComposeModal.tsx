@@ -4,6 +4,7 @@ import { BLOCK_SCHEMA } from '@/activities/blocks/constants/Schema';
 import { WorkflowSendEmailAttachments } from '@/advanced-text-editor/components/WorkflowSendEmailAttachments';
 import { currentWorkspaceMemberState } from '@/auth/states/currentWorkspaceMemberState';
 import { EmailTemplateSelector } from '@/email-composer/components/EmailTemplateSelector';
+import { useEmailSignature } from '@/email-composer/hooks/useEmailSignature';
 import { useSendEmail } from '@/email-composer/hooks/useSendEmail';
 import {
   type EmailComposeContext,
@@ -150,6 +151,7 @@ export const EmailComposeModal = ({
   const { enqueueErrorSnackBar, enqueueSuccessSnackBar } = useSnackBar();
   const { uploadAttachmentFile } = useUploadAttachmentFile();
   const { sendEmail } = useSendEmail();
+  const { getSignatureForEmail } = useEmailSignature();
   const currentWorkspaceMember = useRecoilValue(currentWorkspaceMemberState);
 
   const [connectedAccountId, setConnectedAccountId] = useState<string | null>(
@@ -313,7 +315,13 @@ export const EmailComposeModal = ({
     try {
       // Convert BlockNote content to HTML for email rendering
       // blocksToHTMLLossy() produces standard HTML that works well in email clients
-      const htmlBody = await editor.blocksToHTMLLossy(editor.document);
+      let htmlBody = await editor.blocksToHTMLLossy(editor.document);
+
+      // Append email signature if enabled
+      const signatureHtml = getSignatureForEmail();
+      if (signatureHtml !== '') {
+        htmlBody = htmlBody + signatureHtml;
+      }
 
       const result = await sendEmail({
         email: toEmail,
