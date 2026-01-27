@@ -1,9 +1,6 @@
 import { Injectable } from '@nestjs/common';
 
-import {
-  resolveInput,
-  resolveRichTextVariables,
-} from 'twenty-shared/utils';
+import { resolveInput, resolveRichTextVariables } from 'twenty-shared/utils';
 
 export interface EmailTemplateContext {
   person?: {
@@ -74,7 +71,7 @@ export class EmailTemplateVariableService {
 
     // Resolve body (TipTap JSON with variableTag nodes)
     const resolvedBody = this.isRichTextJson(body)
-      ? resolveRichTextVariables(body, flatContext) ?? body
+      ? (resolveRichTextVariables(body, flatContext) ?? body)
       : (resolveInput(body, flatContext) as string);
 
     return {
@@ -93,6 +90,7 @@ export class EmailTemplateVariableService {
 
     while ((match = variablePattern.exec(content)) !== null) {
       const variable = match[1].trim();
+
       if (!variables.includes(variable)) {
         variables.push(variable);
       }
@@ -141,6 +139,7 @@ export class EmailTemplateVariableService {
   private isRichTextJson(body: string): boolean {
     if (!body) return false;
     const trimmed = body.trim();
+
     return trimmed.startsWith('{') || trimmed.startsWith('[');
   }
 }
