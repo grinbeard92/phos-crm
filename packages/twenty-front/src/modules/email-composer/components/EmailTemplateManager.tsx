@@ -124,13 +124,6 @@ const StyledVariablesHelp = styled.div`
   padding: ${({ theme }) => theme.spacing(2)};
 `;
 
-const CATEGORY_OPTIONS: SelectOption<LocalEmailTemplate['category']>[] = [
-  { label: 'General', value: 'GENERAL' },
-  { label: 'Sales', value: 'SALES' },
-  { label: 'Support', value: 'SUPPORT' },
-  { label: 'Follow Up', value: 'FOLLOW_UP' },
-];
-
 type TemplateEditorProps = {
   template?: LocalEmailTemplate;
   onSave: (
@@ -139,13 +132,24 @@ type TemplateEditorProps = {
   onCancel: () => void;
 };
 
-const TemplateEditor = ({ template, onSave, onCancel }: TemplateEditorProps) => {
+const TemplateEditor = ({
+  template,
+  onSave,
+  onCancel,
+}: TemplateEditorProps) => {
   const [name, setName] = useState(template?.name ?? '');
   const [subject, setSubject] = useState(template?.subject ?? '');
   const [body, setBody] = useState(template?.body ?? '');
   const [category, setCategory] = useState<LocalEmailTemplate['category']>(
     template?.category ?? 'GENERAL',
   );
+
+  const categoryOptions: SelectOption<LocalEmailTemplate['category']>[] = [
+    { label: t`General`, value: 'GENERAL' },
+    { label: t`Sales`, value: 'SALES' },
+    { label: t`Support`, value: 'SUPPORT' },
+    { label: t`Follow Up`, value: 'FOLLOW_UP' },
+  ];
 
   const handleSave = () => {
     if (!name.trim() || !subject.trim()) {
@@ -191,7 +195,7 @@ const TemplateEditor = ({ template, onSave, onCancel }: TemplateEditorProps) => 
         <Select
           dropdownId="template-category-select"
           value={category}
-          options={CATEGORY_OPTIONS}
+          options={categoryOptions}
           onChange={setCategory}
           fullWidth
         />
@@ -264,7 +268,7 @@ export const EmailTemplateManager = () => {
     (
       templateData: Omit<LocalEmailTemplate, 'id' | 'createdAt' | 'updatedAt'>,
     ) => {
-      if (editingTemplate) {
+      if (editingTemplate !== undefined) {
         updateTemplate(editingTemplate.id, templateData);
       } else {
         createTemplate(templateData);

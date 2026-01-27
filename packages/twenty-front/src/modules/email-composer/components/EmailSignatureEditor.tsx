@@ -137,7 +137,7 @@ export const EmailSignatureEditor = () => {
 
   const handleReset = useCallback(() => {
     const content = getInitialContent();
-    if (content) {
+    if (content !== undefined) {
       editor.replaceBlocks(editor.document, content);
     } else {
       editor.replaceBlocks(editor.document, [
