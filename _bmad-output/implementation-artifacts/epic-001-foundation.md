@@ -66,26 +66,45 @@ See [Technical Architecture - Section 3.2](../../prd/technical-architecture.md#3
 
 **Story ID**: STORY-1.2
 **Priority**: P0
-**Estimate**: 2 hours
+**Estimate**: 3 hours
 **Status**: Not Started
 
 **As a** project manager
 **I want** to track project milestones and deliverables
-**So that** I can monitor project progress and client commitments
+**So that** I can monitor project progress and client commitments, with Gantt chart preparation
 
 **Acceptance Criteria**:
-- [ ] ProjectMilestone object created with all fields
+- [ ] ProjectMilestone object created with all fields (including Gantt-ready start/end dates)
 - [ ] ProjectDeliverable object created with all fields
 - [ ] Relations to Project working correctly
+- [ ] **CRITICAL**: Many-to-many relation to WorkspaceMember for milestone assignees
 - [ ] Table views functional
 - [ ] Can create milestones linked to projects
 - [ ] Can create deliverables linked to milestones
 - [ ] Attachment support working on deliverables
+- [ ] Milestone dates validated (start < end, within project date range)
 
 **Technical Notes**:
-- ProjectMilestone fields: name, description, dueDate, completedDate, status
+- ProjectMilestone fields:
+  - name (TEXT, required)
+  - description (RICH_TEXT_V2)
+  - **startDate (DATE_TIME)** - CRITICAL for Gantt charts
+  - **endDate (DATE_TIME)** - CRITICAL for Gantt charts
+  - dueDate (DATE_TIME) - user-facing deadline
+  - completedDate (DATE_TIME)
+  - status (SELECT: NOT_STARTED, IN_PROGRESS, COMPLETED, BLOCKED)
+  - progressPercentage (NUMBER 0-100)
+  - sortOrder (NUMBER) - for ordering in Gantt view
 - ProjectDeliverable fields: name, description, deliveryDate, approvalStatus, version
-- Relation: milestone → project (many-to-one), deliverable → milestone (many-to-one)
+- Relations:
+  - milestone → project (many-to-one)
+  - **milestone → assignees** (many-to-many with WorkspaceMember via join table)
+  - deliverable → milestone (many-to-one)
+
+**Gantt Chart Preparation**:
+- Milestones with startDate/endDate will be rendered as task bars
+- assignees relation enables resource allocation view
+- sortOrder enables manual ordering of milestones
 
 ---
 
@@ -200,6 +219,65 @@ See [Technical Architecture - Section 3.2](../../prd/technical-architecture.md#3
 - Test mutations: createProject with teamMembers, createQuote with lineItems
 - Verify cascade deletes where appropriate
 - Document GraphQL schema for frontend team
+
+---
+
+### Story 1.7: Link Projects to Emails, Quotes, and Invoices
+
+**Story ID**: STORY-1.7
+**Priority**: P1
+**Estimate**: 3 hours
+**Status**: Not Started
+
+**As a** project manager
+**I want** to see all emails, quotes, and invoices related to a project
+**So that** I can have complete context on project communications and financials
+
+**Acceptance Criteria**:
+- [ ] Project has relation to Message (many-to-many via MessageThreadSubscriber or custom)
+- [ ] Project record page shows Email tab with linked email threads
+- [ ] Email compose modal accessible from Project record page
+- [ ] Project has relation to Quote (one-to-many)
+- [ ] Project has relation to Invoice (one-to-many)
+- [ ] Quote → Project linkage allows project cost tracking
+- [ ] Invoice → Project linkage allows project revenue tracking
+
+**Technical Notes**:
+- Consider using Twenty's existing relation patterns for email (how Person/Company link to emails)
+- Email compose button on Project page should pre-fill project context
+- May need custom relation or use existing timelineActivities relation
+- Quote and Invoice already have project relation defined in Story 1.4 and 1.5
+
+**Integration with Email Composer**:
+- Add "Compose Email" action button to Project record page
+- Pre-populate email composer context with project information
+- Link sent emails to project's timeline
+
+---
+
+### Story 1.8: Add Email Compose to Opportunity Record Page
+
+**Story ID**: STORY-1.8
+**Priority**: P1
+**Estimate**: 2 hours
+**Status**: Not Started
+
+**As a** sales representative
+**I want** to compose emails directly from the Opportunity record page
+**So that** I can quickly communicate with prospects without losing context
+
+**Acceptance Criteria**:
+- [ ] "Compose Email" action button on Opportunity record page
+- [ ] Email composer opens with opportunity context
+- [ ] Sent emails appear in Opportunity's timeline/email tab
+- [ ] Recipient pre-filled from Opportunity's primary contact
+- [ ] Templates available when composing (not reply mode)
+
+**Technical Notes**:
+- Opportunity already has relation to Person via pointOfContact
+- Use existing email composer infrastructure from Phase 3.5
+- Context should include: opportunity name, amount, stage for email body templates
+- May leverage useEmailComposer hook with context: { objectType: 'opportunity', recordId: ... }
 
 ---
 
