@@ -22,6 +22,7 @@ import { ObjectMetadataModule } from 'src/engine/metadata-modules/object-metadat
 import { TrashCleanupModule } from 'src/engine/trash-cleanup/trash-cleanup.module';
 import { WorkspaceCacheStorageModule } from 'src/engine/workspace-cache-storage/workspace-cache-storage.module';
 import { DevSeederModule } from 'src/engine/workspace-manager/dev-seeder/dev-seeder.module';
+import { PhosSeederModule } from 'src/engine/workspace-manager/phos-seeder/phos-seeder.module';
 import { WorkspaceCleanerModule } from 'src/engine/workspace-manager/workspace-cleaner/workspace-cleaner.module';
 import { WorkspaceManagerModule } from 'src/engine/workspace-manager/workspace-manager.module';
 import { WorkspaceMigrationModule } from 'src/engine/workspace-manager/workspace-migration/workspace-migration.module';
@@ -46,6 +47,7 @@ import { AutomatedTriggerModule } from 'src/modules/workflow/workflow-trigger/au
     FieldMetadataModule,
     ObjectMetadataModule,
     DevSeederModule,
+    PhosSeederModule,
     WorkspaceManagerModule,
     DataSourceModule,
     WorkspaceCacheStorageModule,
