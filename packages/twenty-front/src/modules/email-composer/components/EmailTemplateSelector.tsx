@@ -84,6 +84,7 @@ export const EmailTemplateSelector = ({
       disabled={disabled}
       dropdownOffset={{ y: parseInt(theme.spacing(1), 10) }}
       dropdownWidth={GenericDropdownContentWidth.ExtraLarge}
+      isDropdownInModal
     />
   );
 };

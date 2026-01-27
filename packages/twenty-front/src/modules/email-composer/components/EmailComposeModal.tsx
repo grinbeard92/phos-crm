@@ -423,6 +423,7 @@ export const EmailComposeModal = ({
               onChange={setConnectedAccountId}
               dropdownOffset={{ y: parseInt(theme.spacing(1), 10) }}
               dropdownWidth={GenericDropdownContentWidth.ExtraLarge}
+              isDropdownInModal
             />
 
             <EmailTemplateSelector
