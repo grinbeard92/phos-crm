@@ -19,7 +19,6 @@ import {
   type EditorMode,
 } from '@/email-composer/states/emailComposerSettingsState';
 import { useFindManyRecords } from '@/object-record/hooks/useFindManyRecords';
-import { FormTextFieldInput } from '@/object-record/record-field/ui/form-types/components/FormTextFieldInput';
 import { useSnackBar } from '@/ui/feedback/snack-bar-manager/hooks/useSnackBar';
 import { Select } from '@/ui/input/components/Select';
 import { TextInput } from '@/ui/input/components/TextInput';
@@ -715,11 +714,12 @@ export const EmailComposeModal = ({
               />
             )}
 
-            <FormTextFieldInput
+            <TextInput
               label={t`To`}
               placeholder={t`Enter recipient email`}
-              defaultValue={toEmail}
+              value={toEmail}
               onChange={setToEmail}
+              fullWidth
             />
 
             <StyledCcBccToggle
@@ -741,18 +741,20 @@ export const EmailComposeModal = ({
 
             {showCcBcc && (
               <>
-                <FormTextFieldInput
+                <TextInput
                   label={t`CC`}
                   placeholder={t`Enter CC emails (comma-separated)`}
-                  defaultValue={ccEmail}
+                  value={ccEmail}
                   onChange={setCcEmail}
+                  fullWidth
                 />
 
-                <FormTextFieldInput
+                <TextInput
                   label={t`BCC`}
                   placeholder={t`Enter BCC emails (comma-separated)`}
-                  defaultValue={bccEmail}
+                  value={bccEmail}
                   onChange={setBccEmail}
+                  fullWidth
                 />
               </>
             )}
