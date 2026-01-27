@@ -579,14 +579,220 @@ WHERE EXISTS (
 | MessageThread entity | ✅ Exists | No changes |
 | MessageChannelMessageAssociation | ✅ Exists | direction field ready |
 | MessageParticipant | ✅ Exists | workspaceMemberId field ready |
-| MessagingSendMessageService | ✅ Exists | Returns needed IDs |
+| MessagingSendMessageService | ✅ Exists | Returns needed IDs, **already supports** inReplyTo/references |
 | SendEmailTool | 🔧 Modify | Add persistence call |
 | Timeline queries | 🔧 Modify | Include outgoing |
 | EmailComposeModal | 🔧 Modify | Pass threading context |
 
 ---
 
-## 10. Risks & Mitigations
+## 10. Critical Gap: Full-Stack Threading Support
+
+### 10.1 Current State Analysis
+
+The backend `MessagingSendMessageService` **already supports** threading headers:
+
+```typescript
+// messaging-send-message.service.ts (EXISTING)
+interface SendMessageInput {
+  // ...
+  inReplyTo?: string;      // ✅ Already supported
+  references?: string[];   // ✅ Already supported
+}
+```
+
+However, threading data **cannot flow from frontend to backend** due to gaps at each layer:
+
+| Layer | File | Gap |
+|-------|------|-----|
+| **GraphQL Schema** | `send-email.input.ts` | Missing `inReplyTo`, `references`, `messageThreadId` fields |
+| **Frontend Hook** | `useSendEmail.ts` | `SendEmailInput` type lacks threading fields |
+| **GraphQL Mutation** | `sendEmail.ts` | Mutation doesn't pass threading variables |
+| **Modal → Hook** | `EmailComposeModal.tsx` | Has props (`threadId`, `inReplyTo`) but doesn't pass to `sendEmail()` |
+
+### 10.2 Impact: Broken Cross-Client Threading
+
+| Scenario | Result |
+|----------|--------|
+| User starts thread in **Gmail**, replies via **CRM** | ❌ CRM reply won't have `In-Reply-To` header → **breaks thread in Gmail** |
+| User starts thread in **CRM**, recipient replies, user replies via **CRM** | ❌ Same issue - second CRM reply orphaned |
+| User starts in **Gmail**, replies in **Gmail**, later views in **CRM** | ✅ Works (sync preserves headers) |
+| User starts in **CRM**, recipient replies, user replies via **Gmail** | ✅ Works (Gmail knows thread from headers) |
+
+### 10.3 Required Changes
+
+#### 10.3.1 Backend: Extend SendEmailInput DTO
+
+**File**: `packages/twenty-server/src/modules/email-template/dtos/send-email.input.ts`
+
+```typescript
+@ArgsType()
+@InputType()
+export class SendEmailInput {
+  // ... existing fields ...
+
+  // NEW: Threading support
+  @Field({ nullable: true })
+  @IsString()
+  @IsOptional()
+  inReplyTo?: string;  // RFC 5322 Message-ID of email being replied to
+
+  @Field(() => [String], { nullable: true })
+  @IsOptional()
+  references?: string[];  // Chain of Message-IDs for threading
+
+  @Field({ nullable: true })
+  @IsString()
+  @IsOptional()
+  messageThreadId?: string;  // Twenty's internal thread ID for persistence
+
+  @Field({ nullable: true })
+  @IsString()
+  @IsOptional()
+  cc?: string;  // CC recipients (comma-separated)
+
+  @Field({ nullable: true })
+  @IsString()
+  @IsOptional()
+  bcc?: string;  // BCC recipients (comma-separated)
+}
+```
+
+#### 10.3.2 Frontend: Update useSendEmail Hook
+
+**File**: `packages/twenty-front/src/modules/email-composer/hooks/useSendEmail.ts`
+
+```typescript
+type SendEmailInput = {
+  email: string;
+  subject: string;
+  body: string;
+  connectedAccountId?: string;
+  files?: Array<{ id: string; name: string; type: string }>;
+
+  // NEW: Threading support
+  inReplyTo?: string;
+  references?: string[];
+  messageThreadId?: string;
+  cc?: string;
+  bcc?: string;
+};
+```
+
+#### 10.3.3 Frontend: Update GraphQL Mutation
+
+**File**: `packages/twenty-front/src/modules/email-composer/graphql/mutations/sendEmail.ts`
+
+```typescript
+export const SEND_EMAIL_MUTATION = gql`
+  mutation SendEmail($input: SendEmailInput!) {
+    sendEmail(input: $input) {
+      success
+      message
+      error
+      recipient
+      connectedAccountId
+      messageId        # NEW: Return the generated Message-ID
+      messageThreadId  # NEW: Return thread ID for future replies
+    }
+  }
+`;
+```
+
+#### 10.3.4 Frontend: Wire EmailComposeModal to Pass Threading
+
+**File**: `packages/twenty-front/src/modules/email-composer/components/EmailComposeModal.tsx`
+
+In `handleSend()`, include threading context when replying:
+
+```typescript
+const handleSend = async () => {
+  // ... existing validation ...
+
+  const result = await sendEmail({
+    email: to,
+    subject,
+    body: finalHtmlBody,
+    connectedAccountId: selectedAccount.id,
+    files: attachments.map(/* ... */),
+
+    // Threading - only when replying
+    ...(inReplyTo && { inReplyTo }),
+    ...(messageThreadId && { messageThreadId }),
+    // Build references chain from existing thread
+    ...(references && { references }),
+
+    // CC/BCC
+    ...(cc && { cc }),
+    ...(bcc && { bcc }),
+  });
+
+  // ... rest of handler ...
+};
+```
+
+#### 10.3.5 Backend: Email Resolver Must Forward Threading
+
+**File**: `packages/twenty-server/src/modules/email-template/email-template.resolver.ts` (or wherever sendEmail mutation is resolved)
+
+The resolver must pass threading params to `MessagingSendMessageService`:
+
+```typescript
+// In the sendEmail resolver
+const sendResult = await this.messagingSendMessageService.sendMessage({
+  // ... existing params ...
+
+  // Forward threading params
+  inReplyTo: input.inReplyTo,
+  references: input.references,
+});
+```
+
+### 10.4 Threading Flow After Fix
+
+```
+User clicks Reply on existing thread
+    ↓
+EmailComposeModal receives:
+  - inReplyTo: "<original-message-id@sender.com>"
+  - messageThreadId: "twenty-thread-uuid"
+  - references: ["<older-id@...>", "<original-id@...>"]
+    ↓
+sendEmail() mutation includes threading fields
+    ↓
+Backend resolver passes to MessagingSendMessageService
+    ↓
+MessagingSendMessageService sets headers:
+  - In-Reply-To: <original-message-id@sender.com>
+  - References: <older-id@...> <original-id@...>
+    ↓
+Gmail/Outlook/IMAP correctly threads the message ✅
+    ↓
+SentMessagePersistenceService links to existing thread in DB ✅
+```
+
+### 10.5 How Reply Context is Obtained
+
+When user clicks "Reply" from the email thread view:
+
+1. **Frontend fetches thread details** via GraphQL
+2. **Pass to EmailComposeModal**:
+   ```typescript
+   openEmailComposer({
+     context: { personId, personEmail, ... },
+     defaultTo: originalSender.email,
+     defaultSubject: `Re: ${originalSubject}`,
+     threadId: message.messageThreadId,
+     inReplyTo: message.headerMessageId,
+     quotedMessageHtml: message.htmlBody,
+   });
+   ```
+
+3. **Modal constructs references** from thread history (optional enhancement)
+
+---
+
+## 11. Risks & Mitigations
 
 | Risk | Impact | Mitigation |
 |------|--------|------------|
@@ -597,7 +803,7 @@ WHERE EXISTS (
 
 ---
 
-## 11. Future Enhancements
+## 12. Future Enhancements
 
 1. **Sent folder sync backfill** - Import historical sent emails
 2. **Draft persistence** - Save drafts to database and provider
@@ -607,15 +813,56 @@ WHERE EXISTS (
 
 ---
 
-## 12. Implementation Checklist
+## 13. Implementation Checklist
 
+### Phase 1: Full-Stack Threading Support (Section 10)
+- [ ] **Backend DTO**: Add `inReplyTo`, `references`, `messageThreadId`, `cc`, `bcc` to `SendEmailInput`
+- [ ] **Backend Resolver**: Forward threading params to `MessagingSendMessageService`
+- [ ] **Frontend Hook**: Update `useSendEmail` type with threading fields
+- [ ] **Frontend Mutation**: Update GraphQL mutation to pass threading variables
+- [ ] **Frontend Modal**: Wire `handleSend()` to include `inReplyTo`/`references` from props
+
+### Phase 2: Sent Message Persistence (Sections 3-4)
 - [ ] Create `SentMessagePersistenceService`
-- [ ] Update `SendEmailTool` to call persistence service
-- [ ] Update `SendEmailInputZodSchema` with threading fields
-- [ ] Uncomment threading params in `SendEmailTool`
-- [ ] Update `EmailComposeModal` to pass inReplyTo/references
-- [ ] Update timeline queries to include outgoing
-- [ ] Add "Outgoing" indicator to timeline UI
-- [ ] Write unit tests
-- [ ] Write integration tests
-- [ ] Document API changes
+- [ ] Update `SendEmailTool` to call persistence service after successful send
+- [ ] Update `SendEmailInputZodSchema` with all new fields
+- [ ] Handle thread lookup via `inReplyTo` → find existing thread
+
+### Phase 3: UI & Timeline (Sections 5-6)
+- [ ] Update timeline queries to include `direction = 'OUTGOING'`
+- [ ] Add "Outgoing" / "Sent" indicator to timeline message cards
+- [ ] Ensure Person/Company timeline shows both sent and received
+
+### Phase 4: Testing & Documentation
+- [ ] Write unit tests for `SentMessagePersistenceService`
+- [ ] Write integration tests for threading scenarios
+- [ ] Write E2E test: CRM reply → check Gmail thread intact
+- [ ] Document API changes in README or changelog
+
+---
+
+## 14. Sync Behavior Summary
+
+### What Twenty's Cron Jobs Sync
+
+Twenty CRM syncs **both Inbox and Sent folders** based on configuration:
+
+| Policy | Behavior |
+|--------|----------|
+| `ALL_FOLDERS` | All folders (Inbox, Sent, custom labels) have `isSynced: true` by default |
+| `SELECTED_FOLDERS` | User must explicitly enable each folder; starts with `isSynced: false` |
+
+**Cron Schedule**:
+- Message List Fetch: Every 5 minutes (`2-59/5 * * * *`)
+- Messages Import: Every 1 minute (`*/1 * * * *`)
+
+### Deduplication with Sync
+
+When we persist sent emails immediately AND the Sent folder syncs later:
+
+1. **Gmail/Outlook**: We store `messageExternalId` (provider's ID) → sync finds existing association → **skips**
+2. **IMAP**: We store `headerMessageId` → sync finds existing Message → **reuses Message, creates new association with folder UID**
+
+No duplicates will appear because:
+- Unique constraint on `(messageChannelId, messageId)` prevents duplicate associations
+- `headerMessageId` lookup prevents duplicate Message records
