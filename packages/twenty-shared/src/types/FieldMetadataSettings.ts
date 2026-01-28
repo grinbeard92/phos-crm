@@ -60,6 +60,20 @@ type FieldMetadataTsVectorSettings = {
   generatedType?: 'STORED' | 'VIRTUAL';
 };
 
+export type CalculatedReturnType =
+  | FieldMetadataType.TEXT
+  | FieldMetadataType.NUMBER
+  | FieldMetadataType.BOOLEAN
+  | FieldMetadataType.DATE
+  | FieldMetadataType.DATE_TIME;
+
+type FieldMetadataCalculatedSettings = {
+  formula: string; // e.g., "{{quantity}} * {{unitPrice}}"
+  returnType: CalculatedReturnType;
+  // Computed by backend - list of field names the formula depends on
+  dependsOnFields?: string[];
+};
+
 export type FieldMetadataSettingsMapping = {
   [FieldMetadataType.NUMBER]: FieldMetadataNumberSettings | null;
   [FieldMetadataType.DATE]: FieldMetadataDateSettings | null;
@@ -74,6 +88,7 @@ export type FieldMetadataSettingsMapping = {
   [FieldMetadataType.LINKS]: FieldMetadataMultiItemSettings | null;
   [FieldMetadataType.ARRAY]: FieldMetadataMultiItemSettings | null;
   [FieldMetadataType.FILES]: FieldMetadataFilesSettings;
+  [FieldMetadataType.CALCULATED]: FieldMetadataCalculatedSettings;
 };
 
 export type AllFieldMetadataSettings =
