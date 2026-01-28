@@ -39,6 +39,70 @@
 
 ---
 
+## CALCULATED Field Type Implementation (2026-01-28)
+
+**Feature Branch Tag**: `[calculated-field]` (7 commits)
+**Status**: Core infrastructure complete, pending migration integration
+
+### Completed Tasks
+1. ✅ Feature flag: `IS_CALCULATED_FIELD_ENABLED`
+2. ✅ FieldMetadataType.CALCULATED enum
+3. ✅ FieldMetadataCalculatedSettings type (formula, returnType, dependsOnFields)
+4. ✅ Formula parser (parse-formula.util.ts) with tests
+5. ✅ SQL expression generator (generate-calculated-expression.util.ts) with tests
+6. ✅ Column type mapping placeholder
+7. ✅ SQL column definition builder (extends GENERATED ALWAYS AS)
+8. ✅ Write operation blocking in data-arg.processor
+9. ✅ GraphQL type mappings (scalar, filter, orderBy)
+10. ✅ Field creation validation with formula parsing
+11. ✅ Documentation (docs/calculated-fields.md)
+12. ✅ Migration runner integration - generateCalculatedColumnDefinition
+13. ✅ Field reference resolution in migration handler
+
+### Remaining Work (Frontend - Lower Priority)
+- Frontend UI for creating calculated fields in Settings > Data Model
+- Formula editor component with field autocomplete
+- Preview/validation of formulas before saving
+
+### Key Files
+- `packages/twenty-server/src/engine/workspace-manager/utils/calculated-field/` - Parser & expression generator
+- `packages/twenty-shared/src/types/FieldMetadataSettings.ts` - Settings type
+- `packages/twenty-server/src/engine/workspace-manager/workspace-migration/workspace-migration-runner/utils/generate-column-definitions.util.ts` - Migration integration
+- `docs/calculated-fields.md` - Usage documentation
+
+### Commits (8 total)
+```
+1aece3e543 feat(calculated-field): wire up migration runner for CALCULATED columns
+39458f38bd docs(calculated-field): add usage documentation
+7d6b8617a2 feat(calculated-field): add backend support for CALCULATED field type
+fc84f91e6b feat(calculated-field): add formula parser and SQL expression generator
+8792649f37 feat(field-metadata): add FieldMetadataCalculatedSettings type
+ece87c8d45 feat(field-metadata): add CALCULATED field type enum
+2749ef7231 feat(feature-flag): add IS_CALCULATED_FIELD_ENABLED
+4ec2e6f47a docs(plans): add CALCULATED field type implementation plan
+```
+
+### Usage Example
+```typescript
+// Via GraphQL
+mutation {
+  createOneFieldMetadata(input: {
+    fieldMetadata: {
+      name: "balanceDue"
+      label: "Balance Due"
+      type: CALCULATED
+      objectMetadataId: "..."
+      settings: {
+        formula: "{{totalAmount}} - {{paidAmount}}"
+        returnType: NUMBER
+      }
+    }
+  }) { id }
+}
+```
+
+---
+
 ## Database Rebuild Session (2026-01-28)
 
 ### Critical Learnings - v1.16 Upgrade Commands
