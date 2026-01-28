@@ -1299,10 +1299,23 @@ export type EmailAccountConnectionParameters = {
   SMTP?: InputMaybe<ConnectionParameters>;
 };
 
+export type EmailFileInput = {
+  id: Scalars['String'];
+  name: Scalars['String'];
+  type: Scalars['String'];
+};
+
 export type EmailPasswordResetLinkOutput = {
   __typename?: 'EmailPasswordResetLinkOutput';
   /** Boolean that confirms query was dispatched */
   success: Scalars['Boolean'];
+};
+
+export type EmailTemplateContextInput = {
+  company?: InputMaybe<Scalars['JSON']>;
+  custom?: InputMaybe<Scalars['JSON']>;
+  person?: InputMaybe<Scalars['JSON']>;
+  sender?: InputMaybe<Scalars['JSON']>;
 };
 
 export type EmailingDomain = {
@@ -1372,6 +1385,7 @@ export enum FeatureFlagKey {
   IS_APPLICATION_ENABLED = 'IS_APPLICATION_ENABLED',
   IS_APPLICATION_INSTALLATION_FROM_TARBALL_ENABLED = 'IS_APPLICATION_INSTALLATION_FROM_TARBALL_ENABLED',
   IS_ATTACHMENT_MIGRATED = 'IS_ATTACHMENT_MIGRATED',
+  IS_CALCULATED_FIELD_ENABLED = 'IS_CALCULATED_FIELD_ENABLED',
   IS_COMMAND_MENU_ITEM_ENABLED = 'IS_COMMAND_MENU_ITEM_ENABLED',
   IS_DASHBOARD_V2_ENABLED = 'IS_DASHBOARD_V2_ENABLED',
   IS_EMAILING_DOMAIN_ENABLED = 'IS_EMAILING_DOMAIN_ENABLED',
@@ -1453,6 +1467,7 @@ export enum FieldMetadataType {
   ADDRESS = 'ADDRESS',
   ARRAY = 'ARRAY',
   BOOLEAN = 'BOOLEAN',
+  CALCULATED = 'CALCULATED',
   CURRENCY = 'CURRENCY',
   DATE = 'DATE',
   DATE_TIME = 'DATE_TIME',
@@ -2082,6 +2097,7 @@ export type Mutation = {
   revokeApiKey?: Maybe<ApiKey>;
   runWorkflowVersion: RunWorkflowVersionOutput;
   saveImapSmtpCaldavAccount: ImapSmtpCaldavConnectionSuccess;
+  sendEmail: SendEmailOutput;
   sendInvitations: SendInvitationsOutput;
   setMeteredSubscriptionPrice: BillingUpdateOutput;
   signIn: AvailableWorkspacesAndAccessTokensOutput;
@@ -2677,6 +2693,11 @@ export type MutationSaveImapSmtpCaldavAccountArgs = {
   connectionParameters: EmailAccountConnectionParameters;
   handle: Scalars['String'];
   id?: InputMaybe<Scalars['UUID']>;
+};
+
+
+export type MutationSendEmailArgs = {
+  input: SendEmailInput;
 };
 
 
@@ -3483,6 +3504,7 @@ export type Query = {
   objects: ObjectConnection;
   pieChartData: PieChartDataOutput;
   search: SearchResultConnection;
+  validateEmailTemplate: ValidateTemplateOutput;
   validatePasswordResetToken: ValidatePasswordResetTokenOutput;
   versionInfo: VersionInfo;
   webhook?: Maybe<Webhook>;
@@ -3748,6 +3770,11 @@ export type QuerySearchArgs = {
   includedObjectNameSingulars?: InputMaybe<Array<Scalars['String']>>;
   limit: Scalars['Int'];
   searchInput: Scalars['String'];
+};
+
+
+export type QueryValidateEmailTemplateArgs = {
+  input: ValidateTemplateInput;
 };
 
 
@@ -4038,6 +4065,31 @@ export type SearchResultPageInfo = {
   __typename?: 'SearchResultPageInfo';
   endCursor?: Maybe<Scalars['String']>;
   hasNextPage: Scalars['Boolean'];
+};
+
+export type SendEmailInput = {
+  bcc?: InputMaybe<Scalars['String']>;
+  body: Scalars['String'];
+  cc?: InputMaybe<Scalars['String']>;
+  connectedAccountId?: InputMaybe<Scalars['String']>;
+  email: Scalars['String'];
+  files?: InputMaybe<Array<EmailFileInput>>;
+  inReplyTo?: InputMaybe<Scalars['String']>;
+  messageThreadId?: InputMaybe<Scalars['String']>;
+  references?: InputMaybe<Array<Scalars['String']>>;
+  subject: Scalars['String'];
+  templateContext?: InputMaybe<EmailTemplateContextInput>;
+};
+
+export type SendEmailOutput = {
+  __typename?: 'SendEmailOutput';
+  connectedAccountId?: Maybe<Scalars['String']>;
+  error?: Maybe<Scalars['String']>;
+  message: Scalars['String'];
+  messageId?: Maybe<Scalars['String']>;
+  messageThreadId?: Maybe<Scalars['String']>;
+  recipient?: Maybe<Scalars['String']>;
+  success: Scalars['Boolean'];
 };
 
 export type SendInvitationsOutput = {
@@ -4744,6 +4796,18 @@ export type ValidatePasswordResetTokenOutput = {
   email: Scalars['String'];
   hasPassword: Scalars['Boolean'];
   id: Scalars['UUID'];
+};
+
+export type ValidateTemplateInput = {
+  body: Scalars['String'];
+  subject: Scalars['String'];
+};
+
+export type ValidateTemplateOutput = {
+  __typename?: 'ValidateTemplateOutput';
+  invalidVariables: Array<Scalars['String']>;
+  valid: Scalars['Boolean'];
+  variables: Array<Scalars['String']>;
 };
 
 export type VerificationRecord = {
