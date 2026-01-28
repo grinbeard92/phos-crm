@@ -1,0 +1,416 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Phos CRM Schema Configuration",
+  "description": "Configuration for Phos Industries CRM custom objects, fields, and relationships",
+  "version": "1.1.0",
+  "lastUpdated": "2026-01-28",
+  "objects": [
+    {
+      "nameSingular": "project",
+      "namePlural": "projects",
+      "labelSingular": "Project",
+      "labelPlural": "Projects",
+      "description": "Project management with Gantt and Kanban support",
+      "icon": "IconBriefcase",
+      "fields": [
+        {
+          "name": "status",
+          "label": "Status",
+          "type": "SELECT",
+          "description": "Project status",
+          "options": [
+            {"value": "NOT_STARTED", "label": "Not Started", "color": "gray", "position": 0},
+            {"value": "IN_PROGRESS", "label": "In Progress", "color": "blue", "position": 1},
+            {"value": "ON_HOLD", "label": "On Hold", "color": "yellow", "position": 2},
+            {"value": "COMPLETED", "label": "Completed", "color": "green", "position": 3},
+            {"value": "CANCELLED", "label": "Cancelled", "color": "red", "position": 4}
+          ]
+        },
+        {"name": "startDate", "label": "Start Date", "type": "DATE", "description": "Project start date"},
+        {"name": "endDate", "label": "End Date", "type": "DATE", "description": "Project end date"},
+        {"name": "budget", "label": "Budget", "type": "CURRENCY", "description": "Project budget"},
+        {"name": "description", "label": "Description", "type": "RICH_TEXT", "description": "Project description"}
+      ],
+      "relationships": [
+        {"name": "company", "type": "MANY_TO_ONE", "targetObject": "company", "description": "Company this project belongs to"}
+      ]
+    },
+    {
+      "nameSingular": "expense",
+      "namePlural": "expenses",
+      "labelSingular": "Expense",
+      "labelPlural": "Expenses",
+      "description": "Expense tracking with receipts and project association",
+      "icon": "IconReceipt",
+      "fields": [
+        {"name": "amount", "label": "Amount", "type": "CURRENCY", "description": "Expense amount"},
+        {"name": "expenseDate", "label": "Date", "type": "DATE", "description": "Date of expense"},
+        {
+          "name": "category",
+          "label": "Category",
+          "type": "SELECT",
+          "description": "Expense category",
+          "options": [
+            {"value": "MATERIALS", "label": "Materials", "color": "blue", "position": 0},
+            {"value": "LABOR", "label": "Labor", "color": "green", "position": 1},
+            {"value": "EQUIPMENT", "label": "Equipment", "color": "purple", "position": 2},
+            {"value": "TRAVEL", "label": "Travel", "color": "orange", "position": 3},
+            {"value": "SOFTWARE", "label": "Software", "color": "cyan", "position": 4},
+            {"value": "MILEAGE", "label": "Mileage", "color": "yellow", "position": 5},
+            {"value": "OTHER", "label": "Other", "color": "gray", "position": 6}
+          ]
+        },
+        {"name": "receiptNumber", "label": "Receipt #", "type": "TEXT", "description": "Receipt or reference number"},
+        {"name": "vendor", "label": "Vendor", "type": "TEXT", "description": "Vendor or merchant name"},
+        {"name": "notes", "label": "Notes", "type": "RICH_TEXT", "description": "Additional notes"},
+        {"name": "taxDeductible", "label": "Tax Deductible", "type": "BOOLEAN", "description": "Is this expense tax deductible?"},
+        {"name": "mileage", "label": "Mileage", "type": "NUMBER", "description": "Miles traveled (for mileage expenses)"}
+      ],
+      "relationships": [
+        {"name": "project", "type": "MANY_TO_ONE", "targetObject": "project", "description": "Project this expense belongs to"},
+        {"name": "company", "type": "MANY_TO_ONE", "targetObject": "company", "description": "Company this expense belongs to"}
+      ]
+    },
+    {
+      "nameSingular": "expenseCategory",
+      "namePlural": "expenseCategories",
+      "labelSingular": "Expense Category",
+      "labelPlural": "Expense Categories",
+      "description": "Categories for organizing expenses",
+      "icon": "IconCategory",
+      "fields": [
+        {"name": "code", "label": "Code", "type": "TEXT", "description": "Category code"},
+        {"name": "description", "label": "Description", "type": "TEXT", "description": "Category description"},
+        {"name": "taxDeductibleByDefault", "label": "Tax Deductible by Default", "type": "BOOLEAN", "description": "Default tax deductibility"}
+      ]
+    },
+    {
+      "nameSingular": "quote",
+      "namePlural": "quotes",
+      "labelSingular": "Quote",
+      "labelPlural": "Quotes",
+      "description": "Customer quotes and proposals",
+      "icon": "IconFileText",
+      "fields": [
+        {"name": "quoteNumber", "label": "Quote #", "type": "TEXT", "description": "Quote number"},
+        {"name": "quoteDate", "label": "Quote Date", "type": "DATE", "description": "Date quote was created"},
+        {"name": "validUntil", "label": "Valid Until", "type": "DATE", "description": "Quote expiration date"},
+        {"name": "subtotal", "label": "Subtotal", "type": "CURRENCY", "description": "Subtotal before tax"},
+        {"name": "taxAmount", "label": "Tax Amount", "type": "CURRENCY", "description": "Tax amount"},
+        {"name": "totalAmount", "label": "Total Amount", "type": "CURRENCY", "description": "Total amount including tax"},
+        {
+          "name": "status",
+          "label": "Status",
+          "type": "SELECT",
+          "description": "Quote status",
+          "options": [
+            {"value": "DRAFT", "label": "Draft", "color": "gray", "position": 0},
+            {"value": "SENT", "label": "Sent", "color": "blue", "position": 1},
+            {"value": "VIEWED", "label": "Viewed", "color": "cyan", "position": 2},
+            {"value": "ACCEPTED", "label": "Accepted", "color": "green", "position": 3},
+            {"value": "DECLINED", "label": "Declined", "color": "red", "position": 4},
+            {"value": "EXPIRED", "label": "Expired", "color": "orange", "position": 5}
+          ]
+        },
+        {"name": "terms", "label": "Terms", "type": "RICH_TEXT", "description": "Terms and conditions"},
+        {"name": "stripeQuoteId", "label": "Stripe Quote ID", "type": "TEXT", "description": "Stripe Quote ID for integration"}
+      ],
+      "relationships": [
+        {"name": "company", "type": "MANY_TO_ONE", "targetObject": "company", "description": "Company this quote is for"},
+        {"name": "project", "type": "MANY_TO_ONE", "targetObject": "project", "description": "Project this quote is for"},
+        {"name": "opportunity", "type": "MANY_TO_ONE", "targetObject": "opportunity", "description": "Opportunity this quote is for"}
+      ]
+    },
+    {
+      "nameSingular": "quoteLineItem",
+      "namePlural": "quoteLineItems",
+      "labelSingular": "Quote Line Item",
+      "labelPlural": "Quote Line Items",
+      "description": "Individual line items on quotes",
+      "icon": "IconListDetails",
+      "fields": [
+        {"name": "description", "label": "Description", "type": "TEXT", "description": "Line item description"},
+        {"name": "quantity", "label": "Quantity", "type": "NUMBER", "description": "Quantity"},
+        {"name": "unitPrice", "label": "Unit Price", "type": "CURRENCY", "description": "Price per unit"},
+        {"name": "totalPrice", "label": "Total Price", "type": "CURRENCY", "description": "Total line item price"},
+        {"name": "sortOrder", "label": "Sort Order", "type": "NUMBER", "description": "Display order"}
+      ],
+      "relationships": [
+        {"name": "quote", "type": "MANY_TO_ONE", "targetObject": "quote", "description": "Quote this line item belongs to"}
+      ]
+    },
+    {
+      "nameSingular": "invoice",
+      "namePlural": "invoices",
+      "labelSingular": "Invoice",
+      "labelPlural": "Invoices",
+      "description": "Billing and invoices with Stripe integration",
+      "icon": "IconFileInvoice",
+      "fields": [
+        {"name": "invoiceNumber", "label": "Invoice #", "type": "TEXT", "description": "Invoice number"},
+        {"name": "invoiceDate", "label": "Invoice Date", "type": "DATE", "description": "Date invoice was created"},
+        {"name": "dueDate", "label": "Due Date", "type": "DATE", "description": "Payment due date"},
+        {"name": "subtotal", "label": "Subtotal", "type": "CURRENCY", "description": "Subtotal before tax"},
+        {"name": "taxAmount", "label": "Tax Amount", "type": "CURRENCY", "description": "Tax amount"},
+        {"name": "totalAmount", "label": "Total Amount", "type": "CURRENCY", "description": "Total amount including tax"},
+        {"name": "amountPaid", "label": "Amount Paid", "type": "CURRENCY", "description": "Amount paid so far"},
+        {
+          "name": "status",
+          "label": "Status",
+          "type": "SELECT",
+          "description": "Invoice status",
+          "options": [
+            {"value": "DRAFT", "label": "Draft", "color": "gray", "position": 0},
+            {"value": "SENT", "label": "Sent", "color": "blue", "position": 1},
+            {"value": "VIEWED", "label": "Viewed", "color": "cyan", "position": 2},
+            {"value": "PARTIALLY_PAID", "label": "Partially Paid", "color": "yellow", "position": 3},
+            {"value": "PAID", "label": "Paid", "color": "green", "position": 4},
+            {"value": "OVERDUE", "label": "Overdue", "color": "red", "position": 5},
+            {"value": "CANCELLED", "label": "Cancelled", "color": "orange", "position": 6}
+          ]
+        },
+        {"name": "stripeInvoiceId", "label": "Stripe Invoice ID", "type": "TEXT", "description": "Stripe Invoice ID for integration"},
+        {"name": "paymentMethod", "label": "Payment Method", "type": "TEXT", "description": "Payment method used"},
+        {"name": "notes", "label": "Notes", "type": "RICH_TEXT", "description": "Additional notes"}
+      ],
+      "relationships": [
+        {"name": "company", "type": "MANY_TO_ONE", "targetObject": "company", "description": "Company this invoice is for"},
+        {"name": "quote", "type": "MANY_TO_ONE", "targetObject": "quote", "description": "Quote this invoice was generated from"},
+        {"name": "project", "type": "MANY_TO_ONE", "targetObject": "project", "description": "Project this invoice is for"}
+      ]
+    },
+    {
+      "nameSingular": "invoiceLineItem",
+      "namePlural": "invoiceLineItems",
+      "labelSingular": "Invoice Line Item",
+      "labelPlural": "Invoice Line Items",
+      "description": "Individual line items on invoices",
+      "icon": "IconListDetails",
+      "fields": [
+        {"name": "description", "label": "Description", "type": "TEXT", "description": "Line item description"},
+        {"name": "quantity", "label": "Quantity", "type": "NUMBER", "description": "Quantity"},
+        {"name": "unitPrice", "label": "Unit Price", "type": "CURRENCY", "description": "Price per unit"},
+        {"name": "totalPrice", "label": "Total Price", "type": "CURRENCY", "description": "Total line item price"},
+        {"name": "sortOrder", "label": "Sort Order", "type": "NUMBER", "description": "Display order"}
+      ],
+      "relationships": [
+        {"name": "invoice", "type": "MANY_TO_ONE", "targetObject": "invoice", "description": "Invoice this line item belongs to"}
+      ]
+    },
+    {
+      "nameSingular": "payment",
+      "namePlural": "payments",
+      "labelSingular": "Payment",
+      "labelPlural": "Payments",
+      "description": "Payment tracking with Stripe integration",
+      "icon": "IconCreditCard",
+      "fields": [
+        {"name": "paymentNumber", "label": "Payment #", "type": "TEXT", "description": "Payment reference number"},
+        {"name": "paymentDate", "label": "Payment Date", "type": "DATE", "description": "Date payment was received"},
+        {"name": "amount", "label": "Amount", "type": "CURRENCY", "description": "Payment amount"},
+        {
+          "name": "method",
+          "label": "Method",
+          "type": "SELECT",
+          "description": "Payment method",
+          "options": [
+            {"value": "CREDIT_CARD", "label": "Credit Card", "color": "blue", "position": 0},
+            {"value": "ACH", "label": "ACH/Bank Transfer", "color": "green", "position": 1},
+            {"value": "CHECK", "label": "Check", "color": "gray", "position": 2},
+            {"value": "CASH", "label": "Cash", "color": "yellow", "position": 3},
+            {"value": "WIRE", "label": "Wire Transfer", "color": "purple", "position": 4},
+            {"value": "OTHER", "label": "Other", "color": "orange", "position": 5}
+          ]
+        },
+        {
+          "name": "status",
+          "label": "Status",
+          "type": "SELECT",
+          "description": "Payment status",
+          "options": [
+            {"value": "PENDING", "label": "Pending", "color": "yellow", "position": 0},
+            {"value": "COMPLETED", "label": "Completed", "color": "green", "position": 1},
+            {"value": "FAILED", "label": "Failed", "color": "red", "position": 2},
+            {"value": "REFUNDED", "label": "Refunded", "color": "orange", "position": 3}
+          ]
+        },
+        {"name": "stripePaymentIntentId", "label": "Stripe Payment ID", "type": "TEXT", "description": "Stripe Payment Intent ID"},
+        {"name": "notes", "label": "Notes", "type": "RICH_TEXT", "description": "Additional notes"}
+      ],
+      "relationships": [
+        {"name": "invoice", "type": "MANY_TO_ONE", "targetObject": "invoice", "description": "Invoice this payment is for"},
+        {"name": "company", "type": "MANY_TO_ONE", "targetObject": "company", "description": "Company that made this payment"}
+      ]
+    },
+    {
+      "nameSingular": "projectMilestone",
+      "namePlural": "projectMilestones",
+      "labelSingular": "Project Milestone",
+      "labelPlural": "Project Milestones",
+      "description": "Key milestones within projects",
+      "icon": "IconFlag",
+      "fields": [
+        {"name": "title", "label": "Title", "type": "TEXT", "description": "Milestone title"},
+        {"name": "description", "label": "Description", "type": "RICH_TEXT", "description": "Milestone description"},
+        {"name": "dueDate", "label": "Due Date", "type": "DATE", "description": "Milestone due date"},
+        {"name": "completedDate", "label": "Completed Date", "type": "DATE", "description": "Date milestone was completed"},
+        {
+          "name": "status",
+          "label": "Status",
+          "type": "SELECT",
+          "description": "Milestone status",
+          "options": [
+            {"value": "PENDING", "label": "Pending", "color": "gray", "position": 0},
+            {"value": "IN_PROGRESS", "label": "In Progress", "color": "blue", "position": 1},
+            {"value": "COMPLETED", "label": "Completed", "color": "green", "position": 2},
+            {"value": "OVERDUE", "label": "Overdue", "color": "red", "position": 3}
+          ]
+        },
+        {"name": "sortOrder", "label": "Sort Order", "type": "NUMBER", "description": "Display order"}
+      ],
+      "relationships": [
+        {"name": "project", "type": "MANY_TO_ONE", "targetObject": "project", "description": "Project this milestone belongs to"}
+      ]
+    },
+    {
+      "nameSingular": "projectDeliverable",
+      "namePlural": "projectDeliverables",
+      "labelSingular": "Project Deliverable",
+      "labelPlural": "Project Deliverables",
+      "description": "Deliverables and outputs for projects",
+      "icon": "IconPackage",
+      "fields": [
+        {"name": "title", "label": "Title", "type": "TEXT", "description": "Deliverable title"},
+        {"name": "description", "label": "Description", "type": "RICH_TEXT", "description": "Deliverable description"},
+        {"name": "dueDate", "label": "Due Date", "type": "DATE", "description": "Deliverable due date"},
+        {"name": "deliveredDate", "label": "Delivered Date", "type": "DATE", "description": "Date deliverable was completed"},
+        {
+          "name": "status",
+          "label": "Status",
+          "type": "SELECT",
+          "description": "Deliverable status",
+          "options": [
+            {"value": "PLANNED", "label": "Planned", "color": "gray", "position": 0},
+            {"value": "IN_PROGRESS", "label": "In Progress", "color": "blue", "position": 1},
+            {"value": "REVIEW", "label": "In Review", "color": "yellow", "position": 2},
+            {"value": "DELIVERED", "label": "Delivered", "color": "green", "position": 3}
+          ]
+        },
+        {"name": "sortOrder", "label": "Sort Order", "type": "NUMBER", "description": "Display order"}
+      ],
+      "relationships": [
+        {"name": "project", "type": "MANY_TO_ONE", "targetObject": "project", "description": "Project this deliverable belongs to"},
+        {"name": "milestone", "type": "MANY_TO_ONE", "targetObject": "projectMilestone", "description": "Milestone this deliverable belongs to"}
+      ]
+    },
+    {
+      "nameSingular": "mileageLog",
+      "namePlural": "mileageLogs",
+      "labelSingular": "Mileage Log",
+      "labelPlural": "Mileage Logs",
+      "description": "Mileage tracking for business travel reimbursement and tax reporting",
+      "icon": "IconCar",
+      "fields": [
+        {"name": "fromAddress", "label": "From", "type": "ADDRESS", "description": "Starting location of the trip"},
+        {"name": "toAddress", "label": "To", "type": "ADDRESS", "description": "Destination of the trip"},
+        {"name": "tripDate", "label": "Trip Date", "type": "DATE", "description": "Date of the trip"},
+        {"name": "mileage", "label": "Mileage", "type": "NUMBER", "description": "Total miles traveled", "settings": {"dataType": "float", "decimals": 2}},
+        {"name": "mileageRate", "label": "Mileage Rate", "type": "NUMBER", "description": "Reimbursement rate per mile (IRS standard)", "settings": {"dataType": "float", "decimals": 4}, "defaultValue": 0.70},
+        {"name": "reimbursementAmount", "label": "Reimbursement Amount", "type": "CURRENCY", "description": "Calculated reimbursement (mileage × rate)"},
+        {"name": "roundTrip", "label": "Round Trip", "type": "BOOLEAN", "description": "Whether this was a round trip", "defaultValue": false},
+        {
+          "name": "purpose",
+          "label": "Purpose",
+          "type": "SELECT",
+          "description": "Business purpose of the trip",
+          "options": [
+            {"value": "CLIENT_MEETING", "label": "Client Meeting", "color": "blue", "position": 0},
+            {"value": "SITE_VISIT", "label": "Site Visit", "color": "green", "position": 1},
+            {"value": "DELIVERY", "label": "Delivery", "color": "orange", "position": 2},
+            {"value": "SUPPLIES_PICKUP", "label": "Supplies Pickup", "color": "purple", "position": 3},
+            {"value": "CONFERENCE", "label": "Conference", "color": "yellow", "position": 4},
+            {"value": "TRAINING", "label": "Training", "color": "pink", "position": 5},
+            {"value": "OTHER", "label": "Other", "color": "gray", "position": 6}
+          ]
+        },
+        {"name": "notes", "label": "Notes", "type": "TEXT", "description": "Additional notes about the trip"}
+      ],
+      "relationships": [
+        {"name": "project", "type": "MANY_TO_ONE", "targetObject": "project", "description": "Project this mileage is associated with"},
+        {"name": "driver", "type": "MANY_TO_ONE", "targetObject": "workspaceMember", "description": "Team member who drove"}
+      ]
+    },
+    {
+      "nameSingular": "milestoneAssignee",
+      "namePlural": "milestoneAssignees",
+      "labelSingular": "Milestone Assignee",
+      "labelPlural": "Milestone Assignees",
+      "description": "Junction table for many-to-many relationship between milestones and team members",
+      "icon": "IconUsers",
+      "fields": [],
+      "relationships": [
+        {"name": "milestone", "type": "MANY_TO_ONE", "targetObject": "projectMilestone", "description": "The milestone being assigned"},
+        {"name": "member", "type": "MANY_TO_ONE", "targetObject": "workspaceMember", "description": "The team member assigned"}
+      ]
+    },
+    {
+      "nameSingular": "emailTemplate",
+      "namePlural": "emailTemplates",
+      "labelSingular": "Email Template",
+      "labelPlural": "Email Templates",
+      "description": "Reusable email templates with variable substitution",
+      "icon": "IconMail",
+      "fields": [
+        {"name": "templateName", "label": "Template Name", "type": "TEXT", "description": "Name of the email template"},
+        {"name": "subject", "label": "Subject", "type": "TEXT", "description": "Email subject line (supports variables like {{firstName}})"},
+        {"name": "body", "label": "Body", "type": "RICH_TEXT", "description": "Email body content (supports variables)"},
+        {
+          "name": "category",
+          "label": "Category",
+          "type": "SELECT",
+          "description": "Template category for organization",
+          "options": [
+            {"value": "SALES", "label": "Sales", "color": "blue", "position": 0},
+            {"value": "FOLLOW_UP", "label": "Follow-up", "color": "green", "position": 1},
+            {"value": "QUOTE", "label": "Quote", "color": "orange", "position": 2},
+            {"value": "INVOICE", "label": "Invoice", "color": "purple", "position": 3},
+            {"value": "SUPPORT", "label": "Support", "color": "yellow", "position": 4},
+            {"value": "GENERAL", "label": "General", "color": "gray", "position": 5}
+          ]
+        },
+        {"name": "isActive", "label": "Active", "type": "BOOLEAN", "description": "Whether this template is active and available for use", "defaultValue": true},
+        {"name": "variables", "label": "Available Variables", "type": "TEXT", "description": "JSON array of variable names available in this template"}
+      ],
+      "relationships": []
+    }
+  ],
+  "opportunityExtensions": {
+    "description": "Custom fields added to the standard Opportunity object",
+    "fields": [
+      {"name": "salesGuidance", "label": "Sales Guidance", "type": "RICH_TEXT", "description": "Sales tips and guidance for this opportunity"},
+      {
+        "name": "leadSource",
+        "label": "Lead Source",
+        "type": "SELECT",
+        "description": "How this lead was acquired",
+        "options": [
+          {"value": "REFERRAL", "label": "Referral", "color": "green", "position": 0},
+          {"value": "WEBSITE", "label": "Website", "color": "blue", "position": 1},
+          {"value": "LINKEDIN", "label": "LinkedIn", "color": "cyan", "position": 2},
+          {"value": "COLD_OUTREACH", "label": "Cold Outreach", "color": "orange", "position": 3},
+          {"value": "CONFERENCE", "label": "Conference", "color": "purple", "position": 4},
+          {"value": "EXISTING_CUSTOMER", "label": "Existing Customer", "color": "yellow", "position": 5},
+          {"value": "OTHER", "label": "Other", "color": "gray", "position": 6}
+        ]
+      },
+      {"name": "daysInStage", "label": "Days in Stage", "type": "NUMBER", "description": "Days the opportunity has been in current stage"}
+    ]
+  },
+  "companyExtensions": {
+    "description": "Custom fields added to the standard Company object",
+    "fields": [
+      {"name": "stripeCustomerId", "label": "Stripe Customer ID", "type": "TEXT", "description": "Stripe Customer ID for integration"},
+      {"name": "stripeDefaultPaymentMethod", "label": "Default Payment Method", "type": "TEXT", "description": "Stripe default payment method ID"}
+    ]
+  }
+}
