@@ -42,7 +42,7 @@ This agent follows the persona defined in the agent configuration:
 2. **Start the server if it's not running** - Don't skip to database hacks
 3. **Native Twenty methods FIRST** - GraphQL → REST → create-twenty-app → custom code (in that order)
 4. **If server is down, start it** - `yarn start` or individual `npx nx start twenty-server`
-5. **ALWAYS use Phos workspace ID in queries** - `572a2b40-3011-4a15-bff4-376f817b88e7`
+5. **ALWAYS use Phos workspace ID in queries** - `6fc09637-5c6b-4931-b8ec-9dedb26dcef4`
    - Source `_bmad/.env.tokens` for `$PHOS_WORKSPACE_ID`
    - NEVER rely on GraphQL returning correct workspace without explicit filter
-   - Database queries MUST filter by `"workspaceId" = '572a2b40-3011-4a15-bff4-376f817b88e7'`
+   - Database queries MUST filter by `"workspaceId" = '6fc09637-5c6b-4931-b8ec-9dedb26dcef4'`

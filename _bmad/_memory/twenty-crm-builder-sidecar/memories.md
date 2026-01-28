@@ -3,236 +3,283 @@
 ## Session History
 
 **Session Started**: 2026-01-24
-
-### Initializing CRM-Forge Agent
-- First activation of the Twenty CRM Builder agent
-- Sidecar memory system initialized
-- Ready to build production-ready Twenty CRM features
+**Last Updated**: 2026-01-28
 
 ---
 
 ## Key Decisions
 
-### Workspace Configuration (2026-01-24)
+### Workspace Configuration (Updated 2026-01-28)
 - **Workspace Name**: Phos Industries
 - **Primary Domain**: phos-ind.com
-- **Workspace ID**: 572a2b40-3011-4a15-bff4-376f817b88e7
+- **Workspace ID**: 6fc09637-5c6b-4931-b8ec-9dedb26dcef4
+- **Workspace Schema**: workspace_6m6cdstwd0rt94hlj25wrvmk4
 - **API Key Name**: crm-forge
-- **API Key**: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI1NzJhMmI0MC0zMDExLTRhMTUtYmZmNC0zNzZmODE3Yjg4ZTciLCJ0eXBlIjoiQVBJX0tFWSIsIndvcmtzcGFjZUlkIjoiNTcyYTJiNDAtMzAxMS00YTE1LWJmZjQtMzc2ZjgxN2I4OGU3IiwiaWF0IjoxNzY5MzIxNDIxLCJleHAiOjQ5MjI5MjE0MjAsImp0aSI6IjVmMjM2MThlLTc3YTMtNDIxZC1iMGRlLTUyZGEzYTI4MTcyMyJ9.TDPdX88kBxuUXnGwieAbt6Naod3XLtDDEhIdFmd7NeE
+- **API Key**: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI2ZmMwOTYzNy01YzZiLTQ5MzEtYjhlYy05ZGVkYjI2ZGNlZjQiLCJ0eXBlIjoiQVBJX0tFWSIsIndvcmtzcGFjZUlkIjoiNmZjMDk2MzctNWM2Yi00OTMxLWI4ZWMtOWRlZGIyNmRjZWY0IiwiaWF0IjoxNzY5NTk5NDc3LCJleHAiOjQ5MjMxOTk0NzYsImp0aSI6ImU4YWQ0ZGFiLWE3MTctNGI0NS1hYjU3LWQzNmUwODE0MDg5MyJ9.FPnTa37__yAxpwMqLDio-KHBi5pRnfVY9uBj8yBlXjQ
 
 ### Multi-Tenant Configuration
 - Multi-workspace enabled: `IS_MULTIWORKSPACE_ENABLED=true`
-- Additional domains to add: @lvnlaser.com, @beehivebirth.com
+- Approved domains: @phos-ind.com, @lvnlaser.com, @beehivebirth.com
 
 ---
 
-## Active Context
+## Epic Status Overview (2026-01-28)
 
-### Current Session: Initial Setup (2026-01-24)
-- ✅ Docker containers configured with custom naming (phos-crm-db, phos-crm-redis)
-- ✅ Dependencies installed (yarn)
-- ✅ Database initialized with migrations
-- ✅ Development servers running:
-  - Backend: http://localhost:3000
-  - Frontend: http://localhost:3001
-  - Worker: Background process active
+| Epic | Description | Data Model | UI/Service | Status |
+|------|-------------|------------|------------|--------|
+| 000 | Email Composer | ⚠️ Partial | ⚠️ Partial | IN PROGRESS |
+| 001 | Foundation Objects | ✅ Complete | N/A | ✅ COMPLETE |
+| 002 | Quoting & Billing | ✅ Objects exist | ❌ Not started | PARTIAL |
+| 003 | Stripe Integration | ✅ Fields exist | ❌ Not started | PARTIAL |
+| 004 | Expense Tracking | ✅ Objects exist | ❌ Not started | PARTIAL |
+| 005 | Gantt View | ✅ Milestones exist | ❌ Not started | PARTIAL |
+| 006 | Workflows | ❌ Not started | ❌ Not started | NOT STARTED |
+| 007 | Polish | N/A | ❌ Not started | NOT STARTED |
+| 008 | Testing/Deploy | N/A | ❌ Not started | NOT STARTED |
 
-### Custom Objects Created (2026-01-24)
-✅ **Projects** (ID: 908deb12-79d9-4516-bf60-f4f0e2853dc3)
-   - Icon: IconBriefcase
-   - Purpose: Project management with Gantt and Kanban support
+---
 
-✅ **Expenses** (ID: de73f140-b98e-4f50-8de5-b0c494c7dbb4)
-   - Icon: IconReceipt
-   - Purpose: Expense tracking with receipts and project association
+## Database Rebuild Session (2026-01-28)
 
-✅ **Quotes** (ID: 1e395f61-91dd-4ce3-8872-0b674cec9b41)
-   - Icon: IconFileText
-   - Purpose: Customer quotes and proposals
+### Critical Learnings - v1.16 Upgrade Commands
+After rebasing `wip` branch onto latest `main`, the application failed with `flatObjectMetadata` errors.
 
-✅ **Invoices** (ID: ab4f4492-82f6-4628-87cb-0b07358ea899)
-   - Icon: IconCurrencyDollar
-   - Purpose: Billing and invoices with Stripe integration
+**Fix**: Run these upgrade commands in order:
+```bash
+npx nx run twenty-server:command upgrade:1-16:identify-object-metadata
+npx nx run twenty-server:command upgrade:1-16:identify-field-metadata
+npx nx run twenty-server:command upgrade:1-16:identify-view-metadata
+npx nx run twenty-server:command upgrade:1-16:identify-index-metadata
+npx nx run twenty-server:command upgrade:1-16:flush-v2-cache-and-increment-metadata-version
+```
 
-✅ **Support Tickets** (ID: 3c04feb6-846e-47e6-a207-4c5eb0c59cb5)
-   - Icon: IconHelp
-   - Purpose: Customer support ticket tracking
+### Admin Panel Access
+- **Field**: `canAccessFullAdminPanel` on `core.user` table (NOT on role)
+- **Fix**: `UPDATE core."user" SET "canAccessFullAdminPanel" = true WHERE email = 'ben@phos-ind.com';`
+- **Note**: User also needs Admin role via `roleTarget` table, but that was already set
 
-### Custom Fields Added (2026-01-24)
+### Custom Objects in phos-seeder (Authoritative Source)
 
-**Projects** (5 fields):
-- status (SELECT): Not Started, In Progress, On Hold, Completed, Cancelled
+**Location**: `packages/twenty-server/src/engine/workspace-manager/phos-seeder/`
+
+**Run command**: `npx nx run twenty-server:command workspace:seed:phos -- --workspace-id <WORKSPACE_ID>`
+
+| # | Object | Icon | Has Fields | Has Relations |
+|---|--------|------|------------|---------------|
+| 1 | Project | IconBriefcase | ✅ | ✅ Company, WorkspaceMember |
+| 2 | ProjectMilestone | IconFlag | ✅ | ✅ Project |
+| 3 | ProjectDeliverable | IconPackage | ✅ | ✅ ProjectMilestone |
+| 4 | MilestoneAssignee | IconUsers | ❌ (junction) | ✅ ProjectMilestone, WorkspaceMember |
+| 5 | ExpenseCategory | IconCategory | ✅ | ❌ |
+| 6 | Expense | IconReceipt | ✅ | ✅ ExpenseCategory, Project, WorkspaceMember |
+| 7 | Quote | IconFileText | ✅ | ✅ Company, Person, Project |
+| 8 | QuoteLineItem | IconListDetails | ✅ | ✅ Quote |
+| 9 | Invoice | IconFileInvoice | ✅ | ✅ Company, Person, Project, Quote |
+| 10 | InvoiceLineItem | IconListDetails | ✅ | ✅ Invoice |
+| 11 | Payment | IconCreditCard | ✅ | ✅ Invoice |
+| 12 | MileageLog | IconCar | ✅ | ✅ Project, WorkspaceMember |
+| 13 | EmailTemplate | IconMail | ✅ | ❌ | (Added 2026-01-28)
+
+**Standard Object Extensions** (also in phos-seeder):
+- Opportunity: salesGuidance, leadSource, daysInStage
+- Company: stripeCustomerId, stripeDefaultPaymentMethod
+
+### Custom Fields Added (2026-01-28)
+
+**Project** (5 fields):
+- status (SELECT): NOT_STARTED, IN_PROGRESS, ON_HOLD, COMPLETED, CANCELLED
 - startDate (DATE)
 - endDate (DATE)
 - budget (CURRENCY)
 - description (RICH_TEXT)
 
-**Expenses** (7 fields):
+**Expense** (8 fields):
 - amount (CURRENCY)
 - expenseDate (DATE)
-- category (SELECT): Materials, Labor, Equipment, Travel, Software, Other
+- category (SELECT): MATERIALS, LABOR, EQUIPMENT, TRAVEL, SOFTWARE, MILEAGE, OTHER
 - receiptNumber (TEXT)
 - vendor (TEXT)
 - notes (RICH_TEXT)
 - taxDeductible (BOOLEAN)
+- mileage (NUMBER) - For tax write-off tracking
 
-**Quotes** (7 fields):
+**Quote** (9 fields):
 - quoteNumber (TEXT)
 - quoteDate (DATE)
 - validUntil (DATE)
+- subtotal (CURRENCY)
+- taxAmount (CURRENCY)
 - totalAmount (CURRENCY)
-- status (SELECT): Draft, Sent, Viewed, Accepted, Declined, Expired
+- status (SELECT): DRAFT, SENT, VIEWED, ACCEPTED, DECLINED, EXPIRED
 - terms (RICH_TEXT)
-- notes (RICH_TEXT)
+- stripeQuoteId (TEXT)
 
-**Invoices** (9 fields):
+**Invoice** (11 fields):
 - invoiceNumber (TEXT)
 - invoiceDate (DATE)
 - dueDate (DATE)
+- subtotal (CURRENCY)
+- taxAmount (CURRENCY)
 - totalAmount (CURRENCY)
 - amountPaid (CURRENCY)
-- status (SELECT): Draft, Sent, Viewed, Partially Paid, Paid, Overdue, Cancelled
-- stripePaymentId (TEXT) - For Stripe integration
+- status (SELECT): DRAFT, SENT, VIEWED, PARTIALLY_PAID, PAID, OVERDUE, CANCELLED
+- stripeInvoiceId (TEXT)
 - paymentMethod (TEXT)
 - notes (RICH_TEXT)
 
-**Support Tickets** (8 fields):
-- ticketNumber (TEXT)
-- priority (SELECT): Low, Medium, High, Urgent
-- status (SELECT): New, Open, In Progress, Waiting on Customer, Resolved, Closed
-- subject (TEXT)
-- description (RICH_TEXT)
-- resolution (RICH_TEXT)
-- createdDate (DATE_TIME)
-- resolvedDate (DATE_TIME)
+**Payment** (7 fields):
+- paymentNumber (TEXT)
+- paymentDate (DATE)
+- amount (CURRENCY)
+- method (SELECT): CREDIT_CARD, ACH, CHECK, CASH, WIRE, OTHER
+- status (SELECT): PENDING, COMPLETED, FAILED, REFUNDED
+- stripePaymentIntentId (TEXT)
+- notes (RICH_TEXT)
 
-### Relationships Created (2026-01-24)
-✅ **All relationships successfully established**:
-- Project → Company (MANY_TO_ONE): Companies have multiple Projects
-- Expense → Project (MANY_TO_ONE): Projects have multiple Expenses
-- Expense → Company (MANY_TO_ONE): Companies have multiple Expenses (non-project)
-- Quote → Company (MANY_TO_ONE): Companies have multiple Quotes
-- Invoice → Company (MANY_TO_ONE): Companies have multiple Invoices
-- Invoice → Quote (MANY_TO_ONE): Quotes can have multiple Invoices
-- Support Ticket → Company (MANY_TO_ONE): Companies have multiple Support Tickets
+---
 
-**Notes**:
-- Company ID (workspace-specific): 92d5b2cc-3e5a-474e-abf1-51ba5f0513fd
-- Two relationships existed from initial attempt (Expense→Project, Invoice→Quote)
-- Five relationships created with corrected workspace-specific Company ID
+## GraphQL API Patterns
 
-### Stripe Integration Design Completed (2026-01-25)
+### Field Creation - MUST Use Variables
+Inline type enums fail. Always use this pattern:
+```json
+{
+  "query": "mutation CreateField($input: CreateOneFieldMetadataInput!) { createOneField(input: $input) { id name } }",
+  "variables": {
+    "input": {
+      "field": {
+        "objectMetadataId": "OBJECT_ID",
+        "name": "fieldName",
+        "label": "Field Label",
+        "type": "TYPE",
+        "description": "Description"
+      }
+    }
+  }
+}
+```
 
-✅ **Comprehensive design documents created**:
+### SELECT Field Options
+Must include `position` for each option:
+```json
+"options": [
+  {"value": "VALUE", "label": "Label", "color": "blue", "position": 0},
+  {"value": "VALUE2", "label": "Label 2", "color": "green", "position": 1}
+]
+```
 
-1. **stripe-integration-design.md**
-   - Complete Stripe data model analysis
-   - CRM object alignment (Invoice, Quote, Customer, PaymentIntent)
-   - Metadata strategy for bidirectional linking
-   - Currency handling (dollars ↔ cents)
-   - Webhook event flows
-   - Field requirements for all CRM objects
-   - 8-phase implementation plan
+---
 
-2. **stripe-data-model-diagram.md**
-   - Visual object relationship diagram
-   - Quote → Order → Invoice workflow states
-   - Webhook integration points
-   - Metadata examples
-   - Payment methods (Cards + ACH)
+## Pending Work (Updated 2026-01-28)
 
-3. **workflow-design-guide.md**
-   - Twenty CRM workflow system capabilities
-   - 10 production-ready workflows:
-     * WF-001 to WF-010 covering Quote, Order, Invoice, Payment, Project, Customer flows
-   - Stripe integration patterns (webhooks, HTTP actions)
-   - Variable system and error handling
-   - Implementation guide (5-week phased rollout)
-   - Best practices and testing strategies
+### Data Model (phos-seeder)
+1. ✅ All 12 custom objects created and in phos-seeder
+2. ✅ All relations configured in phos-seeder
+3. ✅ Opportunity extensions (salesGuidance, leadSource, daysInStage) - added to phos-seeder
+4. ✅ Company extensions (stripeCustomerId, stripeDefaultPaymentMethod) - added to phos-seeder
+5. ✅ EmailTemplate object - added to phos-seeder
 
-4. **domain-configuration-guide.md**
-   - Multi-workspace domain architecture
-   - Approved access domains setup
-   - phos-ind.com as primary domain (via approved domains)
-   - GraphQL mutations for domain management
-   - Custom domain setup (optional)
-   - Troubleshooting guide
+### UI/Service Work (Not Started)
+1. ⏳ Epic 002: Quote/Invoice creation UI, PDF generation
+2. ⏳ Epic 003: Stripe service integration
+3. ⏳ Epic 004: Expense submission UI, approval workflow
+4. ⏳ Epic 005: Gantt view component
+5. ⏳ Epic 006: Workflow automation (Email→Opportunity, stall detection)
+6. ⏳ Epic 000: Complete email composer (Stories 0.3-0.8)
 
-**Key Design Decisions (LOCKED)**:
-- **Workflow**: CRM-First (Quote → Order → Invoice)
-- **Order Object**: NEW object required as bridge between Quote and Invoice
-- **Quote Acceptance**: Stripe webhook creates Order in CRM
-- **Invoice Creation**: Created AFTER order fulfillment (not from quote directly)
-- **Quote Expiration**: Cron job checks daily, sends reminder emails
-- **Payment Methods**: Cards + ACH via Stripe Payment Element
-- **Tax Handling**: Manual entry (can upgrade to Stripe Tax API later)
-- **Invoice Modification**: Editable in Draft status before sending to Stripe
+---
 
-**NEW CRM Objects/Fields Required**:
-- **Order Object** (NEW): Bridge between Quote and Invoice
-  - Fields: orderNumber, orderDate, fulfillmentDate, totalAmount, status, stripeQuoteId, etc.
-  - Relations: company, quote, invoice, project
-- **Quote Object** (UPDATE): Add stripeQuoteId, stripeQuoteUrl, order (1:1), taxAmount, subtotal
-- **Invoice Object** (UPDATE): Add order (M:1), stripeInvoiceId, stripePaymentIntentId, taxAmount, subtotal
-- **Company Object** (UPDATE): Add stripeCustomerId, stripeDefaultPaymentMethod
+## Bug Fix: FlatEntityMaps Type Change (2026-01-28)
 
-**Domain Configuration Status**:
-- Workspace subdomain: `phos-ind` (primary identifier)
-- Approved domains: phos-ind.com (validated), lvnlaser.com (pending), beehivebirth.com (pending)
-- Access method: Email-based auto-signup for approved domains
-- No hierarchical "admin domain" - all approved domains have equal access
+After rebasing `wip` branch onto latest `main`, the `phos-seeder.service.ts` had a type mismatch.
 
-**Admin Panel Access Granted (2026-01-26)**:
-- ✅ Admin role already assigned to ben@phos-ind.com in database
-- Role ID: f46f4e00-ca0c-4063-bcd2-97831256e020 (Admin)
-- User Workspace ID: 044c2f44-7bfa-4cb5-b364-51cb6ac75c6e
-- Workspace Member ID: dfc2dc41-132f-4956-8109-71d8b7044400
-- Verified via `getRoles` query - Admin role shows Ben as workspace member
-- Note: `workspaceMember.roles` GraphQL field returns null (bug?), but `role.workspaceMembers` works correctly
+**Error**: `objectMetadata.fieldMetadataIds is not iterable`
 
-### Priority 1: Sales Acceleration - Fields Complete (2026-01-26)
+**Root cause**: v1.16 upgrade changed flat entity structure. Property renamed from `fieldMetadataIds` to `fieldIds`.
 
-✅ **Custom Fields Added to Opportunity Object:**
-- `salesGuidance` (RICH_TEXT): ID d8f4b27e-a13c-4745-a279-9e206fb6d9d5
-- `leadSource` (SELECT): ID ad1225f1-492f-4aa2-9519-e7cddf972cc6
-- `daysInStage` (NUMBER): ID 622b13ae-6445-4938-9d9f-edcabb0d6fb3
+**Fix in `phos-seeder.service.ts`**:
+```typescript
+// Old (broken):
+type FlatMaps = {
+  objectMaps: { byId: Record<string, { fieldMetadataIds: string[] }> };
+};
+for (const fieldId of objectMetadata.fieldMetadataIds) { ... }
 
-**Implementation:**
-- Created via GraphQL metadata API (production-safe)
-- All 50 existing opportunities preserved
-- Fields verified via GraphQL queries and mutations
-- Atomic commit: d1a6c41d26
+// New (fixed):
+type FlatMaps = {
+  objectMaps: { byId: Record<string, { fieldIds: string[] }> };
+};
+for (const fieldId of objectMetadata.fieldIds) { ... }
+```
 
-**Remaining Priority 1 Work:**
-1. ✅ **Days-in-Stage Automation**: Implemented (commit 0f9c545aec)
-   - DATABASE_EVENT trigger on Opportunity.stage changes
-   - TypeScript module in serverless functions
-2. ✅ **Email → Opportunity Workflow**: Implemented (2026-01-26)
-   - Workflow ID: 402a7fa7-8538-4a3b-b688-3dee0744cfca
-   - Trigger: message.created (DATABASE_EVENT)
-   - Action: Creates Opportunity with name from email subject
-   - Status: ACTIVE with valid step
-3. ⏳ **Stall Detection Dashboard**: Visual dashboard widget
-   - Query opportunities where daysInStage > threshold
-   - Color-coded warnings (green/yellow/red)
-   - Kanban board filtered by stall status
+---
 
-**Workflow Architecture Discovered (2026-01-26):**
-- Twenty has FULL workflow engine with BullMQ background jobs
-- DATABASE_EVENT triggers for record changes
-- CRON triggers for scheduled tasks
-- Visual workflow builder with action system
-- Event enrichment and related entity loading
-- Existing email→contact automation pattern to extend
+## Deployment Requirements
 
-### Next Steps
-1. ✅ Implement days-in-stage workflow (DATABASE_EVENT + CRON) - commit 0f9c545aec
-2. ✅ Implement Email → Opportunity workflow - workflow 402a7fa7-8538-4a3b-b688-3dee0744cfca
-3. ⏳ Build stall detection dashboard widget
-4. ✅ Admin role verified for ben@phos-ind.com (was already assigned)
-5. ⏳ Create NEW Order object in CRM schema (Stripe integration)
-6. ⏳ Add Stripe integration fields to Quote, Invoice, Company objects
-7. ⏳ Implement Stripe webhook endpoint in Twenty backend
-8. ⏳ Implement 10 workflows from workflow-design-guide.md
-9. ⏳ Test complete Quote → Order → Invoice → Payment flow
-10. ⏳ Build custom views (Kanban for projects, table views for others)
+### Primary Seeder: `phos-seeder` NestJS Module
+Location: `packages/twenty-server/src/engine/workspace-manager/phos-seeder/`
+
+**Run command:**
+```bash
+npx nx run twenty-server:command workspace:seed:phos -- --workspace-id <WORKSPACE_ID>
+```
+
+**Architecture:**
+- `phos-seed.command.ts` - CLI command entry point
+- `phos-seeder.service.ts` - Main seeder orchestration service
+- `custom-objects/` - Object seed definitions (11 objects)
+- `custom-fields/` - Field seed definitions for each object
+
+**Objects seeded (13 total):**
+1. Project, ProjectMilestone, ProjectDeliverable
+2. MilestoneAssignee (junction for many-to-many)
+3. ExpenseCategory, Expense
+4. Quote, QuoteLineItem
+5. Invoice, InvoiceLineItem
+6. Payment
+7. MileageLog
+8. EmailTemplate (added 2026-01-28)
+
+**Standard Object Extensions:**
+- Opportunity: salesGuidance (RICH_TEXT), leadSource (SELECT), daysInStage (NUMBER)
+- Company: stripeCustomerId (TEXT), stripeDefaultPaymentMethod (TEXT)
+
+**Relations seeded (22 total):**
+- Project -> Company, WorkspaceMember (projectManager)
+- ProjectMilestone -> Project
+- ProjectDeliverable -> ProjectMilestone
+- MilestoneAssignee -> ProjectMilestone, WorkspaceMember (junction)
+- Expense -> ExpenseCategory, Project, WorkspaceMember (submittedBy)
+- Quote -> Company, Person (contact), Project
+- QuoteLineItem -> Quote
+- Invoice -> Company, Person (contact), Project, Quote
+- InvoiceLineItem -> Invoice
+- Payment -> Invoice
+- MileageLog -> Project, WorkspaceMember (driver)
+
+### Secondary: External CLI Setup Tool (GraphQL API)
+Location: `scripts/phos-setup/`
+- For users who can't run server commands directly
+- Uses GraphQL Metadata API over HTTP
+- Interactive menu for selective setup
+
+---
+
+## CRITICAL DEVELOPMENT RULE
+
+**EVERY NEW FEATURE MUST BE ADDED TO PHOS-SEEDER**
+
+When adding new custom objects, fields, or relationships to the CRM:
+
+1. **Add object seed** in `phos-seeder/custom-objects/`
+2. **Add field seeds** in `phos-seeder/custom-fields/`
+3. **Update `phos-seeder.service.ts`**:
+   - Add to `objectsConfig` array
+   - Add relations to `relationsConfig` array
+   - Add junction configs if many-to-many
+4. **Update `scripts/phos-setup/schema.json`** for external CLI tool parity
+
+This ensures:
+- New users can seed complete schema on fresh install
+- Fork deployments get all features automatically
+- Database rebuilds restore full functionality

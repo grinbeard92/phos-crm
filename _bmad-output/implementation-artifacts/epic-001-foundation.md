@@ -3,10 +3,15 @@
 **Epic ID**: EPIC-001
 **Phase**: Phase 1 (Weeks 1-2)
 **Priority**: P0 (Critical)
-**Status**: Not Started
-**Owner**: TBD
+**Status**: ✅ COMPLETE (Data Model via phos-seeder)
+**Owner**: CRM-Forge
 **Created**: 2026-01-24
+**Completed**: 2026-01-28
 **Target Completion**: Week 2
+
+> **Note**: All custom objects, fields, and relations for this epic are implemented in the
+> `phos-seeder` module. Run `npx nx run twenty-server:command workspace:seed:phos -- --workspace-id <ID>`
+> to deploy. UI work for views is tracked separately in Epics 002-005.
 
 ## Epic Overview
 
