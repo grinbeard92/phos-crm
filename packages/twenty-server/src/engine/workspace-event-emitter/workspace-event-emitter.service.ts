@@ -71,10 +71,22 @@ export class WorkspaceEventEmitterService {
   ): Promise<void> {
     const workspaceId = workspaceEventBatch.workspaceId;
 
+    console.log(
+      `[ReactivityDebugging] publishToEventStreams called — event: ${workspaceEventBatch.name}, workspaceId: ${workspaceId}, eventCount: ${workspaceEventBatch.events.length}`,
+    );
+
     const activeStreamIds =
       await this.eventStreamService.getActiveStreamIds(workspaceId);
 
+    console.log(
+      `[ReactivityDebugging] activeStreamIds: ${activeStreamIds.length}`,
+    );
+
     if (activeStreamIds.length === 0) {
+      console.log(
+        `[ReactivityDebugging] No active streams — events will be dropped`,
+      );
+
       return;
     }
 
@@ -94,13 +106,23 @@ export class WorkspaceEventEmitterService {
 
     for (const [streamChannelId, streamData] of streamsData) {
       if (!isDefined(streamData)) {
+        console.log(
+          `[ReactivityDebugging] Stream ${streamChannelId} has no data — removing`,
+        );
         streamIdsToRemove.push(streamChannelId);
         continue;
       }
 
       if (Object.keys(streamData.queries).length === 0) {
+        console.log(
+          `[ReactivityDebugging] Stream ${streamChannelId} has 0 queries — skipping`,
+        );
         continue;
       }
+
+      console.log(
+        `[ReactivityDebugging] Processing stream ${streamChannelId} — queries: ${Object.keys(streamData.queries).length}, userWorkspaceId: ${streamData.authContext.userWorkspaceId}`,
+      );
 
       await this.processStreamEvents(
         streamChannelId,
@@ -133,12 +155,20 @@ export class WorkspaceEventEmitterService {
     const { userWorkspaceId } = streamData.authContext;
 
     if (!isDefined(userWorkspaceId)) {
+      console.log(
+        `[ReactivityDebugging] processStreamEvents — userWorkspaceId is undefined for stream ${streamChannelId} — DROPPING EVENTS`,
+      );
+
       return;
     }
 
     const roleId = permissionsContext.userWorkspaceRoleMap[userWorkspaceId];
 
     if (!isDefined(roleId)) {
+      console.log(
+        `[ReactivityDebugging] processStreamEvents — no roleId found for userWorkspaceId: ${userWorkspaceId} — DROPPING EVENTS`,
+      );
+
       return;
     }
 
@@ -148,6 +178,10 @@ export class WorkspaceEventEmitterService {
       ];
 
     if (!objectPermissions?.canReadObjectRecords) {
+      console.log(
+        `[ReactivityDebugging] processStreamEvents — no read permission for roleId: ${roleId}, object: ${workspaceEventBatch.objectMetadata.nameSingular} — DROPPING EVENTS`,
+      );
+
       return;
     }
 
@@ -213,11 +247,18 @@ export class WorkspaceEventEmitterService {
     }
 
     if (matchedEvents.length > 0) {
+      console.log(
+        `[ReactivityDebugging] Publishing ${matchedEvents.length} matched events to stream ${streamChannelId} for object: ${workspaceEventBatch.objectMetadata.nameSingular}`,
+      );
       await this.subscriptionService.publishToEventStream({
         workspaceId: workspaceEventBatch.workspaceId,
         eventStreamChannelId: streamChannelId,
         payload: matchedEvents,
       });
+    } else {
+      console.log(
+        `[ReactivityDebugging] No matched events for stream ${streamChannelId} — 0 query matches for object: ${workspaceEventBatch.objectMetadata.nameSingular}`,
+      );
     }
   }
 
