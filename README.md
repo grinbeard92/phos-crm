@@ -1,13 +1,16 @@
 <p align="center">
   <a href="https://www.twenty.com">
     <img src="./packages/twenty-website/public/images/core/logo.svg" width="100px" alt="Twenty logo" />
-
   </a>
-  feat:
+  <img width="50" />
+  <img src="https://img.shields.io/badge/✕-feat-black?style=for-the-badge&labelColor=white" alt="feat" />
+  <img width="50" />
   <a href="https://www.phos-ind.com">
-    <img src"https://media.phos-ind.com/assets/PhosEmailLogo.png" width="200px" alt="Phos Industries logo" />
+    <img src="https://media.phos-ind.com/assets/PhosEmailLogo.png" width="280px" alt="Phos Industries logo" />
   </a>
 </p>
+
+
 
 <h2 align="center" > Phos CRM Added Features and Roadmap </h2>
 <i>This is a fork of the excellent Twenty CRM project and couldn't exist without the Twenty team's hard work, this is a collection of modular added features and configuration scripts to get Twenty into a usable state for project management and direct email functionality essentially out of the box</i>
