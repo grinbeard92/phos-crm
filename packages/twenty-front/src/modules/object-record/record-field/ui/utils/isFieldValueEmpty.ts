@@ -10,6 +10,7 @@ import { isFieldAddressValue } from '@/object-record/record-field/ui/types/guard
 import { isFieldArray } from '@/object-record/record-field/ui/types/guards/isFieldArray';
 import { isFieldArrayValue } from '@/object-record/record-field/ui/types/guards/isFieldArrayValue';
 import { isFieldBoolean } from '@/object-record/record-field/ui/types/guards/isFieldBoolean';
+import { isFieldCalculated } from '@/object-record/record-field/ui/types/guards/isFieldCalculated';
 import { isFieldFiles } from '@/object-record/record-field/ui/types/guards/isFieldFiles';
 import { isFieldFilesValue } from '@/object-record/record-field/ui/types/guards/isFieldFilesValue';
 import { isFieldCurrency } from '@/object-record/record-field/ui/types/guards/isFieldCurrency';
@@ -64,7 +65,8 @@ export const isFieldValueEmpty = ({
     isFieldBoolean(fieldDefinition) ||
     isFieldRawJson(fieldDefinition) ||
     isFieldRichText(fieldDefinition) ||
-    isFieldPosition(fieldDefinition)
+    isFieldPosition(fieldDefinition) ||
+    isFieldCalculated(fieldDefinition)
   ) {
     return isValueEmpty(fieldValue);
   }
