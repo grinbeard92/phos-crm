@@ -10,6 +10,7 @@ import { AppTokenEntity } from 'src/engine/core-modules/app-token/app-token.enti
 import { AppTokenService } from 'src/engine/core-modules/app-token/services/app-token.service';
 import { ApplicationModule } from 'src/engine/core-modules/application/application.module';
 import { AuditModule } from 'src/engine/core-modules/audit/audit.module';
+import { AdminGmailOauthController } from 'src/engine/core-modules/auth/controllers/admin-gmail-oauth.controller';
 import { GoogleAPIsAuthController } from 'src/engine/core-modules/auth/controllers/google-apis-auth.controller';
 import { GoogleAuthController } from 'src/engine/core-modules/auth/controllers/google-auth.controller';
 import { MicrosoftAPIsAuthController } from 'src/engine/core-modules/auth/controllers/microsoft-apis-auth.controller';
@@ -125,6 +126,7 @@ import { JwtAuthStrategy } from './strategies/jwt.auth.strategy';
     GoogleAPIsAuthController,
     MicrosoftAPIsAuthController,
     SSOAuthController,
+    AdminGmailOauthController,
   ],
   providers: [
     SignInUpService,

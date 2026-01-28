@@ -1,6 +1,7 @@
 import { type ConnectedAccount } from '@/accounts/types/ConnectedAccount';
 import { CoreObjectNameSingular } from '@/object-metadata/types/CoreObjectNameSingular';
 import { useDestroyOneRecord } from '@/object-record/hooks/useDestroyOneRecord';
+import { useTriggerChannelSync } from '@/settings/accounts/hooks/useTriggerChannelSync';
 import { useTriggerProviderReconnect } from '@/settings/accounts/hooks/useTriggerProviderReconnect';
 import { Dropdown } from '@/ui/layout/dropdown/components/Dropdown';
 import { DropdownContent } from '@/ui/layout/dropdown/components/DropdownContent';
@@ -16,6 +17,7 @@ import {
   IconDotsVertical,
   IconMail,
   IconRefresh,
+  IconReload,
   IconTrash,
 } from 'twenty-ui/display';
 import { LightIconButton } from 'twenty-ui/input';
@@ -43,6 +45,7 @@ export const SettingsAccountsRowDropdownMenu = ({
     objectNameSingular: CoreObjectNameSingular.ConnectedAccount,
   });
   const { triggerProviderReconnect } = useTriggerProviderReconnect();
+  const { triggerChannelSync } = useTriggerChannelSync();
 
   const deleteAccount = async () => {
     await destroyOneRecord(account.id);
@@ -85,6 +88,14 @@ export const SettingsAccountsRowDropdownMenu = ({
                 text={t`Calendar settings`}
                 onClick={() => {
                   navigate(SettingsPath.AccountsCalendars);
+                  closeDropdown(dropdownId);
+                }}
+              />
+              <MenuItem
+                LeftIcon={IconReload}
+                text={t`Sync messages`}
+                onClick={() => {
+                  triggerChannelSync(account.id);
                   closeDropdown(dropdownId);
                 }}
               />

@@ -15,13 +15,26 @@ export type GmailOAuth2Options = {
   refreshToken: string;
 };
 
+/**
+ * Gmail OAuth2 driver using Nodemailer's OAuth2 transport.
+ *
+ * IMPORTANT: The refresh token must be obtained with the scope:
+ * https://mail.google.com/
+ *
+ * This is different from the gmail.send scope used for the Gmail API.
+ * The full mail.google.com scope is required for SMTP access.
+ *
+ * @see https://nodemailer.com/smtp/oauth2/
+ */
 export class GmailOAuth2Driver implements EmailDriverInterface {
   private readonly logger = new Logger(GmailOAuth2Driver.name);
   private transport: Transporter;
 
   constructor(options: GmailOAuth2Options) {
     this.transport = createTransport({
-      service: 'gmail',
+      host: 'smtp.gmail.com',
+      port: 465,
+      secure: true,
       auth: {
         type: 'OAuth2',
         user: options.user,
@@ -33,17 +46,17 @@ export class GmailOAuth2Driver implements EmailDriverInterface {
   }
 
   async send(sendMailOptions: SendMailOptions): Promise<void> {
-    this.transport
-      .sendMail(sendMailOptions)
-      .then(() =>
-        this.logger.log(
-          `Email to '${sendMailOptions.to}' successfully sent via Gmail OAuth2`,
-        ),
-      )
-      .catch((err) =>
-        this.logger.error(
-          `Error sending email to '${sendMailOptions.to}' via Gmail OAuth2: ${err}`,
-        ),
+    try {
+      const info = await this.transport.sendMail(sendMailOptions);
+
+      this.logger.log(
+        `Email to '${sendMailOptions.to}' successfully sent via Gmail OAuth2 (messageId: ${info.messageId})`,
       );
+    } catch (err) {
+      this.logger.error(
+        `Error sending email to '${sendMailOptions.to}' via Gmail OAuth2: ${err}`,
+      );
+      throw err;
+    }
   }
 }
