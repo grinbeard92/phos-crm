@@ -38,6 +38,18 @@ describe('CastToUpperSnakeCase Decorator', () => {
     expect(result.value).toBe('ALREADY_UPPER_SNAKE');
   });
 
+  it('should preserve UPPER_SNAKE_CASE with numeric suffix (e.g., GMAIL_OAUTH2)', () => {
+    const result = plainToClass(TestClass, { value: 'GMAIL_OAUTH2' });
+
+    expect(result.value).toBe('GMAIL_OAUTH2');
+  });
+
+  it('should preserve UPPER_SNAKE_CASE with numbers (e.g., S3_BUCKET)', () => {
+    const result = plainToClass(TestClass, { value: 'S3_BUCKET' });
+
+    expect(result.value).toBe('S3_BUCKET');
+  });
+
   it('should handle mixed case with numbers', () => {
     const result = plainToClass(TestClass, { value: 'test123Value' });
 

@@ -6,7 +6,15 @@ export const CastToUpperSnakeCase = () =>
 
 const toUpperSnakeCase = (value: unknown): string | undefined => {
   if (typeof value === 'string') {
-    return snakeCase(value.trim()).toUpperCase();
+    const trimmed = value.trim();
+
+    // If already in UPPER_SNAKE_CASE format (only uppercase, numbers, and underscores), return as-is
+    // This prevents lodash.snakeCase from splitting numbers (e.g., OAUTH2 -> oauth_2)
+    if (/^[A-Z0-9_]+$/.test(trimmed)) {
+      return trimmed;
+    }
+
+    return snakeCase(trimmed).toUpperCase();
   }
 
   return undefined;
