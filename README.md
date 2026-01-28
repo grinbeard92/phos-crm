@@ -1,7 +1,28 @@
 <p align="center">
   <a href="https://www.twenty.com">
     <img src="./packages/twenty-website/public/images/core/logo.svg" width="100px" alt="Twenty logo" />
+    feat:
+    <img src"https://media.phos-ind.com/assets/PhosEmailLogo.png" width="200px" alt="Phos Industries logo" />
   </a>
+</p>
+
+<h2 align="center" > Phos CRM Added Features and Roadmap </h2>
+<i>This is a fork of the excellent Twenty CRM project and couldn't exist without the Twenty team's hard work, this is a collection of modular added features and configuration scripts to get Twenty into a usable state for project management and direct email functionality essentially out of the box</i>
+
+<strong>A configurable installation script for fresh Twenty forks is in the works!</strong>
+
+All email functions currently only implemented for Gmail.
+
+<p>
+  <ul>
+    <li>Twenty Email Composition (never leave the CRM!)</li>
+    <li>Twenty Calendar Management</li>
+    <li>Project Management (Gannt Charts coming soon!)</li>
+    <li>Expense Tracking</li>
+    <li>Calculated Fields</li>
+    <li>More Robust Stripe Integration</li>
+    <li>OAuth Email Nodemailer Client for Server</li>
+  </ul>
 </p>
 
 <h2 align="center" >The #1 Open-Source CRM </h2>
