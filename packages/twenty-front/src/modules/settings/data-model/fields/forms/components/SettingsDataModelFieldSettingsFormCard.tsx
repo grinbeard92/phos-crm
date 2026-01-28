@@ -28,6 +28,8 @@ import { SettingsDataModelFieldSelectSettingsFormCard } from '@/settings/data-mo
 import { SettingsDataModelFieldPreviewWidget } from '@/settings/data-model/fields/preview/components/SettingsDataModelFieldPreviewWidget';
 
 import { Separator } from '@/settings/components/Separator';
+import { settingsDataModelFieldCalculatedFormSchema } from '@/settings/data-model/fields/forms/calculated/components/SettingsDataModelFieldCalculatedForm';
+import { SettingsDataModelFieldCalculatedSettingsFormCard } from '@/settings/data-model/fields/forms/calculated/components/SettingsDataModelFieldCalculatedSettingsFormCard';
 import { SettingsDataModelFieldOnClickActionForm } from '@/settings/data-model/fields/forms/components/SettingsDataModelFieldOnClickActionForm';
 import { SettingsDataModelFieldRelationFormCard } from '@/settings/data-model/fields/forms/morph-relation/components/SettingsDataModelFieldRelationFormCard';
 import { mergeSettingsSchemas } from '@/settings/data-model/fields/forms/utils/mergeSettingsSchema.util';
@@ -127,6 +129,10 @@ const filesFieldFormSchema = z
   .object({ type: z.literal(FieldMetadataType.FILES) })
   .merge(mergeSettingsSchemas(settingsDataModelFieldMaxValuesSchema));
 
+const calculatedFieldFormSchema = z
+  .object({ type: z.literal(FieldMetadataType.CALCULATED) })
+  .extend(settingsDataModelFieldCalculatedFormSchema.shape);
+
 const otherFieldsFormSchema = z
   .object({
     type: z.enum(
@@ -148,6 +154,7 @@ const otherFieldsFormSchema = z
           FieldMetadataType.LINKS,
           FieldMetadataType.ARRAY,
           FieldMetadataType.FILES,
+          FieldMetadataType.CALCULATED,
         ]),
       ) as [FieldMetadataType, ...FieldMetadataType[]],
     ),
@@ -173,6 +180,7 @@ export const settingsDataModelFieldSettingsFormSchema = z.discriminatedUnion(
     linksFieldFormSchema,
     arrayFieldFormSchema,
     filesFieldFormSchema,
+    calculatedFieldFormSchema,
     otherFieldsFormSchema,
   ],
 );
@@ -205,6 +213,7 @@ const previewableTypes = [
   FieldMetadataType.SELECT,
   FieldMetadataType.TEXT,
   FieldMetadataType.UUID,
+  FieldMetadataType.CALCULATED,
 ];
 
 export const SettingsDataModelFieldSettingsFormCard = ({
@@ -299,6 +308,16 @@ export const SettingsDataModelFieldSettingsFormCard = ({
   if (fieldType === FieldMetadataType.PHONES) {
     return (
       <SettingsDataModelFieldPhonesSettingsFormCard
+        existingFieldMetadataId={existingFieldMetadataId}
+        objectNameSingular={objectNameSingular}
+        disabled={disabled}
+      />
+    );
+  }
+
+  if (fieldType === FieldMetadataType.CALCULATED) {
+    return (
+      <SettingsDataModelFieldCalculatedSettingsFormCard
         existingFieldMetadataId={existingFieldMetadataId}
         objectNameSingular={objectNameSingular}
         disabled={disabled}
