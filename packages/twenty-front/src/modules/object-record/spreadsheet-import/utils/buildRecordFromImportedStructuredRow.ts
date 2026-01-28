@@ -359,6 +359,7 @@ export const buildRecordFromImportedStructuredRow = ({
       case FieldMetadataType.POSITION:
       case FieldMetadataType.RICH_TEXT:
       case FieldMetadataType.TS_VECTOR:
+      case FieldMetadataType.CALCULATED:
         break;
       default:
         assertUnreachable(field.type);

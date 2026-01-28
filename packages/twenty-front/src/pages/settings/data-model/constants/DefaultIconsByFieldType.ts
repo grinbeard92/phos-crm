@@ -3,6 +3,7 @@ import { FieldMetadataType } from '~/generated-metadata/graphql';
 export const DEFAULT_ICONS_BY_FIELD_TYPE: Record<FieldMetadataType, string> = {
   [FieldMetadataType.ADDRESS]: 'IconMap',
   [FieldMetadataType.BOOLEAN]: 'IconToggleLeft',
+  [FieldMetadataType.CALCULATED]: 'IconMathFunction',
   [FieldMetadataType.CURRENCY]: 'IconMoneybag',
   [FieldMetadataType.DATE]: 'IconCalendarEvent',
   [FieldMetadataType.DATE_TIME]: 'IconCalendarClock',

@@ -126,6 +126,10 @@ export const generateEmptyFieldValue = ({
     case FieldMetadataType.FILES: {
       return null;
     }
+    case FieldMetadataType.CALCULATED: {
+      // Calculated fields are computed, not stored - return null
+      return null;
+    }
     default: {
       return assertUnreachable(
         fieldMetadataItem.type,
