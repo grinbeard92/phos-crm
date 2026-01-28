@@ -7,8 +7,8 @@ import { type FieldMetadataSeed } from 'src/engine/workspace-manager/dev-seeder/
  * Note: 'name' field is auto-created by Twenty (used as trip purpose)
  *
  * IRS Standard Mileage Rates (2026): $0.70/mile for business
- * The reimbursementAmount is calculated as: mileage * mileageRate
- * This calculation should be handled via a workflow trigger on record create/update
+ * The reimbursementAmount is a CALCULATED field: mileage * mileageRate
+ * Requires IS_CALCULATED_FIELD_ENABLED feature flag (enabled by phos-seeder)
  */
 export const MILEAGE_CUSTOM_FIELD_SEEDS: FieldMetadataSeed[] = [
   {
@@ -57,11 +57,16 @@ export const MILEAGE_CUSTOM_FIELD_SEEDS: FieldMetadataSeed[] = [
     defaultValue: 0.7, // 2026 IRS standard mileage rate
   },
   {
-    type: FieldMetadataType.CURRENCY,
+    type: FieldMetadataType.CALCULATED,
     label: 'Reimbursement Amount',
     name: 'reimbursementAmount',
-    icon: 'IconCash',
-    description: 'Calculated reimbursement (mileage × rate)',
+    icon: 'IconCalculator',
+    description: 'Auto-calculated: mileage × mileageRate',
+    settings: {
+      formula: '{{mileage}} * {{mileageRate}}',
+      returnType: FieldMetadataType.NUMBER,
+      dependsOnFields: ['mileage', 'mileageRate'],
+    },
   },
   {
     type: FieldMetadataType.BOOLEAN,
@@ -78,11 +83,26 @@ export const MILEAGE_CUSTOM_FIELD_SEEDS: FieldMetadataSeed[] = [
     icon: 'IconBriefcase',
     description: 'Business purpose of the trip',
     options: [
-      { label: 'Client Meeting', value: 'CLIENT_MEETING', position: 0, color: 'blue' },
+      {
+        label: 'Client Meeting',
+        value: 'CLIENT_MEETING',
+        position: 0,
+        color: 'blue',
+      },
       { label: 'Site Visit', value: 'SITE_VISIT', position: 1, color: 'green' },
       { label: 'Delivery', value: 'DELIVERY', position: 2, color: 'orange' },
-      { label: 'Supplies Pickup', value: 'SUPPLIES_PICKUP', position: 3, color: 'purple' },
-      { label: 'Conference', value: 'CONFERENCE', position: 4, color: 'yellow' },
+      {
+        label: 'Supplies Pickup',
+        value: 'SUPPLIES_PICKUP',
+        position: 3,
+        color: 'purple',
+      },
+      {
+        label: 'Conference',
+        value: 'CONFERENCE',
+        position: 4,
+        color: 'yellow',
+      },
       { label: 'Training', value: 'TRAINING', position: 5, color: 'pink' },
       { label: 'Other', value: 'OTHER', position: 6, color: 'gray' },
     ],
