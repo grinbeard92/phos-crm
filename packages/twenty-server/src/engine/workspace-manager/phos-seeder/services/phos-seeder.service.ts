@@ -360,6 +360,7 @@ export class PhosSeederService {
   // Feature flags required by Phos custom features
   private readonly requiredFeatureFlags: FeatureFlagKey[] = [
     FeatureFlagKey.IS_CALCULATED_FIELD_ENABLED,
+    FeatureFlagKey.IS_SSE_DB_EVENTS_ENABLED,
   ];
 
   // Junction configs for many-to-many via junction table

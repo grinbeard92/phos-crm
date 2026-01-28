@@ -91,66 +91,63 @@ This means the early return would only trigger if the SSE stream itself was esta
 
 Let me re-examine: the issue may not be in `processStreamEvents` but earlier in `publishToEventStreams` or in how the event batch is constructed from workflow context.
 
-### Revised Investigation Needed
+## Debug Results (2026-01-28)
 
-Before implementing, verify:
+### Confirmed Root Cause: Missing Feature Flag
 
-1. **Is `streamData.authContext.userWorkspaceId` actually undefined?** Add logging in `processStreamEvents` to confirm. The stream auth context comes from when the user subscribed (not from the workflow), so it should have a valid `userWorkspaceId`.
+Debug logging with `[ReactivityDebugging]` prefix was added to `workspace-event-emitter.service.ts`. Workflow trigger produced:
 
-2. **Is the event batch `workspaceId` correct?** Workflows use `buildSystemAuthContext(workspaceId)` — verify the workspace ID matches the one used by active streams.
-
-3. **Is `publishToEventStreams` even being called?** The `EntityEventsToDbListener` calls `WorkspaceEventEmitterService.publish()`. Verify workflow mutations go through this listener.
-
-4. **Are there active streams?** Check `eventStreamService.getActiveStreamIds(workspaceId)` returns non-empty for the workspace when the issue occurs.
-
-### Debug Steps
-
-Add temporary logging to these locations:
-
-```typescript
-// workspace-event-emitter.service.ts, line 66
-console.log('[SSE-DEBUG] publishToEventStreams called for:', workspaceEventBatch.name);
-
-// workspace-event-emitter.service.ts, line 74-78
-console.log('[SSE-DEBUG] activeStreamIds:', activeStreamIds.length);
-
-// workspace-event-emitter.service.ts, line 133-136
-console.log('[SSE-DEBUG] processStreamEvents - streamData.authContext.userWorkspaceId:', userWorkspaceId);
-
-// workspace-event-emitter.service.ts, line 139-142
-console.log('[SSE-DEBUG] roleId for userWorkspaceId:', roleId);
+```
+[ReactivityDebugging] publishToEventStreams called — event: mileageLog.created, workspaceId: 6fc09637-5c6b-4931-b8ec-9dedb26dcef4, eventCount: 1
+[ReactivityDebugging] activeStreamIds: 0
+[ReactivityDebugging] No active streams — events will be dropped
 ```
 
-Then trigger a workflow that updates a record and check server logs.
+**Root cause**: `IS_SSE_DB_EVENTS_ENABLED` feature flag was **not set** for the Phos workspace.
 
-### Implementation (After Debug Confirms Root Cause)
+Database query confirmed only 3 flags existed:
+- `IS_CALCULATED_FIELD_ENABLED` (true)
+- `IS_EMAIL_COMPOSER_ENABLED` (true)
+- `IS_TIMELINE_ACTIVITY_MIGRATED` (true)
 
-**If the stream's `userWorkspaceId` IS defined** (subscriber is authenticated) but events still don't arrive — the issue is elsewhere (event batch construction, workspace ID mismatch, or the listener not catching workflow events).
+The flag is seeded by Twenty's dev-seeder (`seed-feature-flags.util.ts:80`) but only for the dev seed workspace. The Phos phos-seeder did not include it.
 
-**If the stream's `userWorkspaceId` IS undefined** (unexpected) — investigate why SSE subscriptions are being created without auth context.
+### Fix Applied
 
-**If `publishToEventStreams` is never called** — the issue is in `EntityEventsToDbListener` not receiving workflow mutation events, which would point to the workflow entity manager not emitting `DatabaseBatchEvent`.
+1. **Immediate**: Inserted `IS_SSE_DB_EVENTS_ENABLED = true` into `core.featureFlag` for workspace `6fc09637-5c6b-4931-b8ec-9dedb26dcef4`
+2. **Permanent**: Added `FeatureFlagKey.IS_SSE_DB_EVENTS_ENABLED` to phos-seeder's `requiredFeatureFlags` array
 
-**If `activeStreamIds` is empty** — the SSE feature flag (`IS_SSE_DB_EVENTS_ENABLED`) may be disabled for the workspace, or the frontend SSE client isn't establishing connections.
+### Why This Caused the Issue
 
-## Risk Assessment
+Without the flag:
+1. `SSEProvider.tsx` checks `useIsFeatureEnabled('IS_SSE_DB_EVENTS_ENABLED')`
+2. Returns `false` → SSEProvider renders null context
+3. `SSEEventStreamEffect` never subscribes to GraphQL `OnEventSubscription`
+4. `onEventSubscription` resolver never called → `EventStreamService.createEventStream()` never called
+5. Redis `workspace:${workspaceId}:activeStreams` set remains empty
+6. `publishToEventStreams()` finds 0 active streams → all events dropped
+7. Table views never receive SSE updates → no reactivity
 
-- **Low risk**: Adding debug logging is non-destructive
-- **Medium risk**: Modifying `processStreamEvents` to broadcast system-context events requires careful RLS handling to avoid leaking data to unauthorized subscribers
-- **Consideration**: This is a Twenty platform bug that affects all installations, not just ours. Any fix should be upstreamable.
+### Verification
+
+After enabling the flag, a **full page reload** is required for the frontend to pick up the new flag value and establish the SSE subscription. Then workflow-triggered mutations should produce:
+```
+[ReactivityDebugging] activeStreamIds: 1  (or more, one per browser tab)
+[ReactivityDebugging] Processing stream ... — queries: N
+[ReactivityDebugging] Publishing N matched events to stream ...
+```
+
+### Status: RESOLVED
+
+Not a Twenty platform bug — a missing feature flag for our workspace. The phos-seeder now includes it for future deployments.
 
 ## Files Involved
 
 | File | Role |
 |------|------|
-| `packages/twenty-server/src/engine/workspace-event-emitter/workspace-event-emitter.service.ts` | Event delivery service — contains the blocking check |
-| `packages/twenty-server/src/engine/twenty-orm/utils/build-system-auth-context.util.ts` | System auth context builder — no `userWorkspaceId` |
-| `packages/twenty-server/src/engine/api/graphql/workspace-query-runner/listeners/entity-events-to-db.listener.ts` | Catches all database events, calls `publish()` |
-| `packages/twenty-server/src/engine/subscriptions/event-stream.service.ts` | Manages active SSE stream state in cache |
-| `packages/twenty-server/src/engine/subscriptions/subscription.service.ts` | Redis pub/sub for SSE delivery |
-| `packages/twenty-front/src/modules/sse-db-event/hooks/useSubscribeToSseEventStream.ts` | Frontend SSE subscription |
-| `packages/twenty-front/src/modules/object-record/record-table/virtualization/components/RecordTableVirtualizedDataChangedEffect.tsx` | Table refresh on browser events |
-
-## Next Step
-
-Add debug logging, trigger a workflow, and confirm exactly where events are dropped before writing the fix.
+| `packages/twenty-server/src/engine/workspace-event-emitter/workspace-event-emitter.service.ts` | Event delivery service — debug logging confirmed 0 active streams |
+| `packages/twenty-front/src/modules/sse-db-event/components/SSEProvider.tsx` | Gates SSE subscription on `IS_SSE_DB_EVENTS_ENABLED` flag |
+| `packages/twenty-front/src/modules/sse-db-event/hooks/useSubscribeToSseEventStream.ts` | Establishes GraphQL SSE subscription |
+| `packages/twenty-server/src/engine/workspace-event-emitter/workspace-event-emitter.resolver.ts` | `onEventSubscription` — registers stream in Redis |
+| `packages/twenty-server/src/engine/subscriptions/event-stream.service.ts` | Redis-based active stream registry |
+| `packages/twenty-server/src/engine/workspace-manager/phos-seeder/services/phos-seeder.service.ts` | Added IS_SSE_DB_EVENTS_ENABLED to requiredFeatureFlags |
