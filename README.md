@@ -2,9 +2,21 @@
   <a href="https://www.twenty.com">
     <img src="./packages/twenty-website/public/images/core/logo.svg" width="100px" alt="Twenty logo" />
   </a>
+  <img width="50" />
+  <img src="https://img.shields.io/badge/✕-feat-black?style=for-the-badge&labelColor=white" alt="feat" />
+  <img width="50" />
+  <a href="https://www.phos-ind.com">
+    <img src="https://media.phos-ind.com/assets/PhosEmailLogo.png" width="280px" alt="Phos Industries logo" />
+  </a>
 </p>
 
-<h2 align="center" >The #1 Open-Source CRM </h2>
+<p align="center">
+  <a href="https://www.phos-ind.com">
+    <img src="https://img.shields.io/badge/Phos_Industries-Custom_Fork-0066cc?style=for-the-badge" alt="Phos Industries Custom Fork" />
+  </a>
+</p>
+
+<h2 align="center">The #1 Open-Source CRM</h2>
 
 <p align="center"><a href="https://twenty.com">🌐 Website</a> · <a href="https://docs.twenty.com">📚 Documentation</a> · <a href="https://github.com/orgs/twentyhq/projects/1"><img src="./packages/twenty-website/public/images/readme/planner-icon.svg" width="12" height="12"/> Roadmap </a> · <a href="https://discord.gg/cx5n4Jzs57"><img src="./packages/twenty-website/public/images/readme/discord-icon.svg" width="12" height="12"/> Discord</a> · <a href="https://www.figma.com/file/xt8O9mFeLl46C5InWwoMrN/Twenty"><img src="./packages/twenty-website/public/images/readme/figma-icon.png"  width="12" height="12"/>  Figma</a></p>
 <br />

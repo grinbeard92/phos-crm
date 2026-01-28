@@ -1,0 +1,21 @@
+{
+  "name": "phos-setup",
+  "version": "1.0.0",
+  "description": "CLI setup tool for Phos Industries CRM extensions",
+  "main": "setup.ts",
+  "bin": {
+    "phos-setup": "./setup.ts"
+  },
+  "scripts": {
+    "setup": "ts-node setup.ts",
+    "build": "tsc setup.ts --outDir dist --esModuleInterop --resolveJsonModule"
+  },
+  "keywords": ["twenty-crm", "phos", "crm", "setup"],
+  "author": "Phos Industries",
+  "license": "MIT",
+  "devDependencies": {
+    "@types/node": "^20.0.0",
+    "typescript": "^5.0.0",
+    "ts-node": "^10.9.0"
+  }
+}
