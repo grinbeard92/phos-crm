@@ -3,6 +3,8 @@ import { Injectable, Logger } from '@nestjs/common';
 import { FieldMetadataType, RelationType } from 'twenty-shared/types';
 import { isDefined } from 'twenty-shared/utils';
 
+import { FeatureFlagKey } from 'src/engine/core-modules/feature-flag/enums/feature-flag-key.enum';
+import { FeatureFlagService } from 'src/engine/core-modules/feature-flag/services/feature-flag.service';
 import { DataSourceService } from 'src/engine/metadata-modules/data-source/data-source.service';
 import { FieldMetadataService } from 'src/engine/metadata-modules/field-metadata/services/field-metadata.service';
 import { WorkspaceManyOrAllFlatEntityMapsCacheService } from 'src/engine/metadata-modules/flat-entity/services/workspace-many-or-all-flat-entity-maps-cache.service';
@@ -355,6 +357,11 @@ export class PhosSeederService {
     },
   ];
 
+  // Feature flags required by Phos custom features
+  private readonly requiredFeatureFlags: FeatureFlagKey[] = [
+    FeatureFlagKey.IS_CALCULATED_FIELD_ENABLED,
+  ];
+
   // Junction configs for many-to-many via junction table
   private readonly junctionConfigs: JunctionConfig[] = [
     // Milestone assignees junction config
@@ -375,6 +382,7 @@ export class PhosSeederService {
     private readonly fieldMetadataService: FieldMetadataService,
     private readonly flatEntityMapsCacheService: WorkspaceManyOrAllFlatEntityMapsCacheService,
     private readonly dataSourceService: DataSourceService,
+    private readonly featureFlagService: FeatureFlagService,
   ) {}
 
   /**
@@ -417,6 +425,11 @@ export class PhosSeederService {
     await this.seedStandardObjectExtensions(workspaceId);
 
     this.logger.log('Phase 4 complete: Standard object extensions added');
+
+    // Phase 5: Enable required feature flags
+    await this.seedFeatureFlags(workspaceId);
+
+    this.logger.log('Phase 5 complete: Feature flags enabled');
     this.logger.log(
       `Phos Industries seeder complete for workspace ${workspaceId}`,
     );
@@ -480,6 +493,21 @@ export class PhosSeederService {
         workspaceId,
       });
     }
+  }
+
+  private async seedFeatureFlags(workspaceId: string): Promise<void> {
+    if (this.requiredFeatureFlags.length === 0) {
+      return;
+    }
+
+    this.logger.log(
+      `Enabling ${this.requiredFeatureFlags.length} feature flags`,
+    );
+
+    await this.featureFlagService.enableFeatureFlags(
+      this.requiredFeatureFlags,
+      workspaceId,
+    );
   }
 
   private async seedObjectIfNotExists({

@@ -1,5 +1,6 @@
 import { Module } from '@nestjs/common';
 
+import { FeatureFlagModule } from 'src/engine/core-modules/feature-flag/feature-flag.module';
 import { DataSourceModule } from 'src/engine/metadata-modules/data-source/data-source.module';
 import { FieldMetadataModule } from 'src/engine/metadata-modules/field-metadata/field-metadata.module';
 import { WorkspaceManyOrAllFlatEntityMapsCacheModule } from 'src/engine/metadata-modules/flat-entity/services/workspace-many-or-all-flat-entity-maps-cache.module';
@@ -13,6 +14,7 @@ import { PhosSeederService } from 'src/engine/workspace-manager/phos-seeder/serv
     FieldMetadataModule,
     WorkspaceManyOrAllFlatEntityMapsCacheModule,
     DataSourceModule,
+    FeatureFlagModule,
   ],
   providers: [PhosSeederService, PhosSeedCommand],
   exports: [PhosSeederService],
