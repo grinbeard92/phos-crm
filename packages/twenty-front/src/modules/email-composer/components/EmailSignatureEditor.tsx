@@ -11,6 +11,7 @@ import { BlockEditor } from '@/ui/input/editor/components/BlockEditor';
 import { H2Title } from 'twenty-ui/display';
 import { Button, Toggle } from 'twenty-ui/input';
 import { Section } from 'twenty-ui/layout';
+import { isDefined } from 'twenty-shared/utils';
 
 const StyledEditorContainer = styled.div`
   border: 1px solid ${({ theme }) => theme.border.color.medium};
@@ -94,41 +95,74 @@ export const EmailSignatureEditor = () => {
   } = useEmailSignature();
 
   const [hasChanges, setHasChanges] = useState(false);
-
-  // Parse existing signature to BlockNote format
-  const getInitialContent = useCallback(() => {
-    if (!signature) {
-      return undefined;
-    }
-
-    // Try to parse as JSON (BlockNote format)
-    try {
-      return JSON.parse(signature);
-    } catch {
-      // Plain text or HTML - create a simple paragraph
-      return [
-        {
-          type: 'paragraph',
-          content: signature.replace(/<[^>]*>/g, ''), // Strip HTML tags
-        },
-      ];
-    }
-  }, [signature]);
+  const [isEditorReady, setIsEditorReady] = useState(false);
+  // Track the signature value we've loaded to avoid re-loading on every render
+  const [loadedSignature, setLoadedSignature] = useState<string | null>(null);
 
   const editor = useCreateBlockNote({
-    initialContent: getInitialContent(),
     domAttributes: { editor: { class: 'editor' } },
     schema: BLOCK_SCHEMA,
   });
 
-  // Track changes
+  // Load signature into editor when it becomes available from localStorage
+  // This handles the async nature of Recoil's localStorageEffect
   useEffect(() => {
+    const loadSignatureIntoEditor = async () => {
+      // Only load once per unique signature value
+      if (loadedSignature === signature) {
+        setIsEditorReady(true);
+        return;
+      }
+
+      // If no signature, just mark as ready
+      if (!isDefined(signature) || signature === '') {
+        setLoadedSignature(signature);
+        setIsEditorReady(true);
+        return;
+      }
+
+      setLoadedSignature(signature);
+
+      // Check if signature is HTML (starts with < or contains HTML tags)
+      const isHtml = signature.startsWith('<') || /<[^>]+>/.test(signature);
+
+      if (isHtml) {
+        // Parse HTML back to BlockNote blocks
+        const blocks = await editor.tryParseHTMLToBlocks(signature);
+        editor.replaceBlocks(editor.document, blocks);
+      } else {
+        // Try to parse as JSON (BlockNote format)
+        try {
+          const parsed = JSON.parse(signature);
+          if (Array.isArray(parsed)) {
+            editor.replaceBlocks(editor.document, parsed);
+          }
+        } catch {
+          // Plain text - create a paragraph
+          editor.replaceBlocks(editor.document, [
+            { type: 'paragraph', content: signature },
+          ]);
+        }
+      }
+
+      setIsEditorReady(true);
+    };
+
+    loadSignatureIntoEditor();
+  }, [signature, editor, loadedSignature]);
+
+  // Track changes - only after editor is ready to avoid false positives
+  useEffect(() => {
+    if (!isEditorReady) {
+      return;
+    }
+
     const unsubscribe = editor.onEditorContentChange(() => {
       setHasChanges(true);
     });
 
     return unsubscribe;
-  }, [editor]);
+  }, [editor, isEditorReady]);
 
   const handleSave = useCallback(async () => {
     // Convert to HTML for storage
@@ -137,17 +171,33 @@ export const EmailSignatureEditor = () => {
     setHasChanges(false);
   }, [editor, updateSignature]);
 
-  const handleReset = useCallback(() => {
-    const content = getInitialContent();
-    if (content !== undefined) {
-      editor.replaceBlocks(editor.document, content);
+  const handleReset = useCallback(async () => {
+    if (isDefined(signature) && signature !== '') {
+      // Check if signature is HTML
+      const isHtml = signature.startsWith('<') || /<[^>]+>/.test(signature);
+
+      if (isHtml) {
+        const blocks = await editor.tryParseHTMLToBlocks(signature);
+        editor.replaceBlocks(editor.document, blocks);
+      } else {
+        try {
+          const parsed = JSON.parse(signature);
+          if (Array.isArray(parsed)) {
+            editor.replaceBlocks(editor.document, parsed);
+          }
+        } catch {
+          editor.replaceBlocks(editor.document, [
+            { type: 'paragraph', content: signature },
+          ]);
+        }
+      }
     } else {
       editor.replaceBlocks(editor.document, [
         { type: 'paragraph', content: '' },
       ]);
     }
     setHasChanges(false);
-  }, [editor, getInitialContent]);
+  }, [editor, signature]);
 
   // Sanitize signature HTML for safe preview rendering
   // The signature is user-created content stored in local storage
