@@ -1,7 +1,10 @@
 <p align="center">
   <a href="https://www.twenty.com">
     <img src="./packages/twenty-website/public/images/core/logo.svg" width="100px" alt="Twenty logo" />
-    feat:
+
+  </a>
+  <a href="https://www.phos-ind.com">
+      feat:
     <img src"https://media.phos-ind.com/assets/PhosEmailLogo.png" width="200px" alt="Phos Industries logo" />
   </a>
 </p>
