@@ -517,6 +517,25 @@ export const buildMessageChannelStandardFlatFieldMetadatas = ({
     twentyStandardApplicationId,
     now,
   }),
+  syncHistoryDepthDays: createStandardFieldFlatMetadata({
+    objectName,
+    workspaceId,
+    context: {
+      fieldName: 'syncHistoryDepthDays',
+      type: FieldMetadataType.NUMBER,
+      label: 'Sync History Depth (Days)',
+      description:
+        'Number of days of email history to sync on initial import. Set to 0 to sync all history.',
+      icon: 'IconCalendarTime',
+      isNullable: false,
+      isUIReadOnly: false,
+      defaultValue: 30,
+    },
+    standardObjectMetadataRelatedEntityIds,
+    dependencyFlatEntityMaps,
+    twentyStandardApplicationId,
+    now,
+  }),
   connectedAccount: createStandardRelationFieldFlatMetadata({
     objectName,
     workspaceId,

@@ -3,7 +3,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 
 import { render, toPlainText } from '@react-email/render';
 import DOMPurify from 'dompurify';
-import { reactMarkupFromJSON } from 'twenty-emails';
+import { ComposedEmail, reactMarkupFromJSON } from 'twenty-emails';
 import {
   extractFolderPathFilenameAndTypeOrThrow,
   isDefined,
@@ -30,6 +30,7 @@ import { buildSystemAuthContext } from 'src/engine/twenty-orm/utils/build-system
 import { type ConnectedAccountWorkspaceEntity } from 'src/modules/connected-account/standard-objects/connected-account.workspace-entity';
 import { MessagingAccountAuthenticationService } from 'src/modules/messaging/message-import-manager/services/messaging-account-authentication.service';
 import { MessagingSendMessageService } from 'src/modules/messaging/message-import-manager/services/messaging-send-message.service';
+import { MessagingSentMessagePersistenceService } from 'src/modules/messaging/message-import-manager/services/messaging-sent-message-persistence.service';
 import { type MessageAttachment } from 'src/modules/messaging/message-import-manager/types/message';
 import { parseEmailBody } from 'src/utils/parse-email-body';
 import { streamToBuffer } from 'src/utils/stream-to-buffer';
@@ -45,6 +46,7 @@ export class SendEmailTool implements Tool {
   constructor(
     private readonly globalWorkspaceOrmManager: GlobalWorkspaceOrmManager,
     private readonly sendMessageService: MessagingSendMessageService,
+    private readonly sentMessagePersistenceService: MessagingSentMessagePersistenceService,
     private readonly messagingAccountAuthenticationService: MessagingAccountAuthenticationService,
     @InjectRepository(FileEntity)
     private readonly fileRepository: Repository<FileEntity>,
@@ -181,6 +183,35 @@ export class SendEmailTool implements Tool {
     return attachments;
   }
 
+  /**
+   * Detects if the body content is HTML or JSON.
+   * HTML bodies come from the new frontend (BlockNote blocksToHTMLLossy).
+   * JSON bodies are legacy TipTap format.
+   */
+  private isHtmlContent(body: string): boolean {
+    const trimmed = body.trim();
+
+    // If it starts with HTML tags, it's HTML
+    if (trimmed.startsWith('<') && !trimmed.startsWith('{')) {
+      return true;
+    }
+
+    // If it starts with [ or {, try to parse as JSON
+    if (trimmed.startsWith('[') || trimmed.startsWith('{')) {
+      try {
+        JSON.parse(trimmed);
+
+        return false; // Valid JSON, not HTML
+      } catch {
+        // Not valid JSON, treat as HTML/text
+        return true;
+      }
+    }
+
+    // Plain text or HTML without leading tag - treat as HTML for proper wrapping
+    return true;
+  }
+
   async execute(
     parameters: SendEmailInput,
     context: ToolExecutionContext,
@@ -234,31 +265,96 @@ export class SendEmailTool implements Tool {
 
       const attachments = await this.getAttachments(files || [], workspaceId);
 
-      const parsedBody = parseEmailBody(body);
-      const reactMarkup = reactMarkupFromJSON(parsedBody);
-      const htmlBody = await render(reactMarkup);
-      const textBody = toPlainText(htmlBody);
-
       const { JSDOM } = await import('jsdom');
       const window = new JSDOM('').window;
       const purify = DOMPurify(window);
+
+      let htmlBody: string;
+      let textBody: string;
+
+      // Detect if body is HTML (from frontend) or JSON (legacy TipTap format)
+      const isHtmlBody = this.isHtmlContent(body);
+
+      if (isHtmlBody) {
+        // Body is already HTML from frontend (BlockNote blocksToHTMLLossy)
+        // Wrap it in a proper email template with styling
+        // Use 'professional' style by default for normal business emails
+        const sanitizedContent = purify.sanitize(body);
+        const reactMarkup = ComposedEmail({
+          htmlContent: sanitizedContent,
+          previewText: subject?.substring(0, 100),
+          style: 'professional',
+        });
+
+        htmlBody = await render(reactMarkup);
+        textBody = toPlainText(htmlBody);
+      } else {
+        // Legacy: Body is JSON (TipTap/BlockNote format)
+        const parsedBody = parseEmailBody(body);
+        const reactMarkup = reactMarkupFromJSON(parsedBody);
+
+        htmlBody = await render(reactMarkup);
+        textBody = toPlainText(htmlBody);
+      }
+
       const safeHtmlBody = purify.sanitize(htmlBody || '');
       const safeSubject = purify.sanitize(subject || '');
 
-      await this.sendMessageService.sendMessage(
+      const sendResult = await this.sendMessageService.sendMessage(
         {
           to: email,
           subject: safeSubject,
           body: textBody,
           html: safeHtmlBody,
           attachments,
+          // Threading support for email replies
+          inReplyTo: parameters.inReplyTo,
+          references: parameters.references,
+          // Additional recipients
+          cc: parameters.cc,
+          bcc: parameters.bcc,
         },
         connectedAccountWithFreshTokens,
       );
 
       this.logger.log(
-        `Email sent successfully to ${email}${attachments.length > 0 ? ` with ${attachments.length} attachments` : ''}`,
+        `Email sent successfully to ${email}${attachments.length > 0 ? ` with ${attachments.length} attachments` : ''} (messageId: ${sendResult.messageId})`,
       );
+
+      // Persist the sent message to Twenty's database for immediate availability
+      let persistedMessageThreadId = parameters.messageThreadId;
+
+      try {
+        const persistResult =
+          await this.sentMessagePersistenceService.persistSentMessage(
+            {
+              headerMessageId: sendResult.messageId,
+              subject: safeSubject,
+              text: textBody,
+              to: email,
+              cc: parameters.cc,
+              bcc: parameters.bcc,
+              externalMessageId: sendResult.externalMessageId,
+              threadExternalId: sendResult.threadExternalId,
+              inReplyTo: parameters.inReplyTo,
+              messageThreadId: parameters.messageThreadId,
+              sentAt: new Date(),
+            },
+            connectedAccount,
+            workspaceId,
+          );
+
+        persistedMessageThreadId = persistResult.messageThreadId;
+
+        this.logger.log(
+          `Persisted sent message ${persistResult.messageId} in thread ${persistResult.messageThreadId} (isNewThread: ${persistResult.isNewThread})`,
+        );
+      } catch (persistError) {
+        // Log but don't fail the operation - email was sent successfully
+        this.logger.error(
+          `Failed to persist sent message to database: ${persistError}`,
+        );
+      }
 
       return {
         success: true,
@@ -266,6 +362,10 @@ export class SendEmailTool implements Tool {
         result: {
           recipient: email,
           subject: safeSubject,
+          messageId: sendResult.messageId,
+          externalMessageId: sendResult.externalMessageId,
+          threadExternalId: sendResult.threadExternalId,
+          messageThreadId: persistedMessageThreadId,
           connectedAccountId,
           attachmentCount: attachments.length,
         },

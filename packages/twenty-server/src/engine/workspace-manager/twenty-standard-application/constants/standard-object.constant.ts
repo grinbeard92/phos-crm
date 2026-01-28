@@ -829,6 +829,10 @@ export const STANDARD_OBJECTS = {
         universalIdentifier:
           MESSAGE_CHANNEL_STANDARD_FIELD_IDS.throttleFailureCount,
       },
+      syncHistoryDepthDays: {
+        universalIdentifier:
+          MESSAGE_CHANNEL_STANDARD_FIELD_IDS.syncHistoryDepthDays,
+      },
     },
     indexes: {
       connectedAccountIdIndex: {

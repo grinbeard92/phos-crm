@@ -29,6 +29,7 @@ import {
   IconMessage,
   IconPlug,
   IconRocket,
+  IconSend,
   IconServer,
   IconSettings,
   IconSparkles,
@@ -73,6 +74,9 @@ const useSettingsNavigationItems = (): SettingsNavigationSection[] => {
   const isApplicationEnabled = useIsFeatureEnabled(
     FeatureFlagKey.IS_APPLICATION_ENABLED,
   );
+  const isEmailComposerEnabled = useIsFeatureEnabled(
+    FeatureFlagKey.IS_EMAIL_COMPOSER_ENABLED,
+  );
   const isSupportChatConfigured =
     supportChat?.supportDriver === 'FRONT' &&
     isNonEmptyString(supportChat.supportFrontChatId);
@@ -108,6 +112,13 @@ const useSettingsNavigationItems = (): SettingsNavigationSection[] => {
               path: SettingsPath.AccountsCalendars,
               Icon: IconCalendarEvent,
               indentationLevel: 2,
+            },
+            {
+              label: t`Email Composer`,
+              path: SettingsPath.AccountsEmailComposer,
+              Icon: IconSend,
+              indentationLevel: 2,
+              isHidden: !isEmailComposerEnabled,
             },
           ],
         },

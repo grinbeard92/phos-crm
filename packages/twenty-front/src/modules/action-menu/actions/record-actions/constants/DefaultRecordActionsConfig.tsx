@@ -21,6 +21,7 @@ import { NavigateToNextRecordSingleRecordAction } from '@/action-menu/actions/re
 import { NavigateToPreviousRecordSingleRecordAction } from '@/action-menu/actions/record-actions/single-record/components/NavigateToPreviousRecordSingleRecordAction';
 import { RemoveFromFavoritesSingleRecordAction } from '@/action-menu/actions/record-actions/single-record/components/RemoveFromFavoritesSingleRecordAction';
 import { RestoreSingleRecordAction } from '@/action-menu/actions/record-actions/single-record/components/RestoreSingleRecordAction';
+import { SendEmailSingleRecordAction } from '@/action-menu/actions/record-actions/single-record/components/SendEmailSingleRecordAction';
 import { SingleRecordActionKeys } from '@/action-menu/actions/record-actions/single-record/types/SingleRecordActionsKey';
 import { type ActionConfig } from '@/action-menu/actions/types/ActionConfig';
 import { ActionScope } from '@/action-menu/actions/types/ActionScope';
@@ -47,6 +48,7 @@ import {
   IconHeartOff,
   IconLayout,
   IconLayoutDashboard,
+  IconMail,
   IconPlus,
   IconRefresh,
   IconRotate2,
@@ -312,6 +314,29 @@ export const DEFAULT_RECORD_ACTIONS_CONFIG: Record<
       ActionViewType.SHOW_PAGE,
     ],
     component: <RemoveFromFavoritesSingleRecordAction />,
+  },
+  [SingleRecordActionKeys.SEND_EMAIL]: {
+    type: ActionType.Standard,
+    scope: ActionScope.RecordSelection,
+    key: SingleRecordActionKeys.SEND_EMAIL,
+    label: msg`Send Email`,
+    shortLabel: msg`Email`,
+    position: 10.5,
+    isPinned: true,
+    Icon: IconMail,
+    shouldBeRegistered: ({ objectMetadataItem, selectedRecord }) =>
+      isDefined(selectedRecord) &&
+      !selectedRecord?.isRemote &&
+      !isDefined(selectedRecord?.deletedAt) &&
+      (objectMetadataItem?.nameSingular === CoreObjectNameSingular.Person ||
+        objectMetadataItem?.nameSingular === CoreObjectNameSingular.Company ||
+        objectMetadataItem?.nameSingular ===
+          CoreObjectNameSingular.Opportunity),
+    availableOn: [
+      ActionViewType.INDEX_PAGE_SINGLE_RECORD_SELECTION,
+      ActionViewType.SHOW_PAGE,
+    ],
+    component: <SendEmailSingleRecordAction />,
   },
   [SingleRecordActionKeys.EXPORT_NOTE_TO_PDF]: {
     type: ActionType.Standard,

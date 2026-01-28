@@ -37,6 +37,14 @@ const SettingsAccountsEmails = lazy(() =>
   })),
 );
 
+const SettingsAccountsEmailComposer = lazy(() =>
+  import('~/pages/settings/accounts/SettingsAccountsEmailComposer').then(
+    (module) => ({
+      default: module.SettingsAccountsEmailComposer,
+    }),
+  ),
+);
+
 const SettingsAccountsConfiguration = lazy(() =>
   import('~/pages/settings/accounts/SettingsAccountsConfiguration').then(
     (module) => ({
@@ -403,6 +411,10 @@ export const SettingsRoutes = ({ isAdminPageEnabled }: SettingsRoutesProps) => (
       <Route
         path={SettingsPath.AccountsEmails}
         element={<SettingsAccountsEmails />}
+      />
+      <Route
+        path={SettingsPath.AccountsEmailComposer}
+        element={<SettingsAccountsEmailComposer />}
       />
       <Route
         path={SettingsPath.NewImapSmtpCaldavConnection}

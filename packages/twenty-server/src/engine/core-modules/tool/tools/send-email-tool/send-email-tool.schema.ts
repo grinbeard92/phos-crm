@@ -18,4 +18,21 @@ export const SendEmailInputZodSchema = z.object({
     .describe('Array of file objects to attach to the email')
     .optional()
     .default([]),
+  // Threading support for email replies
+  inReplyTo: z
+    .string()
+    .describe('RFC 5322 Message-ID of the email being replied to')
+    .optional(),
+  references: z
+    .array(z.string())
+    .describe('Chain of Message-IDs for threading')
+    .optional(),
+  messageThreadId: z
+    .string()
+    .refine((val) => isValidUuid(val))
+    .describe("Twenty's internal thread ID for persistence")
+    .optional(),
+  // Additional recipients
+  cc: z.string().describe('CC recipients (comma-separated)').optional(),
+  bcc: z.string().describe('BCC recipients (comma-separated)').optional(),
 });

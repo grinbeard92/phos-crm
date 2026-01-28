@@ -2,6 +2,7 @@ import { Injectable } from '@nestjs/common';
 
 import { type EmailDriverInterface } from 'src/engine/core-modules/email/drivers/interfaces/email-driver.interface';
 
+import { GmailOAuth2Driver } from 'src/engine/core-modules/email/drivers/gmail-oauth2.driver';
 import { LoggerDriver } from 'src/engine/core-modules/email/drivers/logger.driver';
 import { SmtpDriver } from 'src/engine/core-modules/email/drivers/smtp.driver';
 import { EmailDriver } from 'src/engine/core-modules/email/enums/email-driver.enum';
@@ -28,6 +29,14 @@ export class EmailDriverFactory extends DriverFactoryBase<EmailDriverInterface> 
       );
 
       return `smtp|${emailConfigHash}`;
+    }
+
+    if (driver === EmailDriver.GMAIL_OAUTH2) {
+      const emailConfigHash = this.getConfigGroupHash(
+        ConfigVariablesGroup.EMAIL_SETTINGS,
+      );
+
+      return `gmail-oauth2|${emailConfigHash}`;
     }
 
     throw new Error(`Unsupported email driver: ${driver}`);
@@ -70,6 +79,32 @@ export class EmailDriverFactory extends DriverFactoryBase<EmailDriverInterface> 
         }
 
         return new SmtpDriver(options);
+      }
+
+      case EmailDriver.GMAIL_OAUTH2: {
+        const user = this.twentyConfigService.get('EMAIL_GMAIL_OAUTH2_USER');
+        const clientId = this.twentyConfigService.get('AUTH_GOOGLE_CLIENT_ID');
+        const clientSecret = this.twentyConfigService.get(
+          'AUTH_GOOGLE_CLIENT_SECRET',
+        );
+        const refreshToken = this.twentyConfigService.get(
+          'EMAIL_GMAIL_OAUTH2_REFRESH_TOKEN',
+        );
+
+        if (!user || !clientId || !clientSecret || !refreshToken) {
+          throw new Error(
+            'Gmail OAuth2 driver requires EMAIL_GMAIL_OAUTH2_USER, ' +
+              'AUTH_GOOGLE_CLIENT_ID, AUTH_GOOGLE_CLIENT_SECRET, and ' +
+              'EMAIL_GMAIL_OAUTH2_REFRESH_TOKEN to be defined',
+          );
+        }
+
+        return new GmailOAuth2Driver({
+          user,
+          clientId,
+          clientSecret,
+          refreshToken,
+        });
       }
 
       default:

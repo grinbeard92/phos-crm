@@ -233,6 +233,8 @@ export const MESSAGE_CHANNEL_STANDARD_FIELD_IDS = {
   syncStage: '20202020-7979-4b08-89fe-99cb5e698767',
   syncStageStartedAt: '20202020-8c61-4a42-ae63-73c1c3c52e06',
   throttleFailureCount: '20202020-0291-42be-9ad0-d578a51684ab',
+  /** Number of days of email history to sync on initial import (default: 30, 0 = all) */
+  syncHistoryDepthDays: '20202020-8f7e-4a3b-9c6d-2e5f1a4b8c9d',
 } as const;
 
 export const MESSAGE_FOLDER_STANDARD_FIELD_IDS = {

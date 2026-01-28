@@ -6,7 +6,7 @@ import { type MessageChannelWorkspaceEntity } from 'src/modules/messaging/common
 export type GetMessageListsArgs = {
   messageChannel: Pick<
     MessageChannelWorkspaceEntity,
-    'syncCursor' | 'id' | 'messageFolderImportPolicy'
+    'syncCursor' | 'id' | 'messageFolderImportPolicy' | 'syncHistoryDepthDays'
   >;
   connectedAccount: Pick<
     ConnectedAccountWorkspaceEntity,

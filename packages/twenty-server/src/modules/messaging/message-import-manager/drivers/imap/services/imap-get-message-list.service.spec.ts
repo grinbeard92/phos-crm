@@ -114,6 +114,7 @@ describe('ImapGetMessageListService', () => {
           syncCursor: '',
           id: 'channel-1',
           messageFolderImportPolicy: MessageFolderImportPolicy.SELECTED_FOLDERS,
+          syncHistoryDepthDays: 30,
         },
         messageFolders: [syncedFolder, nonSyncedFolder],
       });
@@ -141,6 +142,7 @@ describe('ImapGetMessageListService', () => {
           syncCursor: '',
           id: 'channel-1',
           messageFolderImportPolicy: MessageFolderImportPolicy.ALL_FOLDERS,
+          syncHistoryDepthDays: 30,
         },
         messageFolders: [syncedFolder, nonSyncedFolder],
       });
@@ -171,6 +173,7 @@ describe('ImapGetMessageListService', () => {
           syncCursor: '',
           id: 'channel-1',
           messageFolderImportPolicy: MessageFolderImportPolicy.SELECTED_FOLDERS,
+          syncHistoryDepthDays: 30,
         },
         messageFolders: [nonSyncedFolder1, nonSyncedFolder2],
       });
@@ -197,6 +200,7 @@ describe('ImapGetMessageListService', () => {
           syncCursor: '',
           id: 'channel-1',
           messageFolderImportPolicy: MessageFolderImportPolicy.ALL_FOLDERS,
+          syncHistoryDepthDays: 30,
         },
         messageFolders: [nonSyncedFolder1, nonSyncedFolder2],
       });
@@ -217,6 +221,7 @@ describe('ImapGetMessageListService', () => {
           syncCursor: '',
           id: 'channel-1',
           messageFolderImportPolicy: MessageFolderImportPolicy.ALL_FOLDERS,
+          syncHistoryDepthDays: 30,
         },
         messageFolders: [folder],
       });

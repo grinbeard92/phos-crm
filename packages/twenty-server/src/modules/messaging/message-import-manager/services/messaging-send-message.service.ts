@@ -26,6 +26,23 @@ interface SendMessageInput {
     content: Buffer;
     contentType: string;
   }[];
+  /** For threading: Message-ID header of the email being replied to */
+  inReplyTo?: string;
+  /** For threading: Chain of Message-IDs (most recent first) */
+  references?: string[];
+  /** CC recipients (comma-separated) */
+  cc?: string;
+  /** BCC recipients (comma-separated) */
+  bcc?: string;
+}
+
+interface SendMessageResult {
+  /** The Message-ID header of the sent email */
+  messageId: string;
+  /** Provider's message ID (for Gmail: messages.send response id) */
+  externalMessageId?: string;
+  /** Provider's thread ID if available */
+  threadExternalId?: string;
 }
 
 @Injectable()
@@ -39,7 +56,7 @@ export class MessagingSendMessageService {
   public async sendMessage(
     sendMessageInput: SendMessageInput,
     connectedAccount: ConnectedAccountWorkspaceEntity,
-  ): Promise<void> {
+  ): Promise<SendMessageResult> {
     switch (connectedAccount.provider) {
       case ConnectedAccountProvider.GOOGLE: {
         const oAuth2Client =
@@ -70,14 +87,36 @@ export class MessagingSendMessageService {
 
         const fromName = peopleData?.names?.[0]?.displayName;
 
+        // Generate a unique Message-ID for threading
+        const messageId = this.generateMessageId(fromEmail ?? 'unknown');
+
+        // Build threading headers
+        const headers: Record<string, string> = {
+          'Message-ID': messageId,
+        };
+
+        if (sendMessageInput.inReplyTo) {
+          headers['In-Reply-To'] = sendMessageInput.inReplyTo;
+        }
+
+        if (
+          sendMessageInput.references &&
+          sendMessageInput.references.length > 0
+        ) {
+          headers['References'] = sendMessageInput.references.join(' ');
+        }
+
         const mail = new MailComposer({
           from: isDefined(fromName)
             ? `"${mimeEncode(fromName)}" <${fromEmail}>`
             : `${fromEmail}`,
           to: sendMessageInput.to,
+          cc: sendMessageInput.cc,
+          bcc: sendMessageInput.bcc,
           subject: sendMessageInput.subject,
           text: sendMessageInput.body,
           html: sendMessageInput.html,
+          headers,
           ...(sendMessageInput.attachments &&
           sendMessageInput.attachments.length > 0
             ? {
@@ -93,19 +132,64 @@ export class MessagingSendMessageService {
         const messageBuffer = await mail.compile().build();
         const encodedMessage = Buffer.from(messageBuffer).toString('base64');
 
-        await gmailClient.users.messages.send({
+        const response = await gmailClient.users.messages.send({
           userId: 'me',
           requestBody: {
             raw: encodedMessage,
           },
         });
-        break;
+
+        return {
+          messageId,
+          externalMessageId: response.data.id ?? undefined,
+          threadExternalId: response.data.threadId ?? undefined,
+        };
       }
       case ConnectedAccountProvider.MICROSOFT: {
         const microsoftClient =
           await this.oAuth2ClientManagerService.getMicrosoftOAuth2Client(
             connectedAccount,
           );
+
+        // Generate a unique Message-ID for threading
+        const messageId = this.generateMessageId(
+          connectedAccount.handle ?? 'unknown',
+        );
+
+        // Build CC/BCC recipients
+        const ccRecipients = sendMessageInput.cc
+          ? sendMessageInput.cc
+              .split(',')
+              .map((email) => ({ emailAddress: { address: email.trim() } }))
+          : [];
+        const bccRecipients = sendMessageInput.bcc
+          ? sendMessageInput.bcc
+              .split(',')
+              .map((email) => ({ emailAddress: { address: email.trim() } }))
+          : [];
+
+        // Build internet message headers for threading
+        const internetMessageHeaders: Array<{
+          name: string;
+          value: string;
+        }> = [{ name: 'Message-ID', value: messageId }];
+
+        if (sendMessageInput.inReplyTo) {
+          internetMessageHeaders.push({
+            name: 'In-Reply-To',
+            value: sendMessageInput.inReplyTo,
+          });
+        }
+
+        if (
+          sendMessageInput.references &&
+          sendMessageInput.references.length > 0
+        ) {
+          internetMessageHeaders.push({
+            name: 'References',
+            value: sendMessageInput.references.join(' '),
+          });
+        }
 
         const message = {
           subject: sendMessageInput.subject,
@@ -114,6 +198,9 @@ export class MessagingSendMessageService {
             content: sendMessageInput.html,
           },
           toRecipients: [{ emailAddress: { address: sendMessageInput.to } }],
+          ...(ccRecipients.length > 0 ? { ccRecipients } : {}),
+          ...(bccRecipients.length > 0 ? { bccRecipients } : {}),
+          internetMessageHeaders,
           ...(sendMessageInput.attachments &&
           sendMessageInput.attachments.length > 0
             ? {
@@ -135,7 +222,11 @@ export class MessagingSendMessageService {
 
         await microsoftClient.api(`/me/messages/${response.id}/send`).post({});
 
-        break;
+        return {
+          messageId,
+          externalMessageId: response.id,
+          threadExternalId: response.conversationId,
+        };
       }
       case ConnectedAccountProvider.IMAP_SMTP_CALDAV: {
         const { handle, connectionParameters, messageChannels } =
@@ -151,12 +242,34 @@ export class MessagingSendMessageService {
           );
         }
 
+        // Generate a unique Message-ID for threading
+        const messageId = this.generateMessageId(handle);
+
+        // Build threading headers
+        const headers: Record<string, string> = {
+          'Message-ID': messageId,
+        };
+
+        if (sendMessageInput.inReplyTo) {
+          headers['In-Reply-To'] = sendMessageInput.inReplyTo;
+        }
+
+        if (
+          sendMessageInput.references &&
+          sendMessageInput.references.length > 0
+        ) {
+          headers['References'] = sendMessageInput.references.join(' ');
+        }
+
         const mail = new MailComposer({
           from: handle,
           to: sendMessageInput.to,
+          cc: sendMessageInput.cc,
+          bcc: sendMessageInput.bcc,
           subject: sendMessageInput.subject,
           text: sendMessageInput.body,
           html: sendMessageInput.html,
+          headers,
           ...(sendMessageInput.attachments &&
           sendMessageInput.attachments.length > 0
             ? {
@@ -196,7 +309,12 @@ export class MessagingSendMessageService {
           await this.imapClientProvider.closeClient(imapClient);
         }
 
-        break;
+        return {
+          messageId,
+          // IMAP/SMTP doesn't provide external IDs like Gmail does
+          externalMessageId: undefined,
+          threadExternalId: undefined,
+        };
       }
       default:
         assertUnreachable(
@@ -204,5 +322,17 @@ export class MessagingSendMessageService {
           `Provider ${connectedAccount.provider} not supported for sending messages`,
         );
     }
+  }
+
+  /**
+   * Generates an RFC 5322 compliant Message-ID header.
+   * Format: <timestamp.random@domain>
+   */
+  private generateMessageId(email: string): string {
+    const domain = email.includes('@') ? email.split('@')[1] : 'localhost';
+    const timestamp = Date.now();
+    const random = Math.random().toString(36).substring(2, 10);
+
+    return `<${timestamp}.${random}@${domain}>`;
   }
 }
