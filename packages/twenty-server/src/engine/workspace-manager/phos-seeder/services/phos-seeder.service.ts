@@ -4,6 +4,8 @@ import { FieldMetadataType, RelationType } from 'twenty-shared/types';
 import { isDefined } from 'twenty-shared/utils';
 
 import { DataSourceService } from 'src/engine/metadata-modules/data-source/data-source.service';
+import { GlobalWorkspaceOrmManager } from 'src/engine/twenty-orm/global-workspace-datasource/global-workspace-orm.manager';
+import { buildSystemAuthContext } from 'src/engine/twenty-orm/utils/build-system-auth-context.util';
 import { FieldMetadataService } from 'src/engine/metadata-modules/field-metadata/services/field-metadata.service';
 import { WorkspaceManyOrAllFlatEntityMapsCacheService } from 'src/engine/metadata-modules/flat-entity/services/workspace-many-or-all-flat-entity-maps-cache.service';
 import { buildObjectIdByNameMaps } from 'src/engine/metadata-modules/flat-object-metadata/utils/build-object-id-by-name-maps.util';
@@ -31,6 +33,12 @@ import { PROJECT_DELIVERABLE_CUSTOM_FIELD_SEEDS } from 'src/engine/workspace-man
 import { PROJECT_MILESTONE_CUSTOM_FIELD_SEEDS } from 'src/engine/workspace-manager/phos-seeder/custom-fields/project-milestone-custom-field-seeds.constant';
 import { QUOTE_CUSTOM_FIELD_SEEDS } from 'src/engine/workspace-manager/phos-seeder/custom-fields/quote-custom-field-seeds.constant';
 import { QUOTE_LINE_ITEM_CUSTOM_FIELD_SEEDS } from 'src/engine/workspace-manager/phos-seeder/custom-fields/quote-line-item-custom-field-seeds.constant';
+import { MILEAGE_CUSTOM_OBJECT_SEED } from 'src/engine/workspace-manager/phos-seeder/custom-objects/mileage-custom-object-seed.constant';
+import { MILEAGE_CUSTOM_FIELD_SEEDS } from 'src/engine/workspace-manager/phos-seeder/custom-fields/mileage-custom-field-seeds.constant';
+import { EMAIL_TEMPLATE_CUSTOM_OBJECT_SEED } from 'src/engine/workspace-manager/phos-seeder/custom-objects/email-template-custom-object-seed.constant';
+import { EMAIL_TEMPLATE_CUSTOM_FIELD_SEEDS } from 'src/engine/workspace-manager/phos-seeder/custom-fields/email-template-custom-field-seeds.constant';
+import { OPPORTUNITY_EXTENSION_FIELD_SEEDS } from 'src/engine/workspace-manager/phos-seeder/custom-fields/opportunity-extension-field-seeds.constant';
+import { COMPANY_EXTENSION_FIELD_SEEDS } from 'src/engine/workspace-manager/phos-seeder/custom-fields/company-extension-field-seeds.constant';
 
 type RelationConfig = {
   sourceObjectName: string;
@@ -52,7 +60,7 @@ type JunctionConfig = {
 // Helper type for flat entity maps
 type FlatMaps = {
   fieldMaps: { byId: Record<string, { name: string; morphId?: string }> };
-  objectMaps: { byId: Record<string, { fieldMetadataIds: string[] }> };
+  objectMaps: { byId: Record<string, { fieldIds: string[] }> };
   objectIdByName: Record<string, string>;
 };
 
@@ -96,6 +104,22 @@ export class PhosSeederService {
       fields: INVOICE_LINE_ITEM_CUSTOM_FIELD_SEEDS,
     },
     { seed: PAYMENT_CUSTOM_OBJECT_SEED, fields: PAYMENT_CUSTOM_FIELD_SEEDS },
+    // Mileage tracking
+    { seed: MILEAGE_CUSTOM_OBJECT_SEED, fields: MILEAGE_CUSTOM_FIELD_SEEDS },
+    // Email templates
+    {
+      seed: EMAIL_TEMPLATE_CUSTOM_OBJECT_SEED,
+      fields: EMAIL_TEMPLATE_CUSTOM_FIELD_SEEDS,
+    },
+  ];
+
+  // Standard object extensions - fields to add to existing Twenty objects
+  private readonly standardObjectExtensions: {
+    objectName: string;
+    fields: FieldMetadataSeed[];
+  }[] = [
+    { objectName: 'opportunity', fields: OPPORTUNITY_EXTENSION_FIELD_SEEDS },
+    { objectName: 'company', fields: COMPANY_EXTENSION_FIELD_SEEDS },
   ];
 
   // Relations to create after all objects exist
@@ -309,6 +333,28 @@ export class PhosSeederService {
       targetFieldIcon: 'IconCreditCard',
       relationType: RelationType.MANY_TO_ONE,
     },
+    // MileageLog -> Project (many-to-one)
+    {
+      sourceObjectName: 'mileageLog',
+      fieldName: 'project',
+      fieldLabel: 'Project',
+      fieldIcon: 'IconBriefcase',
+      targetObjectName: 'project',
+      targetFieldLabel: 'Mileage Logs',
+      targetFieldIcon: 'IconCar',
+      relationType: RelationType.MANY_TO_ONE,
+    },
+    // MileageLog -> WorkspaceMember (many-to-one, driver)
+    {
+      sourceObjectName: 'mileageLog',
+      fieldName: 'driver',
+      fieldLabel: 'Driver',
+      fieldIcon: 'IconUser',
+      targetObjectName: 'workspaceMember',
+      targetFieldLabel: 'Mileage Logs',
+      targetFieldIcon: 'IconCar',
+      relationType: RelationType.MANY_TO_ONE,
+    },
   ];
 
   // Junction configs for many-to-many via junction table
@@ -368,9 +414,74 @@ export class PhosSeederService {
     await this.configureJunctions(workspaceId);
 
     this.logger.log('Phase 3 complete: Junction settings configured');
+
+    // Phase 4: Add custom fields to standard Twenty objects
+    await this.seedStandardObjectExtensions(workspaceId);
+
+    this.logger.log('Phase 4 complete: Standard object extensions added');
     this.logger.log(
       `Phos Industries seeder complete for workspace ${workspaceId}`,
     );
+  }
+
+  /**
+   * Seeds custom fields on standard Twenty objects (Opportunity, Company, etc.)
+   */
+  private async seedStandardObjectExtensions(
+    workspaceId: string,
+  ): Promise<void> {
+    const maps = await this.getFreshFlatMaps(workspaceId);
+
+    for (const extension of this.standardObjectExtensions) {
+      const objectId = maps.objectIdByName[extension.objectName];
+
+      if (!isDefined(objectId)) {
+        this.logger.warn(
+          `Standard object ${extension.objectName} not found, skipping extensions`,
+        );
+        continue;
+      }
+
+      // Check which fields already exist
+      const objectMetadata = maps.objectMaps.byId[objectId];
+      const existingFieldNames = new Set<string>();
+
+      if (objectMetadata?.fieldIds) {
+        for (const fieldId of objectMetadata.fieldIds) {
+          const field = maps.fieldMaps.byId[fieldId];
+
+          if (field?.name) {
+            existingFieldNames.add(field.name);
+          }
+        }
+      }
+
+      // Filter to only new fields
+      const newFields = extension.fields.filter(
+        (f) => !existingFieldNames.has(f.name),
+      );
+
+      if (newFields.length === 0) {
+        this.logger.log(
+          `All extension fields for ${extension.objectName} already exist, skipping`,
+        );
+        continue;
+      }
+
+      this.logger.log(
+        `Adding ${newFields.length} extension fields to ${extension.objectName}`,
+      );
+
+      const createFieldInputs = newFields.map((fieldSeed) => ({
+        ...fieldSeed,
+        objectMetadataId: objectId,
+      }));
+
+      await this.fieldMetadataService.createManyFields({
+        createFieldInputs,
+        workspaceId,
+      });
+    }
   }
 
   private async seedObjectIfNotExists({
@@ -646,7 +757,7 @@ export class PhosSeederService {
       return null;
     }
 
-    for (const fieldId of objectMetadata.fieldMetadataIds) {
+    for (const fieldId of objectMetadata.fieldIds) {
       if (flatMaps.fieldMaps.byId[fieldId]?.name === fieldName) {
         return fieldId;
       }
