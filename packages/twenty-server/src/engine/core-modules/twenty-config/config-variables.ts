@@ -371,6 +371,24 @@ export class ConfigVariables {
   EMAIL_SMTP_PASSWORD: string;
 
   @ConfigVariablesMetadata({
+    group: ConfigVariablesGroup.EMAIL_SETTINGS,
+    description: 'Gmail OAuth2 user email address for sending system emails',
+    type: ConfigVariableType.STRING,
+    isSensitive: true,
+  })
+  @ValidateIf((env) => env.EMAIL_DRIVER === 'GMAIL_OAUTH2')
+  EMAIL_GMAIL_OAUTH2_USER: string;
+
+  @ConfigVariablesMetadata({
+    group: ConfigVariablesGroup.EMAIL_SETTINGS,
+    description: 'Gmail OAuth2 refresh token for sending system emails',
+    type: ConfigVariableType.STRING,
+    isSensitive: true,
+  })
+  @ValidateIf((env) => env.EMAIL_DRIVER === 'GMAIL_OAUTH2')
+  EMAIL_GMAIL_OAUTH2_REFRESH_TOKEN: string;
+
+  @ConfigVariablesMetadata({
     group: ConfigVariablesGroup.OTHER,
     description:
       'When enabled, only server admins can create new workspaces. Ignored during initial setup when no workspace exists.',
