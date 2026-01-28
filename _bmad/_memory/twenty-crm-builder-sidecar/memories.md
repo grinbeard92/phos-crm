@@ -41,8 +41,8 @@
 
 ## CALCULATED Field Type Implementation (2026-01-28)
 
-**Feature Branch Tag**: `[calculated-field]` (7 commits)
-**Status**: Core infrastructure complete, pending migration integration
+**Feature Branch Tag**: `[calculated-field]` (11 commits)
+**Status**: Frontend display + backend infrastructure complete. First use: MileageLog.reimbursementAmount
 
 ### Completed Tasks
 1. ✅ Feature flag: `IS_CALCULATED_FIELD_ENABLED`
@@ -59,7 +59,16 @@
 12. ✅ Migration runner integration - generateCalculatedColumnDefinition
 13. ✅ Field reference resolution in migration handler
 
-### Remaining Work (Frontend - Lower Priority)
+### Completed (2026-01-28, iteration 2)
+14. ✅ Frontend: isFieldCalculated guard, FieldCalculatedMetadata type
+15. ✅ Frontend: useCalculatedFieldDisplay hook
+16. ✅ Frontend: CalculatedFieldDisplay component (delegates by returnType)
+17. ✅ Frontend: Wired into FieldDisplay.tsx router
+18. ✅ Frontend: assertFieldMetadata CALCULATED type mapping
+19. ✅ Phos-seeder: Phase 5 feature flag seeding (IS_CALCULATED_FIELD_ENABLED)
+20. ✅ Mileage reimbursementAmount switched from CURRENCY to CALCULATED field
+
+### Remaining Work (Lower Priority)
 - Frontend UI for creating calculated fields in Settings > Data Model
 - Formula editor component with field autocomplete
 - Preview/validation of formulas before saving
@@ -70,8 +79,11 @@
 - `packages/twenty-server/src/engine/workspace-manager/workspace-migration/workspace-migration-runner/utils/generate-column-definitions.util.ts` - Migration integration
 - `docs/calculated-fields.md` - Usage documentation
 
-### Commits (8 total)
+### Commits (11 total)
 ```
+21004c5bab feat(phos-seeder): use CALCULATED field for mileage reimbursement
+2cd46f1983 feat(phos-seeder): add feature flag seeding phase
+ecb1b96fc6 feat(frontend): add CALCULATED field display support
 1aece3e543 feat(calculated-field): wire up migration runner for CALCULATED columns
 39458f38bd docs(calculated-field): add usage documentation
 7d6b8617a2 feat(calculated-field): add backend support for CALCULATED field type
