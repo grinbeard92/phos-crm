@@ -1,4 +1,5 @@
 import { AuthModal } from '@/auth/components/AuthModal';
+import { EmailComposeModal } from '@/email-composer/components/EmailComposeModal';
 import { AppErrorBoundary } from '@/error-handler/components/AppErrorBoundary';
 import { AppFullScreenErrorFallback } from '@/error-handler/components/AppFullScreenErrorFallback';
 import { AppPageErrorFallback } from '@/error-handler/components/AppPageErrorFallback';
@@ -14,11 +15,13 @@ import { useShowFullscreen } from '@/ui/layout/fullscreen/hooks/useShowFullscree
 import { useShowAuthModal } from '@/ui/layout/hooks/useShowAuthModal';
 import { NAVIGATION_DRAWER_CONSTRAINTS } from '@/ui/layout/resizable-panel/constants/NavigationDrawerConstraints';
 import { useIsMobile } from '@/ui/utilities/responsive/hooks/useIsMobile';
+import { useIsFeatureEnabled } from '@/workspace/hooks/useIsFeatureEnabled';
 import { Global, css, useTheme } from '@emotion/react';
 import styled from '@emotion/styled';
 import { AnimatePresence, LayoutGroup, motion } from 'framer-motion';
 import { Outlet } from 'react-router-dom';
 import { useScreenSize } from 'twenty-ui/utilities';
+import { FeatureFlagKey } from '~/generated/graphql';
 
 const StyledLayout = styled.div`
   background: ${({ theme }) => theme.background.noisy};
@@ -63,6 +66,9 @@ export const DefaultLayout = () => {
   const windowsWidth = useScreenSize().width;
   const showAuthModal = useShowAuthModal();
   const useShowFullScreen = useShowFullscreen();
+  const isEmailComposerEnabled = useIsFeatureEnabled(
+    FeatureFlagKey.IS_EMAIL_COMPOSER_ENABLED,
+  );
 
   return (
     <>
@@ -119,6 +125,8 @@ export const DefaultLayout = () => {
             )}
           </StyledPageContainer>
           {isMobile && !showAuthModal && <MobileNavigationBar />}
+          {/* Global Email Compose Modal - available from action menus */}
+          {isEmailComposerEnabled && !showAuthModal && <EmailComposeModal />}
         </AppErrorBoundary>
       </StyledLayout>
     </>
