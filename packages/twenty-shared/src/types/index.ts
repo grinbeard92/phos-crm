@@ -87,6 +87,7 @@ export {
 } from './FieldMetadataOptions';
 export type {
   FieldNumberVariant,
+  CalculatedReturnType,
   FieldMetadataSettingsMapping,
   AllFieldMetadataSettings,
   FieldMetadataSettings,
