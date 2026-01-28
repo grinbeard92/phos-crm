@@ -289,6 +289,7 @@ export class DataArgProcessor {
       }
       case FieldMetadataType.RICH_TEXT:
       case FieldMetadataType.TS_VECTOR:
+      case FieldMetadataType.CALCULATED:
         throw new CommonQueryRunnerException(
           `${key} ${fieldMetadata.type}-typed field does not support write operations`,
           CommonQueryRunnerExceptionCode.INVALID_ARGS_DATA,

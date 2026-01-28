@@ -1,7 +1,9 @@
 import { msg } from '@lingui/core/macro';
 import {
+  type CalculatedReturnType,
   FieldMetadataType,
   type FieldMetadataOptions,
+  type FieldMetadataSettingsMapping,
 } from 'twenty-shared/types';
 import {
   assertUnreachable,
@@ -21,6 +23,7 @@ import { fromRelationCreateFieldInputToFlatFieldMetadatas } from 'src/engine/met
 import { generateIndexForFlatFieldMetadata } from 'src/engine/metadata-modules/flat-field-metadata/utils/generate-index-for-flat-field-metadata.util';
 import { getDefaultFlatFieldMetadata } from 'src/engine/metadata-modules/flat-field-metadata/utils/get-default-flat-field-metadata-from-create-field-input.util';
 import { type FlatIndexMetadata } from 'src/engine/metadata-modules/flat-index-metadata/types/flat-index-metadata.type';
+import { parseFormula } from 'src/engine/workspace-manager/utils/calculated-field';
 
 export type FromCreateFieldInputToFlatObjectMetadataArgs = {
   createFieldInput: Omit<CreateFieldInput, 'workspaceId'>;
@@ -159,6 +162,90 @@ export const fromCreateFieldInputToFlatFieldMetadatasToCreate = async ({
             message: 'TS Vector is not supported for field creation',
           },
         ],
+      };
+    }
+    case FieldMetadataType.CALCULATED: {
+      const settings =
+        createFieldInput.settings as FieldMetadataSettingsMapping['CALCULATED'];
+
+      // Validate required settings
+      if (!settings?.formula) {
+        return {
+          status: 'fail',
+          errors: [
+            {
+              code: FieldMetadataExceptionCode.INVALID_FIELD_INPUT,
+              message: 'CALCULATED field requires a formula in settings',
+            },
+          ],
+        };
+      }
+
+      if (!settings?.returnType) {
+        return {
+          status: 'fail',
+          errors: [
+            {
+              code: FieldMetadataExceptionCode.INVALID_FIELD_INPUT,
+              message: 'CALCULATED field requires a returnType in settings',
+            },
+          ],
+        };
+      }
+
+      // Validate returnType is one of the allowed types
+      const allowedReturnTypes: CalculatedReturnType[] = [
+        FieldMetadataType.TEXT,
+        FieldMetadataType.NUMBER,
+        FieldMetadataType.BOOLEAN,
+        FieldMetadataType.DATE,
+        FieldMetadataType.DATE_TIME,
+      ];
+
+      if (!allowedReturnTypes.includes(settings.returnType)) {
+        return {
+          status: 'fail',
+          errors: [
+            {
+              code: FieldMetadataExceptionCode.INVALID_FIELD_INPUT,
+              message: `Invalid returnType for CALCULATED field. Must be one of: ${allowedReturnTypes.join(', ')}`,
+            },
+          ],
+        };
+      }
+
+      // Validate formula syntax
+      const parseResult = parseFormula(settings.formula);
+
+      if (!parseResult.isValid) {
+        return {
+          status: 'fail',
+          errors: [
+            {
+              code: FieldMetadataExceptionCode.INVALID_FIELD_INPUT,
+              message: `Invalid formula: ${parseResult.error}`,
+            },
+          ],
+        };
+      }
+
+      // CALCULATED fields are read-only and non-nullable (computed by DB)
+      return {
+        status: 'success',
+        result: {
+          flatFieldMetadatas: [
+            {
+              ...commonFlatFieldMetadata,
+              type: createFieldInput.type,
+              isNullable: true, // Generated columns can have null values
+              settings: {
+                ...settings,
+                dependsOnFields: parseResult.fieldReferences,
+              },
+            },
+          ],
+          indexMetadatas: [],
+        },
       };
     }
     case FieldMetadataType.UUID:

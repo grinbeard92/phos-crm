@@ -80,6 +80,8 @@ export class TypeMapperService {
     [FieldMetadataType.ARRAY, StringArrayScalarType],
     [FieldMetadataType.RICH_TEXT, GraphQLString],
     [FieldMetadataType.TS_VECTOR, TSVectorScalarType],
+    // CALCULATED fields use GraphQLString as default; actual type depends on returnType in settings
+    [FieldMetadataType.CALCULATED, GraphQLString],
   ]);
 
   mapToPreBuiltGraphQLOutputType({
@@ -185,6 +187,8 @@ export class TypeMapperService {
       [FieldMetadataType.MULTI_SELECT, MultiSelectFilterType],
       [FieldMetadataType.SELECT, SelectFilterType],
       [FieldMetadataType.TS_VECTOR, TSVectorFilterType],
+      // CALCULATED fields use StringFilterType as default; actual filter depends on returnType
+      [FieldMetadataType.CALCULATED, StringFilterType],
     ]);
 
     return typeFilterMapping.get(fieldMetadataType);
@@ -212,6 +216,7 @@ export class TypeMapperService {
       [FieldMetadataType.RICH_TEXT, OrderByDirectionType],
       [FieldMetadataType.ARRAY, OrderByDirectionType],
       [FieldMetadataType.TS_VECTOR, OrderByDirectionType], // TODO: Add TSVectorOrderByType
+      [FieldMetadataType.CALCULATED, OrderByDirectionType],
     ]);
 
     return typeOrderByMapping.get(fieldMetadataType);

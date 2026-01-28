@@ -11,7 +11,8 @@ export const buildSqlColumnDefinition = (
 
   parts.push(column.isArray ? `${column.type}[]` : column.type);
 
-  if (column.asExpression && column.type === 'tsvector') {
+  // Support GENERATED ALWAYS AS for tsvector and calculated fields
+  if (column.asExpression) {
     parts.push(`GENERATED ALWAYS AS (${column.asExpression})`); // TODO: to sanitize
     if (column.generatedType) {
       parts.push(column.generatedType);
@@ -22,11 +23,12 @@ export const buildSqlColumnDefinition = (
     parts.push('PRIMARY KEY');
   }
 
-  if (column.isNullable === false) {
+  // Generated columns cannot have NOT NULL or DEFAULT constraints
+  if (column.isNullable === false && !column.asExpression) {
     parts.push('NOT NULL');
   }
 
-  if (isDefined(column.default) && column.type !== 'tsvector') {
+  if (isDefined(column.default) && !column.asExpression) {
     parts.push(`DEFAULT ${column.default}`);
   }
 

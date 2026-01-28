@@ -40,6 +40,14 @@ export const fieldMetadataTypeToColumnType = <Type extends FieldMetadataType>(
       return 'jsonb';
     case FieldMetadataType.TS_VECTOR:
       return 'tsvector';
+    case FieldMetadataType.CALCULATED:
+      // CALCULATED fields derive column type from settings.returnType
+      // This case should not be reached - caller must handle CALCULATED specially
+      throw new WorkspaceMigrationActionExecutionException({
+        message:
+          'CALCULATED fields must use settings.returnType for column type determination',
+        code: WorkspaceMigrationActionExecutionExceptionCode.UNSUPPORTED_FIELD_METADATA_TYPE,
+      });
     default:
       throw new WorkspaceMigrationActionExecutionException({
         message: `Cannot convert ${fieldMetadataType} to column type.`,

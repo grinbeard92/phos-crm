@@ -91,6 +91,7 @@ export class FlatFieldMetadataTypeValidatorService {
       RATING: validateEnumSelectFlatFieldMetadata,
       RELATION: validateMorphOrRelationFlatFieldMetadata,
       SELECT: validateEnumSelectFlatFieldMetadata,
+      CALCULATED: DEFAULT_NO_VALIDATION, // Validation happens in field creation util
     };
 
   public validateFlatFieldMetadataTypeSpecificities(
