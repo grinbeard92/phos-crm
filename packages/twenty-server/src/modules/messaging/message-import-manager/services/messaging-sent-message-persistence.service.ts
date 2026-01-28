@@ -89,7 +89,6 @@ export class MessagingSentMessagePersistenceService {
     const authContext = buildSystemAuthContext(workspaceId);
 
     return this.globalWorkspaceOrmManager.executeInWorkspaceContext(
-      authContext,
       async () => {
         const workspaceDataSource =
           await this.globalWorkspaceOrmManager.getGlobalWorkspaceDataSource();
@@ -111,6 +110,7 @@ export class MessagingSentMessagePersistenceService {
 
         return result;
       },
+      authContext,
     );
   }
 
@@ -283,13 +283,25 @@ export class MessagingSentMessagePersistenceService {
     );
 
     // Match participants with people/workspace members
-    await this.matchParticipantService.matchParticipants({
-      participants: createdParticipants.raw ?? [],
-      objectMetadataName: 'messageParticipant',
-      transactionManager,
-      matchWith: 'workspaceMemberAndPerson',
-      workspaceId,
-    });
+    // The insert result may return participants in different formats depending on the driver
+    const participantsToMatch = createdParticipants?.raw ?? [];
+
+    if (participantsToMatch.length > 0) {
+      try {
+        await this.matchParticipantService.matchParticipants({
+          participants: participantsToMatch,
+          objectMetadataName: 'messageParticipant',
+          transactionManager,
+          matchWith: 'workspaceMemberAndPerson',
+          workspaceId,
+        });
+      } catch (matchError) {
+        // Log but don't fail - matching is optional enhancement
+        this.logger.warn(
+          `Failed to match participants: ${matchError instanceof Error ? matchError.message : matchError}`,
+        );
+      }
+    }
 
     this.logger.log(
       `Persisted sent message ${messageId} with ${participants.length} participants`,
