@@ -3,6 +3,7 @@ export enum FieldMetadataType {
   ADDRESS = 'ADDRESS',
   ARRAY = 'ARRAY',
   BOOLEAN = 'BOOLEAN',
+  CALCULATED = 'CALCULATED',
   CURRENCY = 'CURRENCY',
   DATE = 'DATE',
   DATE_TIME = 'DATE_TIME',
