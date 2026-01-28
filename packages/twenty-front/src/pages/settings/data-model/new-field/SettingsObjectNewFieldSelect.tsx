@@ -52,6 +52,10 @@ export const SettingsObjectNewFieldSelect = () => {
     FeatureFlagKey.IS_FILES_FIELD_ENABLED,
   );
 
+  const isCalculatedFieldEnabled = useIsFeatureEnabled(
+    FeatureFlagKey.IS_CALCULATED_FIELD_ENABLED,
+  );
+
   const excludedFieldTypes: FieldType[] = (
     [
       FieldMetadataType.NUMERIC,
@@ -60,6 +64,7 @@ export const SettingsObjectNewFieldSelect = () => {
       FieldMetadataType.ACTOR,
       FieldMetadataType.UUID,
       !isFilesFieldEnabled ? FieldMetadataType.FILES : undefined,
+      !isCalculatedFieldEnabled ? FieldMetadataType.CALCULATED : undefined,
     ] as const
   ).filter(isDefined);
 

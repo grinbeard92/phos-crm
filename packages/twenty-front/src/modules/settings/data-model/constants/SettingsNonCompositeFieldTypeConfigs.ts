@@ -141,6 +141,12 @@ export const SETTINGS_NON_COMPOSITE_FIELD_TYPE_CONFIGS: SettingsNonCompositeFiel
       category: 'Advanced',
       exampleValues: [['value1', 'value2'], ['value3'], []],
     } as const satisfies SettingsFieldTypeConfig<FieldArrayValue>,
+    [FieldMetadataType.CALCULATED]: {
+      label: 'Calculated',
+      Icon: IllustrationIconNumbers,
+      exampleValues: [42, 100.5, 0],
+      category: 'Advanced',
+    } as const satisfies SettingsFieldTypeConfig<FieldNumberValue>,
     [FieldMetadataType.FILES]: {
       label: 'Files',
       Icon: IllustrationIconFile,

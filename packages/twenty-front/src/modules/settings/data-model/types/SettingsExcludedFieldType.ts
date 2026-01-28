@@ -3,7 +3,6 @@ import { type PickLiteral } from '~/types/PickLiteral';
 
 export type SettingsExcludedFieldType = PickLiteral<
   FieldType,
-  | 'CALCULATED'
   | 'NUMERIC'
   | 'POSITION'
   | 'RICH_TEXT'
