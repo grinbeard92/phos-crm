@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
 
 import {
+  type CalculatedReturnType,
   FieldMetadataType,
   compositeTypeDefinitions,
 } from 'twenty-shared/types';
@@ -24,6 +25,20 @@ import {
 } from 'src/engine/twenty-orm/global-workspace-datasource/types/entity-schema-metadata.type';
 import { isFieldMetadataEntityOfType } from 'src/engine/utils/is-field-metadata-of-type.util';
 import { fieldMetadataTypeToColumnType } from 'src/engine/workspace-manager/workspace-migration/workspace-migration-runner/utils/field-metadata-type-to-column-type.util';
+
+const calculatedReturnTypeToColumnType = (
+  returnType: CalculatedReturnType,
+): string => {
+  const mapping: Record<CalculatedReturnType, string> = {
+    [FieldMetadataType.TEXT]: 'text',
+    [FieldMetadataType.NUMBER]: 'float',
+    [FieldMetadataType.BOOLEAN]: 'boolean',
+    [FieldMetadataType.DATE]: 'date',
+    [FieldMetadataType.DATE_TIME]: 'timestamptz',
+  };
+
+  return mapping[returnType] ?? 'text';
+};
 
 type EntitySchemaColumnMap = {
   [key: string]: EntitySchemaColumnOptions;
@@ -86,6 +101,30 @@ export class EntitySchemaColumnFactory {
           ...entitySchemaColumnMap,
           ...compositeColumns,
         };
+
+        continue;
+      }
+
+      if (fieldMetadata.type === FieldMetadataType.CALCULATED) {
+        const settings = fieldMetadata.settings as {
+          formula?: string;
+          returnType?: CalculatedReturnType;
+        } | null;
+
+        if (settings?.returnType) {
+          const columnType = calculatedReturnTypeToColumnType(
+            settings.returnType,
+          );
+
+          entitySchemaColumnMap[key] = {
+            name: key,
+            type: columnType as ColumnType,
+            nullable: true,
+            // Generated column expression is managed at DB level via migration.
+            // generatedType tells TypeORM not to include this column in writes.
+            generatedType: 'STORED',
+          };
+        }
 
         continue;
       }
