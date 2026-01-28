@@ -203,6 +203,14 @@ export type FieldFilesMetadata = BaseFieldMetadata & {
   settings?: FieldMetadataMultiItemSettings | null;
 };
 
+export type FieldCalculatedMetadata = BaseFieldMetadata & {
+  settings?: {
+    formula?: string;
+    returnType?: string;
+    dependsOnFields?: string[];
+  };
+};
+
 export type FieldMetadata =
   | FieldBooleanMetadata
   | FieldCurrencyMetadata
@@ -229,7 +237,8 @@ export type FieldMetadata =
   | FieldArrayMetadata
   | FieldTsVectorMetadata
   | FieldRichTextV2Metadata
-  | FieldRichTextMetadata;
+  | FieldRichTextMetadata
+  | FieldCalculatedMetadata;
 
 export type FieldTextValue = string;
 export type FieldUUidValue = string; // TODO: can we replace with a template literal type, or maybe overkill ?

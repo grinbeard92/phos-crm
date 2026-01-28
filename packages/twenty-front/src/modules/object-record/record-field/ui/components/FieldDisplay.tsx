@@ -1,6 +1,7 @@
 import { useContext } from 'react';
 
 import { ActorFieldDisplay } from '@/object-record/record-field/ui/meta-types/display/components/ActorFieldDisplay';
+import { CalculatedFieldDisplay } from '@/object-record/record-field/ui/meta-types/display/components/CalculatedFieldDisplay';
 import { ArrayFieldDisplay } from '@/object-record/record-field/ui/meta-types/display/components/ArrayFieldDisplay';
 import { BooleanFieldDisplay } from '@/object-record/record-field/ui/meta-types/display/components/BooleanFieldDisplay';
 import { EmailsFieldDisplay } from '@/object-record/record-field/ui/meta-types/display/components/EmailsFieldDisplay';
@@ -14,6 +15,7 @@ import { RichTextFieldDisplay } from '@/object-record/record-field/ui/meta-types
 import { RichTextV2FieldDisplay } from '@/object-record/record-field/ui/meta-types/display/components/RichTextV2FieldDisplay';
 import { isFieldIdentifierDisplay } from '@/object-record/record-field/ui/meta-types/display/utils/isFieldIdentifierDisplay';
 import { isFieldActor } from '@/object-record/record-field/ui/types/guards/isFieldActor';
+import { isFieldCalculated } from '@/object-record/record-field/ui/types/guards/isFieldCalculated';
 import { isFieldArray } from '@/object-record/record-field/ui/types/guards/isFieldArray';
 import { isFieldBoolean } from '@/object-record/record-field/ui/types/guards/isFieldBoolean';
 import { isFieldEmails } from '@/object-record/record-field/ui/types/guards/isFieldEmails';
@@ -74,7 +76,9 @@ export const FieldDisplay = () => {
     return <ForbiddenFieldDisplay />;
   }
 
-  return isChipDisplay ? (
+  return isFieldCalculated(fieldDefinition) ? (
+    <CalculatedFieldDisplay />
+  ) : isChipDisplay ? (
     <ChipFieldDisplay />
   ) : isFieldRelationManyToOne(fieldDefinition) ? (
     <RelationToOneFieldDisplay />

@@ -6,6 +6,7 @@ import {
   type FieldAddressMetadata,
   type FieldArrayMetadata,
   type FieldBooleanMetadata,
+  type FieldCalculatedMetadata,
   type FieldCurrencyMetadata,
   type FieldDateMetadata,
   type FieldDateTimeMetadata,
@@ -82,7 +83,9 @@ type AssertFieldMetadataFunction = <
                                                   ? FieldArrayMetadata
                                                   : E extends 'PHONES'
                                                     ? FieldPhonesMetadata
-                                                    : never,
+                                                    : E extends 'CALCULATED'
+                                                      ? FieldCalculatedMetadata
+                                                      : never,
 >(
   fieldType: E,
   fieldTypeGuard: (
