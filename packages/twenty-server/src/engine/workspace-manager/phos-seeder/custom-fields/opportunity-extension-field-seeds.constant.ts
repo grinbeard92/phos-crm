@@ -1,4 +1,8 @@
-import { FieldMetadataType } from 'twenty-shared/types';
+import {
+  type FieldMetadataComplexOption,
+  FieldMetadataType,
+  NumberDataType,
+} from 'twenty-shared/types';
 
 import { type FieldMetadataSeed } from 'src/engine/workspace-manager/dev-seeder/metadata/types/field-metadata-seed.type';
 
@@ -24,14 +28,19 @@ export const OPPORTUNITY_EXTENSION_FIELD_SEEDS: FieldMetadataSeed[] = [
     options: [
       { value: 'REFERRAL', label: 'Referral', color: 'green', position: 0 },
       { value: 'WEBSITE', label: 'Website', color: 'blue', position: 1 },
-      { value: 'LINKEDIN', label: 'LinkedIn', color: 'cyan', position: 2 },
+      { value: 'LINKEDIN', label: 'LinkedIn', color: 'sky', position: 2 },
       {
         value: 'COLD_OUTREACH',
         label: 'Cold Outreach',
         color: 'orange',
         position: 3,
       },
-      { value: 'CONFERENCE', label: 'Conference', color: 'purple', position: 4 },
+      {
+        value: 'CONFERENCE',
+        label: 'Conference',
+        color: 'purple',
+        position: 4,
+      },
       {
         value: 'EXISTING_CUSTOMER',
         label: 'Existing Customer',
@@ -39,7 +48,7 @@ export const OPPORTUNITY_EXTENSION_FIELD_SEEDS: FieldMetadataSeed[] = [
         position: 5,
       },
       { value: 'OTHER', label: 'Other', color: 'gray', position: 6 },
-    ],
+    ] as FieldMetadataComplexOption[],
   },
   {
     name: 'daysInStage',
@@ -49,7 +58,7 @@ export const OPPORTUNITY_EXTENSION_FIELD_SEEDS: FieldMetadataSeed[] = [
       'Number of days the opportunity has been in current stage - for stall detection',
     icon: 'IconClock',
     settings: {
-      dataType: 'int',
+      dataType: NumberDataType.INT,
     },
   },
 ];
