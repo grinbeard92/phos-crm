@@ -59,6 +59,10 @@ export const transformAggregateRawValueIntoAggregateDisplayValue = ({
           : formatNumber(castedValue, { decimals });
       }
 
+      case FieldMetadataType.CALCULATED: {
+        return formatNumber(Number(aggregateRawValue), { decimals: 2 });
+      }
+
       case FieldMetadataType.DATE_TIME: {
         const dateFieldSettings = aggregateFieldMetadataItem.settings;
 

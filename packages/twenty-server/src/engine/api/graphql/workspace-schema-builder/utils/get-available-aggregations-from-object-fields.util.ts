@@ -145,6 +145,39 @@ export const getAvailableAggregationsFromObjectFields = (
             aggregateOperation: AggregateOperations.SUM,
           };
           break;
+        case FieldMetadataType.CALCULATED:
+          acc[`min${capitalize(field.name)}`] = {
+            type: GraphQLFloat,
+            description: `Minimum value of calculated field ${field.name}`,
+            fromField: field.name,
+            fromFieldType: field.type,
+            aggregateOperation: AggregateOperations.MIN,
+          };
+
+          acc[`max${capitalize(field.name)}`] = {
+            type: GraphQLFloat,
+            description: `Maximum value of calculated field ${field.name}`,
+            fromField: field.name,
+            fromFieldType: field.type,
+            aggregateOperation: AggregateOperations.MAX,
+          };
+
+          acc[`avg${capitalize(field.name)}`] = {
+            type: GraphQLFloat,
+            description: `Average value of calculated field ${field.name}`,
+            fromField: field.name,
+            fromFieldType: field.type,
+            aggregateOperation: AggregateOperations.AVG,
+          };
+
+          acc[`sum${capitalize(field.name)}`] = {
+            type: GraphQLFloat,
+            description: `Sum of values in calculated field ${field.name}`,
+            fromField: field.name,
+            fromFieldType: field.type,
+            aggregateOperation: AggregateOperations.SUM,
+          };
+          break;
         case FieldMetadataType.CURRENCY:
           acc[`min${capitalize(field.name)}AmountMicros`] = {
             type: GraphQLFloat,
