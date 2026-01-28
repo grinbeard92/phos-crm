@@ -1,7 +1,13 @@
-import { type CompositeProperty, FieldMetadataType } from 'twenty-shared/types';
+import {
+  type CalculatedReturnType,
+  type CompositeProperty,
+  FieldMetadataType,
+  type FieldMetadataSettingsMapping,
+} from 'twenty-shared/types';
 import { type ColumnType } from 'typeorm';
 
 import { type CompositeFieldMetadataType } from 'src/engine/metadata-modules/field-metadata/types/composite-field-metadata-type.type';
+import { generateCalculatedExpression } from 'src/engine/workspace-manager/utils/calculated-field';
 import {
   computeColumnName,
   computeCompositeColumnName,
@@ -101,6 +107,100 @@ const generateTsVectorColumnDefinition = (
   };
 };
 
+/**
+ * Maps CALCULATED field returnType to PostgreSQL column type
+ */
+const calculatedReturnTypeToColumnType = (
+  returnType: CalculatedReturnType,
+): string => {
+  const mapping: Record<CalculatedReturnType, string> = {
+    [FieldMetadataType.TEXT]: 'text',
+    [FieldMetadataType.NUMBER]: 'float',
+    [FieldMetadataType.BOOLEAN]: 'boolean',
+    [FieldMetadataType.DATE]: 'date',
+    [FieldMetadataType.DATE_TIME]: 'timestamptz',
+  };
+
+  return mapping[returnType] ?? 'text';
+};
+
+/**
+ * Generates column definition for CALCULATED fields
+ * Similar to TS_VECTOR, uses GENERATED ALWAYS AS for computed values
+ *
+ * @param flatFieldMetadata - The CALCULATED field metadata
+ * @param siblingFields - Other fields on the same object (for resolving field references)
+ */
+const generateCalculatedColumnDefinition = (
+  flatFieldMetadata: FlatFieldMetadata<FieldMetadataType.CALCULATED>,
+  siblingFields: FlatFieldMetadata[],
+): WorkspaceSchemaColumnDefinition | null => {
+  const columnName = computeColumnName(flatFieldMetadata.name);
+  const settings =
+    flatFieldMetadata.settings as FieldMetadataSettingsMapping['CALCULATED'];
+
+  // CALCULATED fields require settings with formula and returnType
+  if (!settings?.formula || !settings?.returnType) {
+    return null;
+  }
+
+  // Build field map from sibling fields for resolving {{fieldName}} references
+  const fieldMap: Record<
+    string,
+    { columnName: string; type: FieldMetadataType }
+  > = {};
+
+  for (const field of siblingFields) {
+    // Skip the calculated field itself to prevent self-reference
+    if (field.name === flatFieldMetadata.name) {
+      continue;
+    }
+
+    // Skip relation fields - they don't have direct column storage
+    if (
+      field.type === FieldMetadataType.RELATION ||
+      field.type === FieldMetadataType.MORPH_RELATION
+    ) {
+      continue;
+    }
+
+    // Skip other calculated fields to prevent circular dependencies
+    if (field.type === FieldMetadataType.CALCULATED) {
+      continue;
+    }
+
+    fieldMap[field.name] = {
+      columnName: computeColumnName(field.name),
+      type: field.type,
+    };
+  }
+
+  try {
+    // Generate the SQL expression with resolved column names
+    const { expression, columnType } = generateCalculatedExpression({
+      formula: settings.formula,
+      returnType: settings.returnType,
+      fieldMap,
+    });
+
+    return {
+      name: columnName,
+      type: columnType,
+      isNullable: true,
+      isArray: false,
+      isUnique: false,
+      default: null,
+      asExpression: expression,
+      generatedType: 'STORED',
+      isPrimary: false,
+    };
+  } catch {
+    // If expression generation fails, return null (field won't be created)
+    // This can happen if referenced fields don't exist yet
+    return null;
+  }
+};
+
 const generateRelationColumnDefinition = (
   flatFieldMetadata: FlatFieldMetadata<
     FieldMetadataType.RELATION | FieldMetadataType.MORPH_RELATION
@@ -166,9 +266,12 @@ const generateColumnDefinition = ({
 export const generateColumnDefinitions = ({
   flatFieldMetadata,
   flatObjectMetadata,
+  siblingFields = [],
 }: {
   flatFieldMetadata: FlatFieldMetadata;
   flatObjectMetadata: FlatObjectMetadata;
+  /** Other fields on the same object - needed for CALCULATED field reference resolution */
+  siblingFields?: FlatFieldMetadata[];
 }): WorkspaceSchemaColumnDefinition[] => {
   const { tableName, schemaName } = getWorkspaceSchemaContextForMigration({
     workspaceId: flatObjectMetadata.workspaceId,
@@ -191,6 +294,17 @@ export const generateColumnDefinitions = ({
     isFlatFieldMetadataOfType(flatFieldMetadata, FieldMetadataType.TS_VECTOR)
   ) {
     return [generateTsVectorColumnDefinition(flatFieldMetadata)];
+  }
+
+  if (
+    isFlatFieldMetadataOfType(flatFieldMetadata, FieldMetadataType.CALCULATED)
+  ) {
+    const calculatedColumn = generateCalculatedColumnDefinition(
+      flatFieldMetadata,
+      siblingFields,
+    );
+
+    return calculatedColumn ? [calculatedColumn] : [];
   }
 
   if (isMorphOrRelationFlatFieldMetadata(flatFieldMetadata)) {

@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 
-import { RelationType } from 'twenty-shared/types';
+import { FieldMetadataType, RelationType } from 'twenty-shared/types';
 import { isDefined } from 'twenty-shared/utils';
 
 import { WorkspaceMigrationRunnerActionHandler } from 'src/engine/workspace-manager/workspace-migration/workspace-migration-runner/interfaces/workspace-migration-runner-action-handler-service.interface';
@@ -54,7 +54,7 @@ export class CreateFieldActionHandlerService extends WorkspaceMigrationRunnerAct
     const {
       action,
       queryRunner,
-      allFlatEntityMaps: { flatObjectMetadataMaps },
+      allFlatEntityMaps: { flatObjectMetadataMaps, flatFieldMetadataMaps },
       workspaceId,
     } = context;
     const { flatFieldMetadatas } = action;
@@ -77,9 +77,20 @@ export class CreateFieldActionHandlerService extends WorkspaceMigrationRunnerAct
         operation: EnumOperation.CREATE,
       });
 
+      // For CALCULATED fields, we need sibling fields to resolve formula references
+      const siblingFields =
+        flatFieldMetadata.type === FieldMetadataType.CALCULATED
+          ? Object.values(flatFieldMetadataMaps.byId).filter(
+              (f): f is NonNullable<typeof f> =>
+                isDefined(f) &&
+                f.objectMetadataId === flatFieldMetadata.objectMetadataId,
+            )
+          : [];
+
       const columnDefinitions = generateColumnDefinitions({
         flatFieldMetadata,
         flatObjectMetadata,
+        siblingFields,
       });
 
       await executeBatchEnumOperations({
