@@ -141,7 +141,7 @@ export const useNavigationHierarchy = (): CategorizedNavigationData => {
   }, [configs]);
 
   return {
-    categories: categories.sort((a, b) => a.position - b.position),
+    categories: [...categories].sort((a, b) => a.position - b.position),
     configsByCategory,
     uncategorizedConfigs,
     getConfigForObject,
