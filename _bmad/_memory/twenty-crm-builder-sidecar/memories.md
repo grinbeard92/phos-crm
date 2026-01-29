@@ -36,6 +36,9 @@
 | 006 | Workflows | ❌ Not started | ❌ Not started | NOT STARTED |
 | 007 | Polish | N/A | ❌ Not started | NOT STARTED |
 | 008 | Testing/Deploy | N/A | ❌ Not started | NOT STARTED |
+| 009 | SSE Reactivity Fix | N/A | ✅ Flag enabled | ✅ RESOLVED — missing IS_SSE_DB_EVENTS_ENABLED flag |
+| 010 | Theme Customization | N/A | Spec only | SPEC COMPLETE |
+| 011 | Navigation Hierarchy | N/A | Spec only | SPEC COMPLETE |
 
 ---
 
