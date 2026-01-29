@@ -1,5 +1,5 @@
 import { useWorkspaceFavorites } from '@/favorites/hooks/useWorkspaceFavorites';
-import { NavigationDrawerSectionForObjectMetadataItems } from '@/object-metadata/components/NavigationDrawerSectionForObjectMetadataItems';
+import { NavigationDrawerCategorizedSections } from '@/navigation/components/NavigationDrawerCategorizedSections';
 import { NavigationDrawerSectionForObjectMetadataItemsSkeletonLoader } from '@/object-metadata/components/NavigationDrawerSectionForObjectMetadataItemsSkeletonLoader';
 import { useIsPrefetchLoading } from '@/prefetch/hooks/useIsPrefetchLoading';
 import { useLingui } from '@lingui/react/macro';
@@ -15,7 +15,7 @@ export const WorkspaceFavorites = () => {
   }
 
   return (
-    <NavigationDrawerSectionForObjectMetadataItems
+    <NavigationDrawerCategorizedSections
       sectionTitle={t`Workspace`}
       objectMetadataItems={workspaceFavoritesObjectMetadataItems}
       isRemote={false}
