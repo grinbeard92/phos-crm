@@ -1,10 +1,11 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 
 import { NavigationDrawerItemForObjectMetadataItem } from '@/object-metadata/components/NavigationDrawerItemForObjectMetadataItem';
 import { type ObjectMetadataItem } from '@/object-metadata/types/ObjectMetadataItem';
+import { useTheme } from '@emotion/react';
 import styled from '@emotion/styled';
 import { AnimatedExpandableContainer } from 'twenty-ui/layout';
-import { useIcons } from 'twenty-ui/display';
+import { IconChevronDown, IconChevronRight, useIcons } from 'twenty-ui/display';
 import { NavigationDrawerItem } from '@/ui/navigation/navigation-drawer/components/NavigationDrawerItem';
 import { NavigationDrawerItemsCollapsableContainer } from '@/ui/navigation/navigation-drawer/components/NavigationDrawerItemsCollapsableContainer';
 import { useLocation } from 'react-router-dom';
@@ -13,6 +14,22 @@ import { getAppPath } from 'twenty-shared/utils';
 
 const StyledChildrenContainer = styled.div`
   padding-left: ${({ theme }) => theme.spacing(3)};
+`;
+
+const StyledChevronButton = styled.button`
+  all: unset;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: ${({ theme }) => theme.border.radius.sm};
+  padding: ${({ theme }) => theme.spacing(0.5)};
+  color: ${({ theme }) => theme.font.color.light};
+
+  &:hover {
+    background: ${({ theme }) => theme.background.transparent.medium};
+    color: ${({ theme }) => theme.font.color.primary};
+  }
 `;
 
 type NavigationDrawerObjectTreeItemProps = {
@@ -27,6 +44,7 @@ export const NavigationDrawerObjectTreeItem = ({
   const [isExpanded, setIsExpanded] = useState(false);
   const hasChildren = childObjectMetadataItems.length > 0;
   const { getIcon } = useIcons();
+  const theme = useTheme();
   const currentPath = useLocation().pathname;
 
   const isParentActive =
@@ -55,6 +73,13 @@ export const NavigationDrawerObjectTreeItem = ({
       ),
   );
 
+  // Auto-expand when navigating to a child object
+  useEffect(() => {
+    if (isChildActive && !isExpanded) {
+      setIsExpanded(true);
+    }
+  }, [isChildActive, isExpanded]);
+
   const shouldShowChildren = hasChildren && (isExpanded || isChildActive);
 
   if (!hasChildren) {
@@ -65,6 +90,8 @@ export const NavigationDrawerObjectTreeItem = ({
       />
     );
   }
+
+  const ChevronIcon = shouldShowChildren ? IconChevronDown : IconChevronRight;
 
   return (
     <NavigationDrawerItemsCollapsableContainer
@@ -78,7 +105,20 @@ export const NavigationDrawerObjectTreeItem = ({
         })}
         Icon={getIcon(objectMetadataItem.icon)}
         active={isParentActive}
-        onClick={() => setIsExpanded((prev) => !prev)}
+        rightOptions={
+          <StyledChevronButton
+            onClick={(e) => {
+              e.stopPropagation();
+              e.preventDefault();
+              setIsExpanded((prev) => !prev);
+            }}
+          >
+            <ChevronIcon
+              size={theme.icon.size.sm}
+              stroke={theme.icon.stroke.md}
+            />
+          </StyledChevronButton>
+        }
       />
       <AnimatedExpandableContainer
         isExpanded={shouldShowChildren}
