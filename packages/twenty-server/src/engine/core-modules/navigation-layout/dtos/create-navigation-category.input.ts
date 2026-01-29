@@ -10,7 +10,7 @@ export class CreateNavigationCategoryInput {
   @MaxLength(100)
   name: string;
 
-  @Field({ nullable: true })
+  @Field(() => String, { nullable: true })
   @IsOptional()
   @IsString()
   @MaxLength(50)

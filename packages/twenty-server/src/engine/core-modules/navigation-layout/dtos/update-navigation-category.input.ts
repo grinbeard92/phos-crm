@@ -9,13 +9,13 @@ export class UpdateNavigationCategoryInput {
   @Field(() => UUIDScalarType, { nullable: false })
   id: string;
 
-  @Field({ nullable: true })
+  @Field(() => String, { nullable: true })
   @IsOptional()
   @IsString()
   @MaxLength(100)
   name?: string;
 
-  @Field({ nullable: true })
+  @Field(() => String, { nullable: true })
   @IsOptional()
   @IsString()
   @MaxLength(50)

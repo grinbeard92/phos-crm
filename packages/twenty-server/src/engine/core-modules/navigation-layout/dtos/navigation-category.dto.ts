@@ -15,7 +15,7 @@ export class NavigationCategoryDTO {
   @Field({ nullable: false })
   name: string;
 
-  @Field({ nullable: true })
+  @Field(() => String, { nullable: true })
   icon: string | null;
 
   @Field(() => Int, { nullable: false })
