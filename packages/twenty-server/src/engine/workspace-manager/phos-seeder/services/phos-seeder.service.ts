@@ -361,6 +361,8 @@ export class PhosSeederService {
   private readonly requiredFeatureFlags: FeatureFlagKey[] = [
     FeatureFlagKey.IS_CALCULATED_FIELD_ENABLED,
     FeatureFlagKey.IS_SSE_DB_EVENTS_ENABLED,
+    FeatureFlagKey.IS_THEME_CUSTOMIZATION_ENABLED,
+    FeatureFlagKey.IS_NAVIGATION_HIERARCHY_ENABLED,
   ];
 
   // Junction configs for many-to-many via junction table
