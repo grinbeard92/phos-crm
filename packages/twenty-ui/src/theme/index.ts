@@ -9,10 +9,20 @@
 
 export { ACCENT_DARK } from './constants/AccentDark';
 export { ACCENT_LIGHT } from './constants/AccentLight';
+export type { AccentPreset } from './constants/AccentPalettes';
+export {
+  ACCENT_PRESETS,
+  DEFAULT_ACCENT_PRESET_ID,
+} from './constants/AccentPalettes';
 export type { AnimationDuration } from './constants/Animation';
 export { ANIMATION } from './constants/Animation';
 export { BACKGROUND_DARK } from './constants/BackgroundDark';
 export { BACKGROUND_LIGHT } from './constants/BackgroundLight';
+export type { BackgroundTone } from './constants/BackgroundTonePalettes';
+export {
+  DEFAULT_BACKGROUND_TONE,
+  BACKGROUND_TONE_GRAY_SCALES,
+} from './constants/BackgroundTonePalettes';
 export { BLUR_DARK } from './constants/BlurDark';
 export { BLUR_LIGHT } from './constants/BlurLight';
 export { BORDER_COMMON } from './constants/BorderCommon';
