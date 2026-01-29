@@ -24,6 +24,7 @@ import {
   IconHelpCircle,
   IconHierarchy2,
   IconKey,
+  IconLayout,
   IconLock,
   IconMail,
   IconMessage,
@@ -76,6 +77,9 @@ const useSettingsNavigationItems = (): SettingsNavigationSection[] => {
   );
   const isEmailComposerEnabled = useIsFeatureEnabled(
     FeatureFlagKey.IS_EMAIL_COMPOSER_ENABLED,
+  );
+  const isNavigationHierarchyEnabled = useIsFeatureEnabled(
+    FeatureFlagKey.IS_NAVIGATION_HIERARCHY_ENABLED,
   );
   const isSupportChatConfigured =
     supportChat?.supportDriver === 'FRONT' &&
@@ -138,6 +142,15 @@ const useSettingsNavigationItems = (): SettingsNavigationSection[] => {
           path: SettingsPath.Objects,
           Icon: IconHierarchy2,
           isHidden: !permissionMap[PermissionFlagType.DATA_MODEL],
+        },
+        {
+          label: t`Layout Model`,
+          path: SettingsPath.LayoutModel,
+          Icon: IconLayout,
+          isHidden:
+            !isNavigationHierarchyEnabled ||
+            !permissionMap[PermissionFlagType.WORKSPACE],
+          isNew: true,
         },
         {
           label: t`Members`,

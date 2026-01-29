@@ -346,6 +346,14 @@ const SettingsAdminConfigVariableDetails = lazy(() =>
   })),
 );
 
+const SettingsLayoutModel = lazy(() =>
+  import('~/pages/settings/layout-model/SettingsLayoutModel').then(
+    (module) => ({
+      default: module.SettingsLayoutModel,
+    }),
+  ),
+);
+
 const SettingsUpdates = lazy(() =>
   import('~/pages/settings/updates/SettingsUpdates').then((module) => ({
     default: module.SettingsUpdates,
@@ -575,6 +583,21 @@ export const SettingsRoutes = ({ isAdminPageEnabled }: SettingsRoutesProps) => (
         <Route
           path={SettingsPath.WebhookDetail}
           element={<SettingsDevelopersWebhookDetail />}
+        />
+      </Route>
+
+      <Route
+        element={
+          <SettingsProtectedRouteWrapper
+            requiredFeatureFlag={
+              FeatureFlagKey.IS_NAVIGATION_HIERARCHY_ENABLED
+            }
+          />
+        }
+      >
+        <Route
+          path={SettingsPath.LayoutModel}
+          element={<SettingsLayoutModel />}
         />
       </Route>
 
