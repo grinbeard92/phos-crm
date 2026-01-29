@@ -29,8 +29,35 @@ export const buildCustomTheme = (
 
   return {
     ...baseTheme,
+    color: {
+      ...baseTheme.color,
+      // The UI uses theme.color.blue / blue1-12 as the primary accent.
+      // These map to Radix indigo steps in the default theme; we swap
+      // them to the selected preset's accent steps.
+      blue: accentSteps.accent9,
+      blue1: accentSteps.accent1,
+      blue2: accentSteps.accent2,
+      blue3: accentSteps.accent3,
+      blue4: accentSteps.accent4,
+      blue5: accentSteps.accent5,
+      blue6: accentSteps.accent6,
+      blue7: accentSteps.accent7,
+      blue8: accentSteps.accent8,
+      blue9: accentSteps.accent9,
+      blue10: accentSteps.accent10,
+      blue11: accentSteps.accent11,
+      blue12: accentSteps.accent12,
+    },
     accent: {
       ...baseTheme.accent,
+      // Semantic accent tokens that reference color.blue steps
+      primary: accentSteps.accent5,
+      secondary: accentSteps.accent5,
+      tertiary: accentSteps.accent3,
+      quaternary: accentSteps.accent2,
+      accent3570: accentSteps.accent8,
+      accent4060: accentSteps.accent8,
+      // Raw accent steps
       accent1: accentSteps.accent1,
       accent2: accentSteps.accent2,
       accent3: accentSteps.accent3,
@@ -43,6 +70,13 @@ export const buildCustomTheme = (
       accent10: accentSteps.accent10,
       accent11: accentSteps.accent11,
       accent12: accentSteps.accent12,
+    },
+    border: {
+      ...baseTheme.border,
+      color: {
+        ...baseTheme.border.color,
+        blue: accentSteps.accent7,
+      },
     },
     grayScale,
     background: {
