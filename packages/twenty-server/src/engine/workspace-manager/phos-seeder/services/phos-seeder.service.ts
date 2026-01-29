@@ -363,6 +363,7 @@ export class PhosSeederService {
     FeatureFlagKey.IS_SSE_DB_EVENTS_ENABLED,
     FeatureFlagKey.IS_THEME_CUSTOMIZATION_ENABLED,
     FeatureFlagKey.IS_NAVIGATION_HIERARCHY_ENABLED,
+    FeatureFlagKey.IS_EMAIL_COMPOSER_ENABLED,
   ];
 
   // Junction configs for many-to-many via junction table

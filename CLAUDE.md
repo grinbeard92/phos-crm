@@ -8,6 +8,15 @@ https://docs.twenty.com/developers/contribute/capabilities/backend-development/
 
 All of our additions need to be modular in design and added with Twenty's Feature Flag conventions so that I can later request that they be features when completed and so that they feel very Twenty-native.
 
+## Feature Flag Checklist (MANDATORY for every new Phos feature)
+
+When adding a new feature flag for Phos:
+1. Add the key to the backend enum: `packages/twenty-server/src/engine/core-modules/feature-flag/enums/feature-flag-key.enum.ts`
+2. Add it to the phos-seeder `requiredFeatureFlags` array: `packages/twenty-server/src/engine/workspace-manager/phos-seeder/services/phos-seeder.service.ts`
+3. Add it to the `PHOS_FEATURE_FLAGS` metadata array in the Admin Panel: `packages/twenty-front/src/modules/settings/admin-panel/components/SettingsAdminWorkspaceContent.tsx` — include a human-readable label and one-line description
+4. Add it to the workspace-entity-manager test mock: `packages/twenty-server/src/engine/twenty-orm/entity-manager/workspace-entity-manager.spec.ts`
+5. Run `npx nx typecheck twenty-front && npx nx typecheck twenty-server` to verify
+
 Our Workspace will be "Phos Industries" and allowable domains will be "@phos-ind.com" and "@lvnlaser.com" and "@beehivebirth.com" (Multi-tenant)
 
 We are focused on Phos only right now.
