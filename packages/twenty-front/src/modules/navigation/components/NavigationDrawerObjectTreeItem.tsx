@@ -11,6 +11,7 @@ import { NavigationDrawerItemsCollapsableContainer } from '@/ui/navigation/navig
 import { useLocation } from 'react-router-dom';
 import { AppPath } from 'twenty-shared/types';
 import { getAppPath } from 'twenty-shared/utils';
+import { MOBILE_VIEWPORT } from 'twenty-ui/theme';
 
 const StyledChildrenContainer = styled.div`
   padding-left: ${({ theme }) => theme.spacing(3)};
@@ -29,6 +30,12 @@ const StyledChevronButton = styled.button`
   &:hover {
     background: ${({ theme }) => theme.background.transparent.medium};
     color: ${({ theme }) => theme.font.color.primary};
+  }
+
+  @media (max-width: ${MOBILE_VIEWPORT}px) {
+    padding: ${({ theme }) => theme.spacing(1.5)};
+    border: 1px solid ${({ theme }) => theme.border.color.medium};
+    border-radius: ${({ theme }) => theme.border.radius.md};
   }
 `;
 
@@ -100,11 +107,9 @@ export const NavigationDrawerObjectTreeItem = ({
       <NavigationDrawerItem
         key={objectMetadataItem.id}
         label={objectMetadataItem.labelPlural}
-        to={getAppPath(AppPath.RecordIndexPage, {
-          objectNamePlural: objectMetadataItem.namePlural,
-        })}
         Icon={getIcon(objectMetadataItem.icon)}
-        active={isParentActive}
+        active={isParentActive || isChildActive}
+        onClick={() => setIsExpanded((prev) => !prev)}
         rightOptions={
           <StyledChevronButton
             onClick={(e) => {
