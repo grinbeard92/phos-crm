@@ -228,6 +228,8 @@ describe('WorkspaceEntityManager', () => {
         IS_APPLICATION_INSTALLATION_FROM_TARBALL_ENABLED: false,
         IS_EMAIL_COMPOSER_ENABLED: false,
         IS_CALCULATED_FIELD_ENABLED: false,
+        IS_THEME_CUSTOMIZATION_ENABLED: false,
+        IS_NAVIGATION_HIERARCHY_ENABLED: false,
       },
       userWorkspaceRoleMap: {},
       eventEmitterService: {
