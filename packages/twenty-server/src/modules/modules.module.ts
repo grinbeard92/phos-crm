@@ -2,6 +2,7 @@ import { Module } from '@nestjs/common';
 
 import { CalendarModule } from 'src/modules/calendar/calendar.module';
 import { ConnectedAccountModule } from 'src/modules/connected-account/connected-account.module';
+import { CustomerBillingModule } from 'src/modules/customer-billing/customer-billing.module';
 import { EmailTemplateModule } from 'src/modules/email-template/email-template.module';
 import { FavoriteFolderModule } from 'src/modules/favorite-folder/favorite-folder.module';
 import { FavoriteModule } from 'src/modules/favorite/favorite.module';
@@ -15,6 +16,7 @@ import { WorkflowModule } from 'src/modules/workflow/workflow.module';
     MessagingModule,
     CalendarModule,
     ConnectedAccountModule,
+    CustomerBillingModule,
     EmailTemplateModule,
     WorkflowModule,
     FavoriteFolderModule,
