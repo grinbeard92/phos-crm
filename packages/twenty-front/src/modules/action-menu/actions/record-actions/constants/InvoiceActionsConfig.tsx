@@ -1,5 +1,6 @@
 import { MultipleRecordsActionKeys } from '@/action-menu/actions/record-actions/multiple-records/types/MultipleRecordsActionKeys';
 import { NoSelectionRecordActionKeys } from '@/action-menu/actions/record-actions/no-selection/types/NoSelectionRecordActionsKeys';
+import { CreateStripeInvoiceAction } from '@/action-menu/actions/record-actions/single-record/invoice-actions/components/CreateStripeInvoiceAction';
 import { DownloadInvoicePdfAction } from '@/action-menu/actions/record-actions/single-record/invoice-actions/components/DownloadInvoicePdfAction';
 import { SendInvoiceEmailAction } from '@/action-menu/actions/record-actions/single-record/invoice-actions/components/SendInvoiceEmailAction';
 import { InvoiceSingleRecordActionKeys } from '@/action-menu/actions/record-actions/single-record/invoice-actions/types/InvoiceSingleRecordActionKeys';
@@ -10,7 +11,7 @@ import { ActionType } from '@/action-menu/actions/types/ActionType';
 import { ActionViewType } from '@/action-menu/actions/types/ActionViewType';
 import { msg } from '@lingui/core/macro';
 import { isDefined } from 'twenty-shared/utils';
-import { IconDownload, IconMail } from 'twenty-ui/display';
+import { IconDownload, IconMail, IconBrandStripe } from 'twenty-ui/display';
 
 export const INVOICE_ACTIONS_CONFIG = inheritActionsFromDefaultConfig({
   config: {
@@ -41,6 +42,22 @@ export const INVOICE_ACTIONS_CONFIG = inheritActionsFromDefaultConfig({
         isDefined(selectedRecord) && !isDefined(selectedRecord?.deletedAt),
       availableOn: [ActionViewType.SHOW_PAGE],
       component: <SendInvoiceEmailAction />,
+    },
+    [InvoiceSingleRecordActionKeys.CREATE_STRIPE_INVOICE]: {
+      key: InvoiceSingleRecordActionKeys.CREATE_STRIPE_INVOICE,
+      label: msg`Create Stripe Invoice`,
+      shortLabel: msg`Stripe`,
+      isPinned: false,
+      position: 5,
+      Icon: IconBrandStripe,
+      type: ActionType.Standard,
+      scope: ActionScope.RecordSelection,
+      shouldBeRegistered: ({ selectedRecord }) =>
+        isDefined(selectedRecord) &&
+        !isDefined(selectedRecord?.deletedAt) &&
+        !isDefined(selectedRecord?.stripeInvoiceId),
+      availableOn: [ActionViewType.SHOW_PAGE],
+      component: <CreateStripeInvoiceAction />,
     },
   },
   actionKeys: [
