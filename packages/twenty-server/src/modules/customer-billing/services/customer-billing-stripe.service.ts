@@ -111,6 +111,7 @@ export class CustomerBillingStripeService {
       metadata: {
         crmInvoiceId: invoice.id,
         crmInvoiceNumber: invoice.invoiceNumber || invoice.id.slice(0, 8),
+        workspaceId,
       },
     };
   }
@@ -227,8 +228,78 @@ export class CustomerBillingStripeService {
       metadata: invoice.metadata,
     });
 
-    // TODO: Update CRM invoice record status to PAID
-    // This will be implemented when we wire up the GraphQL mutation
+    const workspaceId = invoice.metadata?.workspaceId;
+    const crmInvoiceId = invoice.metadata?.crmInvoiceId;
+
+    if (!workspaceId || !crmInvoiceId) {
+      this.logger.warn(
+        'Invoice paid webhook missing workspaceId or crmInvoiceId in metadata',
+        { invoiceId: invoice.id, metadata: invoice.metadata },
+      );
+      return;
+    }
+
+    try {
+      const invoiceRepository =
+        await this.globalWorkspaceOrmManager.getRepository(
+          workspaceId,
+          'invoice',
+        );
+
+      const crmInvoice = await invoiceRepository.findOne({
+        where: { id: crmInvoiceId },
+      });
+
+      if (!crmInvoice) {
+        this.logger.error(
+          `CRM invoice not found: ${crmInvoiceId} in workspace ${workspaceId}`,
+        );
+        return;
+      }
+
+      // Update invoice status to PAID and set paid amount
+      await invoiceRepository.update(crmInvoiceId, {
+        status: 'PAID',
+        paidAmount: {
+          amountMicros: invoice.amount_paid * 10000, // Convert cents to micros
+          currencyCode: (invoice.currency || 'usd').toUpperCase(),
+        },
+        stripePaymentStatus: 'SUCCEEDED',
+      });
+
+      // Create Payment record
+      const paymentRepository =
+        await this.globalWorkspaceOrmManager.getRepository(
+          workspaceId,
+          'payment',
+        );
+
+      await paymentRepository.save({
+        name: `Payment for ${crmInvoice.invoiceNumber || invoice.id.slice(0, 8)}`,
+        paymentDate: new Date(),
+        amount: {
+          amountMicros: invoice.amount_paid * 10000,
+          currencyCode: (invoice.currency || 'usd').toUpperCase(),
+        },
+        paymentMethod: 'STRIPE',
+        stripePaymentId:
+          typeof (invoice as any).payment_intent === 'string'
+            ? (invoice as any).payment_intent
+            : (invoice as any).payment_intent?.id || '',
+        invoiceId: crmInvoiceId,
+        companyId: crmInvoice.companyId,
+        notes: `Stripe invoice ${invoice.id} paid`,
+      });
+
+      this.logger.log(
+        `Updated CRM invoice ${crmInvoiceId} to PAID and created payment record`,
+      );
+    } catch (error) {
+      this.logger.error(
+        `Failed to update CRM invoice after payment: ${error.message}`,
+        { error, invoiceId: invoice.id },
+      );
+    }
   }
 
   async handlePaymentIntentSucceeded(event: Stripe.Event): Promise<void> {
@@ -240,7 +311,75 @@ export class CustomerBillingStripeService {
       metadata: paymentIntent.metadata,
     });
 
-    // TODO: Create payment record in CRM
+    const workspaceId = paymentIntent.metadata?.workspaceId;
+    const crmInvoiceId = paymentIntent.metadata?.crmInvoiceId;
+
+    if (!workspaceId || !crmInvoiceId) {
+      this.logger.warn(
+        'Payment intent webhook missing workspaceId or crmInvoiceId in metadata',
+        { paymentIntentId: paymentIntent.id },
+      );
+      return;
+    }
+
+    try {
+      const invoiceRepository =
+        await this.globalWorkspaceOrmManager.getRepository(
+          workspaceId,
+          'invoice',
+        );
+
+      const crmInvoice = await invoiceRepository.findOne({
+        where: { id: crmInvoiceId },
+      });
+
+      if (!crmInvoice) {
+        this.logger.error(`CRM invoice not found: ${crmInvoiceId}`);
+        return;
+      }
+
+      // Create Payment record
+      const paymentRepository =
+        await this.globalWorkspaceOrmManager.getRepository(
+          workspaceId,
+          'payment',
+        );
+
+      // Check if payment already exists (idempotency)
+      const existingPayment = await paymentRepository.findOne({
+        where: { stripePaymentId: paymentIntent.id },
+      });
+
+      if (existingPayment) {
+        this.logger.log(
+          `Payment record already exists for payment intent ${paymentIntent.id}`,
+        );
+        return;
+      }
+
+      await paymentRepository.save({
+        name: `Payment for ${crmInvoice.invoiceNumber || crmInvoiceId.slice(0, 8)}`,
+        paymentDate: new Date(),
+        amount: {
+          amountMicros: paymentIntent.amount * 10000,
+          currencyCode: (paymentIntent.currency || 'usd').toUpperCase(),
+        },
+        paymentMethod: 'STRIPE',
+        stripePaymentId: paymentIntent.id,
+        invoiceId: crmInvoiceId,
+        companyId: crmInvoice.companyId,
+        notes: `Stripe payment intent ${paymentIntent.id}`,
+      });
+
+      this.logger.log(
+        `Created payment record for payment intent ${paymentIntent.id}`,
+      );
+    } catch (error) {
+      this.logger.error(
+        `Failed to create payment record: ${error.message}`,
+        { error, paymentIntentId: paymentIntent.id },
+      );
+    }
   }
 
   async handleChargeRefunded(event: Stripe.Event): Promise<void> {
@@ -252,6 +391,79 @@ export class CustomerBillingStripeService {
       refunded: charge.refunded,
     });
 
-    // TODO: Update payment record in CRM
+    const workspaceId = charge.metadata?.workspaceId;
+    const crmInvoiceId = charge.metadata?.crmInvoiceId;
+
+    if (!workspaceId || !crmInvoiceId) {
+      this.logger.warn(
+        'Charge refunded webhook missing workspaceId or crmInvoiceId in metadata',
+        { chargeId: charge.id },
+      );
+      return;
+    }
+
+    try {
+      const invoiceRepository =
+        await this.globalWorkspaceOrmManager.getRepository(
+          workspaceId,
+          'invoice',
+        );
+
+      const crmInvoice = await invoiceRepository.findOne({
+        where: { id: crmInvoiceId },
+      });
+
+      if (!crmInvoice) {
+        this.logger.error(`CRM invoice not found: ${crmInvoiceId}`);
+        return;
+      }
+
+      // Create refund Payment record
+      const paymentRepository =
+        await this.globalWorkspaceOrmManager.getRepository(
+          workspaceId,
+          'payment',
+        );
+
+      // Check if refund payment already exists (idempotency)
+      const existingRefund = await paymentRepository.findOne({
+        where: { stripeChargeId: charge.id, notes: `Refund for charge ${charge.id}` },
+      });
+
+      if (existingRefund) {
+        this.logger.log(
+          `Refund payment record already exists for charge ${charge.id}`,
+        );
+        return;
+      }
+
+      await paymentRepository.save({
+        name: `Refund for ${crmInvoice.invoiceNumber || crmInvoiceId.slice(0, 8)}`,
+        paymentDate: new Date(),
+        amount: {
+          amountMicros: -charge.amount_refunded * 10000, // Negative for refund
+          currencyCode: (charge.currency || 'usd').toUpperCase(),
+        },
+        paymentMethod: 'STRIPE',
+        stripeChargeId: charge.id,
+        invoiceId: crmInvoiceId,
+        companyId: crmInvoice.companyId,
+        notes: `Refund for charge ${charge.id}`,
+      });
+
+      // Update invoice status if fully refunded
+      if (charge.refunded) {
+        await invoiceRepository.update(crmInvoiceId, {
+          status: 'REFUNDED',
+        });
+      }
+
+      this.logger.log(`Created refund payment record for charge ${charge.id}`);
+    } catch (error) {
+      this.logger.error(`Failed to create refund record: ${error.message}`, {
+        error,
+        chargeId: charge.id,
+      });
+    }
   }
 }
