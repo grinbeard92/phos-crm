@@ -1,7 +1,7 @@
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { InvoiceForm } from '@/invoices/components/InvoiceForm';
 import { PageContainer } from '@/ui/layout/page/components/PageContainer';
-import { PageHeader } from '@/ui/layout/page-header/components/PageHeader';
+import { PageHeader } from '@/ui/layout/page/components/PageHeader';
 
 export const CreateInvoicePage = () => {
   const navigate = useNavigate();
@@ -22,7 +22,9 @@ export const CreateInvoicePage = () => {
 
   return (
     <PageContainer>
-      <PageHeader title={quoteId ? 'Create Invoice from Quote' : 'Create Invoice'} />
+      <PageHeader
+        title={quoteId ? 'Create Invoice from Quote' : 'Create Invoice'}
+      />
       <InvoiceForm
         onCancel={handleCancel}
         onSuccess={handleSuccess}

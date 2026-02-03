@@ -1,7 +1,7 @@
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { QuoteForm } from '@/quotes/components/QuoteForm';
 import { PageContainer } from '@/ui/layout/page/components/PageContainer';
-import { PageHeader } from '@/ui/layout/page-header/components/PageHeader';
+import { PageHeader } from '@/ui/layout/page/components/PageHeader';
 
 export const CreateQuotePage = () => {
   const navigate = useNavigate();

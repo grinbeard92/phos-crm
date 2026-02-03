@@ -1,5 +1,7 @@
 import { DASHBOARD_ACTIONS_CONFIG } from '@/action-menu/actions/record-actions/constants/DashboardActionsConfig';
 import { DEFAULT_RECORD_ACTIONS_CONFIG } from '@/action-menu/actions/record-actions/constants/DefaultRecordActionsConfig';
+import { INVOICE_ACTIONS_CONFIG } from '@/action-menu/actions/record-actions/constants/InvoiceActionsConfig';
+import { QUOTE_ACTIONS_CONFIG } from '@/action-menu/actions/record-actions/constants/QuoteActionsConfig';
 import { WORKFLOW_ACTIONS_CONFIG } from '@/action-menu/actions/record-actions/constants/WorkflowActionsConfig';
 import { WORKFLOW_RUNS_ACTIONS_CONFIG } from '@/action-menu/actions/record-actions/constants/WorkflowRunsActionsConfig';
 import { WORKFLOW_VERSIONS_ACTIONS_CONFIG } from '@/action-menu/actions/record-actions/constants/WorkflowVersionsActionsConfig';
@@ -36,6 +38,12 @@ export const getActionConfig = ({
     }
     case CoreObjectNameSingular.Company: {
       return DEFAULT_RECORD_ACTIONS_CONFIG;
+    }
+    case 'quote': {
+      return QUOTE_ACTIONS_CONFIG;
+    }
+    case 'invoice': {
+      return INVOICE_ACTIONS_CONFIG;
     }
     default: {
       return DEFAULT_RECORD_ACTIONS_CONFIG;

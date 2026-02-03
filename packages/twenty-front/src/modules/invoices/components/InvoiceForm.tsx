@@ -1,8 +1,7 @@
 import styled from '@emotion/styled';
 import { useState } from 'react';
-import { IconCheck, IconX } from 'twenty-ui/display';
+import { IconCheck, IconX, H2Title } from 'twenty-ui/display';
 import { Button } from 'twenty-ui/input';
-import { H2Title } from 'twenty-ui/typography';
 import { useInvoiceForm } from '../hooks/useInvoiceForm';
 import { useCreateInvoice } from '../hooks/useCreateInvoice';
 import {
@@ -60,9 +59,9 @@ const StyledField = styled.div`
 `;
 
 const StyledLabel = styled.label`
+  color: ${({ theme }) => theme.font.color.secondary};
   font-size: ${({ theme }) => theme.font.size.sm};
   font-weight: ${({ theme }) => theme.font.weight.medium};
-  color: ${({ theme }) => theme.font.color.secondary};
 `;
 
 const StyledRequiredMark = styled.span`
@@ -131,20 +130,20 @@ const StyledErrorText = styled.div`
 `;
 
 const StyledActions = styled.div`
+  border-top: 1px solid ${({ theme }) => theme.border.color.medium};
   display: flex;
   gap: ${({ theme }) => theme.spacing(2)};
   justify-content: flex-end;
   padding-top: ${({ theme }) => theme.spacing(4)};
-  border-top: 1px solid ${({ theme }) => theme.border.color.medium};
 `;
 
 const StyledGlobalError = styled.div`
-  padding: ${({ theme }) => theme.spacing(3)};
   background: ${({ theme }) => theme.background.danger};
   border: 1px solid ${({ theme }) => theme.color.red};
   border-radius: ${({ theme }) => theme.border.radius.md};
   color: ${({ theme }) => theme.color.red};
   font-size: ${({ theme }) => theme.font.size.sm};
+  padding: ${({ theme }) => theme.spacing(3)};
 `;
 
 export const InvoiceForm = ({
@@ -177,7 +176,7 @@ export const InvoiceForm = ({
   const [globalError, setGlobalError] = useState<string | null>(null);
 
   // Fetch relation options
-  const { options: companyOptions, loading: companiesLoading} =
+  const { options: companyOptions, loading: companiesLoading } =
     useCompanyOptions(formData.companyId);
   const { options: contactOptions, loading: contactsLoading } =
     useContactOptions(formData.companyId);
@@ -222,12 +221,16 @@ export const InvoiceForm = ({
               </StyledLabel>
               <StyledSelect
                 value={formData.companyId || ''}
-                onChange={(e) => updateField('companyId', e.target.value || null)}
+                onChange={(e) =>
+                  updateField('companyId', e.target.value || null)
+                }
                 hasError={!!errors.companyId}
                 disabled={companiesLoading}
               >
                 <option value="">
-                  {companiesLoading ? 'Loading companies...' : 'Select a company...'}
+                  {companiesLoading
+                    ? 'Loading companies...'
+                    : 'Select a company...'}
                 </option>
                 {companyOptions.map((option) => (
                   <option key={option.value} value={option.value}>
@@ -244,7 +247,9 @@ export const InvoiceForm = ({
               <StyledLabel>Contact</StyledLabel>
               <StyledSelect
                 value={formData.contactId || ''}
-                onChange={(e) => updateField('contactId', e.target.value || null)}
+                onChange={(e) =>
+                  updateField('contactId', e.target.value || null)
+                }
                 disabled={!formData.companyId || contactsLoading}
               >
                 <option value="">
@@ -266,11 +271,15 @@ export const InvoiceForm = ({
               <StyledLabel>Project</StyledLabel>
               <StyledSelect
                 value={formData.projectId || ''}
-                onChange={(e) => updateField('projectId', e.target.value || null)}
+                onChange={(e) =>
+                  updateField('projectId', e.target.value || null)
+                }
                 disabled={projectsLoading}
               >
                 <option value="">
-                  {projectsLoading ? 'Loading projects...' : 'Select a project...'}
+                  {projectsLoading
+                    ? 'Loading projects...'
+                    : 'Select a project...'}
                 </option>
                 {projectOptions.map((option) => (
                   <option key={option.value} value={option.value}>
@@ -330,9 +339,7 @@ export const InvoiceForm = ({
               <StyledInput
                 type="date"
                 value={formData.dueDate || ''}
-                onChange={(e) =>
-                  updateField('dueDate', e.target.value || null)
-                }
+                onChange={(e) => updateField('dueDate', e.target.value || null)}
               />
             </StyledField>
 
