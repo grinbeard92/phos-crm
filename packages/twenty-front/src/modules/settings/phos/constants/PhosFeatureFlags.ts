@@ -16,8 +16,7 @@ export const PHOS_FEATURE_FLAGS: PhosFeatureFlag[] = [
   {
     key: FeatureFlagKey.IS_SSE_DB_EVENTS_ENABLED,
     label: 'SSE DB Events',
-    description:
-      'Real-time server-sent events for database change reactivity',
+    description: 'Real-time server-sent events for database change reactivity',
   },
   {
     key: FeatureFlagKey.IS_THEME_CUSTOMIZATION_ENABLED,

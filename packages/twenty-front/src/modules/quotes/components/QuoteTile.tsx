@@ -1,6 +1,10 @@
 import styled from '@emotion/styled';
 import { useNavigate } from 'react-router-dom';
-import { IconCalendar, IconCurrencyDollar, IconFileText } from 'twenty-ui/display';
+import {
+  IconCalendar,
+  IconCurrencyDollar,
+  IconFileText,
+} from 'twenty-ui/display';
 
 import { type Quote } from '../types/quote.types';
 import { microsToAmount } from '../hooks/useQuoteCalculations';

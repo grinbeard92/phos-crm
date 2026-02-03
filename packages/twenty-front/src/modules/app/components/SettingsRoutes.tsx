@@ -595,9 +595,7 @@ export const SettingsRoutes = ({ isAdminPageEnabled }: SettingsRoutesProps) => (
       <Route
         element={
           <SettingsProtectedRouteWrapper
-            requiredFeatureFlag={
-              FeatureFlagKey.IS_NAVIGATION_HIERARCHY_ENABLED
-            }
+            requiredFeatureFlag={FeatureFlagKey.IS_NAVIGATION_HIERARCHY_ENABLED}
           />
         }
       >

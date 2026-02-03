@@ -1,5 +1,8 @@
 import { type ObjectRecord } from '@/object-record/types/ObjectRecord';
-import { type CurrencyValue, type ServiceCategory } from '@/quotes/types/quote.types';
+import {
+  type CurrencyValue,
+  type ServiceCategory,
+} from '@/quotes/types/quote.types';
 
 export type InvoiceStatus =
   | 'DRAFT'

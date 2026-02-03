@@ -1,4 +1,7 @@
-import { type InvoiceLineItemFormData, type InvoiceCalculations } from '../types/invoice-form.types';
+import {
+  type InvoiceLineItemFormData,
+  type InvoiceCalculations,
+} from '../types/invoice-form.types';
 
 /**
  * Calculate invoice totals from line items, discount/tax percentages, and amount paid.

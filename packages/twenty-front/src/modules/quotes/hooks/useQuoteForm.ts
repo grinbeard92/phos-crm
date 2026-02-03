@@ -1,6 +1,9 @@
 import { useState, useCallback } from 'react';
 import { v4 as uuidv4 } from 'uuid';
-import { type QuoteFormData, type QuoteLineItemFormData } from '../types/quote-form.types';
+import {
+  type QuoteFormData,
+  type QuoteLineItemFormData,
+} from '../types/quote-form.types';
 import { calculateQuoteTotals } from '../utils/calculateQuoteTotals';
 
 const createEmptyLineItem = (): QuoteLineItemFormData => ({
@@ -92,25 +95,22 @@ export const useQuoteForm = () => {
   }, []);
 
   // Reorder line items (for drag-and-drop)
-  const reorderLineItems = useCallback(
-    (fromIndex: number, toIndex: number) => {
-      setFormData((prev) => {
-        const items = [...prev.lineItems];
-        const [movedItem] = items.splice(fromIndex, 1);
-        items.splice(toIndex, 0, movedItem);
+  const reorderLineItems = useCallback((fromIndex: number, toIndex: number) => {
+    setFormData((prev) => {
+      const items = [...prev.lineItems];
+      const [movedItem] = items.splice(fromIndex, 1);
+      items.splice(toIndex, 0, movedItem);
 
-        // Update sortOrder
-        return {
-          ...prev,
-          lineItems: items.map((item, index) => ({
-            ...item,
-            sortOrder: index,
-          })),
-        };
-      });
-    },
-    [],
-  );
+      // Update sortOrder
+      return {
+        ...prev,
+        lineItems: items.map((item, index) => ({
+          ...item,
+          sortOrder: index,
+        })),
+      };
+    });
+  }, []);
 
   // Validate form
   const validate = useCallback((): boolean => {

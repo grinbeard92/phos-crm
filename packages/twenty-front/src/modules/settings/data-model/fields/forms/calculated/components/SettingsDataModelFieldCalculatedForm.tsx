@@ -44,11 +44,11 @@ export type SettingsDataModelFieldCalculatedFormValues = z.infer<
 >;
 
 const StyledFormulaSection = styled.div`
+  background-color: ${({ theme }) => theme.background.secondary};
   display: flex;
   flex-direction: column;
   gap: ${({ theme }) => theme.spacing(2)};
   padding: ${({ theme }) => theme.spacing(4)};
-  background-color: ${({ theme }) => theme.background.secondary};
 `;
 
 const StyledFormulaLabel = styled.div`
@@ -87,7 +87,8 @@ export const SettingsDataModelFieldCalculatedForm = ({
   objectNameSingular,
 }: SettingsDataModelFieldCalculatedFormProps) => {
   const { t } = useLingui();
-  const { control } = useFormContext<SettingsDataModelFieldCalculatedFormValues>();
+  const { control } =
+    useFormContext<SettingsDataModelFieldCalculatedFormValues>();
 
   const { fieldMetadataItem } = useFieldMetadataItemById(
     existingFieldMetadataId,
@@ -178,10 +179,7 @@ export const SettingsDataModelFieldCalculatedForm = ({
                         key={field.id}
                         onClick={() => insertFieldReference(field.name)}
                       >
-                        <Tag
-                          text={field.label}
-                          color="blue"
-                        />
+                        <Tag text={field.label} color="blue" />
                       </StyledClickableTag>
                     ))}
                   </StyledFieldChipsContainer>

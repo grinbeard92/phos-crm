@@ -83,9 +83,9 @@ const StyledDueDate = styled.div<{ isOverdue: boolean }>`
 `;
 
 const StyledEmptyState = styled.div`
-  text-align: center;
   color: ${({ theme }) => theme.font.color.tertiary};
   padding: ${({ theme }) => theme.spacing(4)};
+  text-align: center;
 `;
 
 const StyledSummary = styled.div`
@@ -108,7 +108,10 @@ const StyledSummaryValue = styled.div`
   font-weight: ${({ theme }) => theme.font.weight.semiBold};
 `;
 
-const formatCurrency = (amount: number, currencyCode: string = 'USD'): string => {
+const formatCurrency = (
+  amount: number,
+  currencyCode: string = 'USD',
+): string => {
   return new Intl.NumberFormat('en-US', {
     style: 'currency',
     currency: currencyCode,

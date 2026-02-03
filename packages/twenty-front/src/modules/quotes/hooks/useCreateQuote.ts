@@ -1,6 +1,9 @@
 import { useMutation } from '@apollo/client';
 import { useNavigate } from 'react-router-dom';
-import { CREATE_QUOTE, CREATE_QUOTE_LINE_ITEM } from '../graphql/mutations/createQuote';
+import {
+  CREATE_QUOTE,
+  CREATE_QUOTE_LINE_ITEM,
+} from '../graphql/mutations/createQuote';
 import { type QuoteFormData } from '../types/quote-form.types';
 import { calculateQuoteTotals } from '../utils/calculateQuoteTotals';
 

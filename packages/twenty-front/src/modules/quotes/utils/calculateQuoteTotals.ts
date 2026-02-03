@@ -1,4 +1,7 @@
-import { type QuoteLineItemFormData, type QuoteCalculations } from '../types/quote-form.types';
+import {
+  type QuoteLineItemFormData,
+  type QuoteCalculations,
+} from '../types/quote-form.types';
 
 /**
  * Calculate quote totals from line items and discount/tax percentages.

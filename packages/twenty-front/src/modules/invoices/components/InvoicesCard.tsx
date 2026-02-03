@@ -5,7 +5,7 @@ import { useObjectPermissionsForObject } from '@/object-record/hooks/useObjectPe
 import { useTargetRecord } from '@/ui/layout/contexts/useTargetRecord';
 import styled from '@emotion/styled';
 import { t } from '@lingui/core/macro';
-import { IconFileText, IconPlus } from 'twenty-ui/display';
+import { IconPlus } from 'twenty-ui/display';
 import { Button } from 'twenty-ui/input';
 import {
   AnimatedPlaceholder,

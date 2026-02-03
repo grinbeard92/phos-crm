@@ -1,6 +1,10 @@
 import { useQuery } from '@apollo/client';
 import { useMemo } from 'react';
-import { GET_COMPANIES, GET_PEOPLE, GET_PROJECTS } from '../graphql/queries/getRelationOptions';
+import {
+  GET_COMPANIES,
+  GET_PEOPLE,
+  GET_PROJECTS,
+} from '../graphql/queries/getRelationOptions';
 
 type SelectOption = {
   value: string;

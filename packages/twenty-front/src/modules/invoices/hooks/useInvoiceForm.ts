@@ -1,7 +1,13 @@
 import { useState, useCallback } from 'react';
 import { v4 as uuidv4 } from 'uuid';
-import { type InvoiceFormData, type InvoiceLineItemFormData } from '../types/invoice-form.types';
-import { calculateInvoiceTotals, calculateDueDate } from '../utils/calculateInvoiceTotals';
+import {
+  type InvoiceFormData,
+  type InvoiceLineItemFormData,
+} from '../types/invoice-form.types';
+import {
+  calculateInvoiceTotals,
+  calculateDueDate,
+} from '../utils/calculateInvoiceTotals';
 
 const createEmptyLineItem = (): InvoiceLineItemFormData => ({
   id: uuidv4(),
@@ -116,24 +122,21 @@ export const useInvoiceForm = (initialData?: Partial<InvoiceFormData>) => {
   }, []);
 
   // Reorder line items
-  const reorderLineItems = useCallback(
-    (fromIndex: number, toIndex: number) => {
-      setFormData((prev) => {
-        const items = [...prev.lineItems];
-        const [movedItem] = items.splice(fromIndex, 1);
-        items.splice(toIndex, 0, movedItem);
+  const reorderLineItems = useCallback((fromIndex: number, toIndex: number) => {
+    setFormData((prev) => {
+      const items = [...prev.lineItems];
+      const [movedItem] = items.splice(fromIndex, 1);
+      items.splice(toIndex, 0, movedItem);
 
-        return {
-          ...prev,
-          lineItems: items.map((item, index) => ({
-            ...item,
-            sortOrder: index,
-          })),
-        };
-      });
-    },
-    [],
-  );
+      return {
+        ...prev,
+        lineItems: items.map((item, index) => ({
+          ...item,
+          sortOrder: index,
+        })),
+      };
+    });
+  }, []);
 
   // Validate form
   const validate = useCallback((): boolean => {

@@ -51,9 +51,9 @@ const StyledSection = styled.div`
 `;
 
 const StyledHeader = styled.div`
+  align-items: center;
   display: flex;
   justify-content: space-between;
-  align-items: center;
 `;
 
 const StyledFormWrapper = styled.div`

@@ -3,7 +3,7 @@
 ## Session History
 
 **Session Started**: 2026-01-24
-**Last Updated**: 2026-01-29
+**Last Updated**: 2026-02-03
 
 ---
 
@@ -280,11 +280,21 @@ Must include `position` for each option:
 
 ## Implementation Session (2026-02-03)
 
-### Completed Today
+### Session 1 - Morning
 1. ✅ Fixed quote/invoice navigation (404 error) - changed `/objects/` to `/object/`
 2. ✅ Generated GraphQL types successfully
 3. ✅ Updated CLAUDE.md with prominent production data protection warning
 4. ✅ Created comprehensive task tracking for Epics 002-004
+
+### Session 2 - Continuation
+1. ✅ **Epic 002 - PDF Download Actions Complete**:
+   - Created Twenty-native action configs for quotes and invoices
+   - Implemented DownloadQuotePdfAction and DownloadInvoicePdfAction components
+   - Wired action configs into Twenty's action system via getActionConfig()
+   - PDF download buttons now appear on quote/invoice show pages
+   - Deleted orphaned hooks (useQuoteActions, useInvoiceActions)
+   - Fixed import errors in forms and create pages
+   - Commit: `d491c87d3e feat(quotes-invoices): add PDF download actions [epic-002]`
 
 ### Progress Update (Session continues - ~3 hours in)
 

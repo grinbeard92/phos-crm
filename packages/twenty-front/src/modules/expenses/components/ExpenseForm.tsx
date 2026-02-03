@@ -261,7 +261,10 @@ export const ExpenseForm = ({ onSubmit, onCancel }: ExpenseFormProps) => {
             step="0.01"
             value={formData.amount}
             onChange={(e) =>
-              setFormData({ ...formData, amount: parseFloat(e.target.value) || 0 })
+              setFormData({
+                ...formData,
+                amount: parseFloat(e.target.value) || 0,
+              })
             }
             placeholder="0.00"
             hasError={!!errors.amount}

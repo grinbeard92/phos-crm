@@ -35,7 +35,7 @@ import { Button, Toggle } from 'twenty-ui/input';
 import { Section } from 'twenty-ui/layout';
 import { REACT_APP_SERVER_BASE_URL } from '~/config';
 import {
-  FeatureFlagKey,
+  type FeatureFlagKey,
   useImpersonateMutation,
   useUpdateWorkspaceFeatureFlagMutation,
 } from '~/generated-metadata/graphql';

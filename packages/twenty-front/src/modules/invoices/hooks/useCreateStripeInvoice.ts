@@ -39,7 +39,8 @@ export const useCreateStripeInvoice = () => {
       } catch (error) {
         console.error('Error creating Stripe invoice:', error);
         enqueueErrorSnackBar({
-          message: 'Failed to create Stripe invoice. Check Stripe configuration.',
+          message:
+            'Failed to create Stripe invoice. Check Stripe configuration.',
         });
 
         return null;

@@ -60,10 +60,10 @@ const StyledTableRow = styled.tr`
 `;
 
 const StyledTableCell = styled.td`
-  padding: ${({ theme }) => theme.spacing(2)} ${({ theme }) => theme.spacing(3)};
-  vertical-align: middle;
   color: ${({ theme }) => theme.font.color.primary};
   font-size: ${({ theme }) => theme.font.size.md};
+  padding: ${({ theme }) => theme.spacing(2)} ${({ theme }) => theme.spacing(3)};
+  vertical-align: middle;
 `;
 
 const StyledIconButton = styled.button`
@@ -89,8 +89,8 @@ const StyledIconButton = styled.button`
 `;
 
 const StyledAmountCell = styled(StyledTableCell)`
-  text-align: right;
   font-weight: ${({ theme }) => theme.font.weight.medium};
+  text-align: right;
 `;
 
 const StyledAddButtonContainer = styled.div`
@@ -100,10 +100,10 @@ const StyledAddButtonContainer = styled.div`
 `;
 
 const StyledEmptyState = styled.div`
-  padding: ${({ theme }) => theme.spacing(6)} ${({ theme }) => theme.spacing(3)};
-  text-align: center;
   color: ${({ theme }) => theme.font.color.tertiary};
   font-size: ${({ theme }) => theme.font.size.md};
+  padding: ${({ theme }) => theme.spacing(6)} ${({ theme }) => theme.spacing(3)};
+  text-align: center;
 `;
 
 const formatPaymentMethod = (method: string): string => {
@@ -133,7 +133,9 @@ export const PaymentList = ({
                 Method
               </StyledTableHeaderCell>
               <StyledTableHeaderCell>Reference</StyledTableHeaderCell>
-              <StyledTableHeaderCell style={{ width: '180px', textAlign: 'right' }}>
+              <StyledTableHeaderCell
+                style={{ width: '180px', textAlign: 'right' }}
+              >
                 Amount
               </StyledTableHeaderCell>
               <StyledTableHeaderCell style={{ width: '50px' }}>

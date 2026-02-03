@@ -2,7 +2,7 @@ import { useCallback } from 'react';
 import { useSelectedRecordIdOrThrow } from '@/action-menu/actions/record-actions/single-record/hooks/useSelectedRecordIdOrThrow';
 import { useSnackBar } from '@/ui/feedback/snack-bar-manager/hooks/useSnackBar';
 
-export const DownloadQuotePdfAction = () => {
+export const DownloadQuotePdfActionEffect = () => {
   const { enqueueSuccessSnackBar, enqueueErrorSnackBar } = useSnackBar();
   const recordId = useSelectedRecordIdOrThrow();
 

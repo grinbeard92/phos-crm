@@ -3,7 +3,7 @@ import { useSelectedRecordIdOrThrow } from '@/action-menu/actions/record-actions
 import { useCreateStripeInvoice } from '@/invoices/hooks/useCreateStripeInvoice';
 import { useUpdateOneRecord } from '@/object-record/hooks/useUpdateOneRecord';
 
-export const CreateStripeInvoiceAction = () => {
+export const CreateStripeInvoiceActionEffect = () => {
   const invoiceId = useSelectedRecordIdOrThrow();
   const { createStripeInvoice, loading } = useCreateStripeInvoice();
   const { updateOneRecord } = useUpdateOneRecord();

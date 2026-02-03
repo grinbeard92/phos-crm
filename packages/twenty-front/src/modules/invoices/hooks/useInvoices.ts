@@ -29,7 +29,10 @@ export const useInvoices = (targetRecord: TargetRecordIdentifier) => {
       case 'project':
         return { projectId: { eq: targetRecord.id } };
       default:
-        console.warn('Unknown target object type:', targetRecord.targetObjectNameSingular);
+        console.warn(
+          'Unknown target object type:',
+          targetRecord.targetObjectNameSingular,
+        );
         return {};
     }
   }, [targetRecord]);

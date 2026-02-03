@@ -19,25 +19,26 @@ import { Section } from 'twenty-ui/layout';
 import { Button } from 'twenty-ui/input';
 
 const StyledCategoryRow = styled.div`
-  display: flex;
   align-items: center;
+  border-bottom: 1px solid ${({ theme }) => theme.border.color.light};
+  display: flex;
   gap: ${({ theme }) => theme.spacing(2)};
   padding: ${({ theme }) => theme.spacing(2)} 0;
-  border-bottom: 1px solid ${({ theme }) => theme.border.color.light};
 `;
 
 const StyledCategoryName = styled.span`
+  color: ${({ theme }) => theme.font.color.primary};
   flex: 1;
   font-size: ${({ theme }) => theme.font.size.md};
-  color: ${({ theme }) => theme.font.color.primary};
 `;
 
 const StyledDefaultBadge = styled.span`
-  font-size: ${({ theme }) => theme.font.size.xs};
-  color: ${({ theme }) => theme.font.color.tertiary};
   background: ${({ theme }) => theme.background.transparent.light};
-  padding: ${({ theme }) => theme.spacing(0.5)} ${({ theme }) => theme.spacing(1)};
   border-radius: ${({ theme }) => theme.border.radius.xs};
+  color: ${({ theme }) => theme.font.color.tertiary};
+  font-size: ${({ theme }) => theme.font.size.xs};
+  padding: ${({ theme }) => theme.spacing(0.5)}
+    ${({ theme }) => theme.spacing(1)};
 `;
 
 const StyledObjectRow = styled.div`
@@ -49,9 +50,9 @@ const StyledObjectRow = styled.div`
 `;
 
 const StyledObjectLabel = styled.span`
+  color: ${({ theme }) => theme.font.color.secondary};
   flex: 1;
   font-size: ${({ theme }) => theme.font.size.sm};
-  color: ${({ theme }) => theme.font.color.secondary};
 `;
 
 const StyledNewCategoryRow = styled.div`
@@ -82,9 +83,9 @@ const StyledTextInput = styled.input`
 `;
 
 const StyledSelectContainer = styled.div`
+  align-items: center;
   display: flex;
   gap: ${({ theme }) => theme.spacing(1)};
-  align-items: center;
 `;
 
 const StyledSelect = styled.select`
@@ -114,16 +115,13 @@ export const SettingsLayoutModel = () => {
 
   const categories: NavigationCategory[] =
     categoriesData?.navigationCategories ?? [];
-  const configs: ObjectLayoutConfig[] =
-    configsData?.objectLayoutConfigs ?? [];
+  const configs: ObjectLayoutConfig[] = configsData?.objectLayoutConfigs ?? [];
 
   const sortedCategories = [...categories].sort(
     (a, b) => a.position - b.position,
   );
 
-  const configByObjectId = new Map(
-    configs.map((c) => [c.objectMetadataId, c]),
-  );
+  const configByObjectId = new Map(configs.map((c) => [c.objectMetadataId, c]));
 
   const visibleObjects = activeObjectMetadataItems.filter(
     (item) => !item.isSystem,
@@ -264,10 +262,7 @@ export const SettingsLayoutModel = () => {
                   <StyledSelect
                     value={currentParentId}
                     onChange={(e) =>
-                      handleSetParentObject(
-                        obj.id,
-                        e.target.value || null,
-                      )
+                      handleSetParentObject(obj.id, e.target.value || null)
                     }
                   >
                     <option value="">No Parent</option>

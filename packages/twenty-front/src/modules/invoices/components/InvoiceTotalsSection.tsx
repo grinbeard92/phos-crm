@@ -1,6 +1,10 @@
 import styled from '@emotion/styled';
 import { type InvoiceCalculations } from '../types/invoice-form.types';
-import { formatCurrencyFromMicros, dollarsToMicros, microsToDollars } from '../utils/calculateInvoiceTotals';
+import {
+  formatCurrencyFromMicros,
+  dollarsToMicros,
+  microsToDollars,
+} from '../utils/calculateInvoiceTotals';
 
 type InvoiceTotalsSectionProps = {
   calculations: InvoiceCalculations;
@@ -14,53 +18,53 @@ type InvoiceTotalsSectionProps = {
 };
 
 const StyledContainer = styled.div`
-  display: flex;
-  flex-direction: column;
   align-items: flex-end;
-  gap: ${({ theme }) => theme.spacing(2)};
-  padding: ${({ theme }) => theme.spacing(4)};
   background: ${({ theme }) => theme.background.secondary};
   border: 1px solid ${({ theme }) => theme.border.color.medium};
   border-radius: ${({ theme }) => theme.border.radius.md};
+  display: flex;
+  flex-direction: column;
+  gap: ${({ theme }) => theme.spacing(2)};
+  padding: ${({ theme }) => theme.spacing(4)};
 `;
 
 const StyledRow = styled.div`
-  display: flex;
   align-items: center;
+  display: flex;
+  gap: ${({ theme }) => theme.spacing(4)};
   justify-content: space-between;
   min-width: 400px;
-  gap: ${({ theme }) => theme.spacing(4)};
 `;
 
 const StyledLabel = styled.div`
-  font-size: ${({ theme }) => theme.font.size.md};
   color: ${({ theme }) => theme.font.color.secondary};
+  font-size: ${({ theme }) => theme.font.size.md};
 `;
 
 const StyledValue = styled.div`
+  color: ${({ theme }) => theme.font.color.primary};
   font-size: ${({ theme }) => theme.font.size.md};
   font-weight: ${({ theme }) => theme.font.weight.medium};
-  color: ${({ theme }) => theme.font.color.primary};
-  text-align: right;
   min-width: 120px;
+  text-align: right;
 `;
 
 const StyledTotalRow = styled(StyledRow)`
-  padding-top: ${({ theme }) => theme.spacing(2)};
   border-top: 2px solid ${({ theme }) => theme.border.color.strong};
   margin-top: ${({ theme }) => theme.spacing(1)};
+  padding-top: ${({ theme }) => theme.spacing(2)};
 `;
 
 const StyledBalanceDueRow = styled(StyledRow)`
-  padding-top: ${({ theme }) => theme.spacing(2)};
   border-top: 2px solid ${({ theme }) => theme.border.color.strong};
   margin-top: ${({ theme }) => theme.spacing(2)};
+  padding-top: ${({ theme }) => theme.spacing(2)};
 `;
 
 const StyledTotalLabel = styled(StyledLabel)`
+  color: ${({ theme }) => theme.font.color.primary};
   font-size: ${({ theme }) => theme.font.size.lg};
   font-weight: ${({ theme }) => theme.font.weight.semiBold};
-  color: ${({ theme }) => theme.font.color.primary};
 `;
 
 const StyledTotalValue = styled(StyledValue)`
@@ -81,7 +85,8 @@ const StyledInputGroup = styled.div`
 
 const StyledPercentInput = styled.input`
   width: 80px;
-  padding: ${({ theme }) => theme.spacing(1.5)} ${({ theme }) => theme.spacing(2)};
+  padding: ${({ theme }) => theme.spacing(1.5)}
+    ${({ theme }) => theme.spacing(2)};
   border: 1px solid ${({ theme }) => theme.border.color.medium};
   border-radius: ${({ theme }) => theme.border.radius.sm};
   font-size: ${({ theme }) => theme.font.size.md};
@@ -105,8 +110,8 @@ const StyledCurrencyInput = styled(StyledPercentInput)`
 `;
 
 const StyledSymbol = styled.span`
-  font-size: ${({ theme }) => theme.font.size.md};
   color: ${({ theme }) => theme.font.color.tertiary};
+  font-size: ${({ theme }) => theme.font.size.md};
 `;
 
 export const InvoiceTotalsSection = ({
@@ -161,7 +166,8 @@ export const InvoiceTotalsSection = ({
           <StyledSymbol>%</StyledSymbol>
         </StyledInputGroup>
         <StyledValue>
-          -{formatCurrencyFromMicros(
+          -
+          {formatCurrencyFromMicros(
             calculations.discountAmountMicros,
             calculations.currencyCode,
           )}
@@ -183,7 +189,8 @@ export const InvoiceTotalsSection = ({
           <StyledSymbol>%</StyledSymbol>
         </StyledInputGroup>
         <StyledValue>
-          +{formatCurrencyFromMicros(
+          +
+          {formatCurrencyFromMicros(
             calculations.taxAmountMicros,
             calculations.currencyCode,
           )}

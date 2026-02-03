@@ -101,9 +101,7 @@ export const NavigationDrawerObjectTreeItem = ({
   const ChevronIcon = shouldShowChildren ? IconChevronDown : IconChevronRight;
 
   return (
-    <NavigationDrawerItemsCollapsableContainer
-      isGroup={shouldShowChildren}
-    >
+    <NavigationDrawerItemsCollapsableContainer isGroup={shouldShowChildren}>
       <NavigationDrawerItem
         key={objectMetadataItem.id}
         label={objectMetadataItem.labelPlural}

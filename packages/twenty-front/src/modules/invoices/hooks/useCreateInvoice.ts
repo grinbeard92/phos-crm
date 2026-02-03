@@ -1,6 +1,9 @@
 import { useMutation } from '@apollo/client';
 import { useNavigate } from 'react-router-dom';
-import { CREATE_INVOICE, CREATE_INVOICE_LINE_ITEM } from '../graphql/mutations/createInvoice';
+import {
+  CREATE_INVOICE,
+  CREATE_INVOICE_LINE_ITEM,
+} from '../graphql/mutations/createInvoice';
 import { type InvoiceFormData } from '../types/invoice-form.types';
 import { calculateInvoiceTotals } from '../utils/calculateInvoiceTotals';
 

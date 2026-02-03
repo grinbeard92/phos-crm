@@ -1,6 +1,9 @@
 import { atom } from 'recoil';
 
-import { type QuoteFormInput, type QuoteLineItemFormInput } from '../types/quote.types';
+import {
+  type QuoteFormInput,
+  type QuoteLineItemFormInput,
+} from '../types/quote.types';
 
 export const quoteFormState = atom<QuoteFormInput>({
   key: 'quoteFormState',

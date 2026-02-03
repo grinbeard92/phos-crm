@@ -1,7 +1,10 @@
 import { useState } from 'react';
 import styled from '@emotion/styled';
 import { Button } from 'twenty-ui/input';
-import { microsToDollars, dollarsToMicros } from '../utils/calculateInvoiceTotals';
+import {
+  microsToDollars,
+  dollarsToMicros,
+} from '../utils/calculateInvoiceTotals';
 
 type PaymentFormData = {
   paymentDate: string;
@@ -197,7 +200,10 @@ export const PaymentForm = ({
             step="0.01"
             value={formData.amount}
             onChange={(e) =>
-              setFormData({ ...formData, amount: parseFloat(e.target.value) || 0 })
+              setFormData({
+                ...formData,
+                amount: parseFloat(e.target.value) || 0,
+              })
             }
             hasError={!!errors.amount}
           />

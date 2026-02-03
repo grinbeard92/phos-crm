@@ -55,7 +55,8 @@ export const QUOTE_ACTIONS_CONFIG = inheritActionsFromDefaultConfig({
       shouldBeRegistered: ({ selectedRecord }) =>
         isDefined(selectedRecord) &&
         !isDefined(selectedRecord?.deletedAt) &&
-        (selectedRecord.status === 'ACCEPTED' || selectedRecord.status === 'SENT'),
+        (selectedRecord.status === 'ACCEPTED' ||
+          selectedRecord.status === 'SENT'),
       availableOn: [ActionViewType.SHOW_PAGE],
       component: <ConvertQuoteToInvoiceAction />,
     },

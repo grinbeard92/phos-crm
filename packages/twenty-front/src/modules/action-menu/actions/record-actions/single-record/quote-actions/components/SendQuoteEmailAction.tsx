@@ -4,7 +4,7 @@ import { useEmailComposer } from '@/email-composer/hooks/useEmailComposer';
 import { useFindOneRecord } from '@/object-record/hooks/useFindOneRecord';
 import { useSnackBar } from '@/ui/feedback/snack-bar-manager/hooks/useSnackBar';
 
-export const SendQuoteEmailAction = () => {
+export const SendQuoteEmailActionEffect = () => {
   const { enqueueErrorSnackBar } = useSnackBar();
   const quoteId = useSelectedRecordIdOrThrow();
   const { openEmailComposer } = useEmailComposer();

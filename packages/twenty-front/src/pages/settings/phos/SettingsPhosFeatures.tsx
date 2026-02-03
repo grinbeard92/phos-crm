@@ -11,9 +11,8 @@ import { TableRow } from '@/ui/layout/table/components/TableRow';
 import styled from '@emotion/styled';
 import { t } from '@lingui/core/macro';
 import { useRecoilState } from 'recoil';
-import { isDefined } from 'twenty-shared/utils';
+import { isDefined, getSettingsPath } from 'twenty-shared/utils';
 import { SettingsPath } from 'twenty-shared/types';
-import { getSettingsPath } from 'twenty-shared/utils';
 import { H2Title } from 'twenty-ui/display';
 import { Toggle } from 'twenty-ui/input';
 import { Section } from 'twenty-ui/layout';
@@ -23,13 +22,14 @@ import {
 } from '~/generated-metadata/graphql';
 
 const StyledFlagDescription = styled.span`
-  font-size: ${({ theme }) => theme.font.size.xs};
   color: ${({ theme }) => theme.font.color.tertiary};
+  font-size: ${({ theme }) => theme.font.size.xs};
 `;
 
 export const SettingsPhosFeatures = () => {
-  const [currentWorkspace, setCurrentWorkspace] =
-    useRecoilState(currentWorkspaceState);
+  const [currentWorkspace, setCurrentWorkspace] = useRecoilState(
+    currentWorkspaceState,
+  );
   const { enqueueErrorSnackBar } = useSnackBar();
   const [updateFeatureFlag] = useUpdateWorkspaceFeatureFlagMutation();
 
@@ -44,7 +44,10 @@ export const SettingsPhosFeatures = () => {
       ? previousFlags?.map((f) =>
           f.key === flagKey ? { ...f, value: newValue } : f,
         )
-      : [...(previousFlags ?? []), { key: flagKey, value: newValue, id: flagKey }];
+      : [
+          ...(previousFlags ?? []),
+          { key: flagKey, value: newValue, id: flagKey },
+        ];
 
     setCurrentWorkspace({
       ...currentWorkspace,

@@ -1,6 +1,9 @@
 import { useMemo } from 'react';
 
-import { type CurrencyValue, type QuoteLineItemFormInput } from '../types/quote.types';
+import {
+  type CurrencyValue,
+  type QuoteLineItemFormInput,
+} from '../types/quote.types';
 
 export type QuoteTotals = {
   subtotal: CurrencyValue;
@@ -29,8 +32,7 @@ export const useQuoteCalculations = ({
   return useMemo(() => {
     // Calculate subtotal from all line items
     const subtotalMicros = lineItems.reduce((sum, item) => {
-      const lineSubtotal =
-        item.quantity * (item.unitPrice?.amountMicros ?? 0);
+      const lineSubtotal = item.quantity * (item.unitPrice?.amountMicros ?? 0);
       return sum + lineSubtotal;
     }, 0);
 

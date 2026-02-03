@@ -29,12 +29,12 @@ const StyledCategoryList = styled.div`
 `;
 
 const StyledCategoryRow = styled.div`
-  display: flex;
   align-items: center;
-  justify-content: space-between;
-  padding: ${({ theme }) => theme.spacing(2)};
   background: ${({ theme }) => theme.background.transparent.lighter};
   border-radius: ${({ theme }) => theme.border.radius.sm};
+  display: flex;
+  justify-content: space-between;
+  padding: ${({ theme }) => theme.spacing(2)};
 `;
 
 const StyledCategoryInfo = styled.div`
@@ -44,10 +44,10 @@ const StyledCategoryInfo = styled.div`
 `;
 
 const StyledColorDot = styled.div<{ color: string }>`
-  width: 12px;
-  height: 12px;
-  border-radius: 50%;
   background: ${({ color }) => color};
+  border-radius: 50%;
+  height: 12px;
+  width: 12px;
 `;
 
 const StyledCategoryName = styled.div`
@@ -63,9 +63,9 @@ const StyledAmount = styled.div`
 `;
 
 const StyledEmptyState = styled.div`
-  text-align: center;
   color: ${({ theme }) => theme.font.color.tertiary};
   padding: ${({ theme }) => theme.spacing(4)};
+  text-align: center;
 `;
 
 const DEFAULT_COLORS = [
@@ -79,7 +79,10 @@ const DEFAULT_COLORS = [
   '#F97316', // orange
 ];
 
-const formatCurrency = (amount: number, currencyCode: string = 'USD'): string => {
+const formatCurrency = (
+  amount: number,
+  currencyCode: string = 'USD',
+): string => {
   return new Intl.NumberFormat('en-US', {
     style: 'currency',
     currency: currencyCode,
@@ -105,7 +108,10 @@ export const ExpensesByCategoryCard = ({
             <StyledCategoryRow key={expense.categoryName}>
               <StyledCategoryInfo>
                 <StyledColorDot
-                  color={expense.color || DEFAULT_COLORS[index % DEFAULT_COLORS.length]}
+                  color={
+                    expense.color ||
+                    DEFAULT_COLORS[index % DEFAULT_COLORS.length]
+                  }
                 />
                 <StyledCategoryName>{expense.categoryName}</StyledCategoryName>
               </StyledCategoryInfo>

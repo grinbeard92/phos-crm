@@ -35,7 +35,10 @@ const StyledMetricLabel = styled.div`
   font-weight: ${({ theme }) => theme.font.weight.medium};
 `;
 
-const StyledMetricValue = styled.div<{ isNegative?: boolean; isPositive?: boolean }>`
+const StyledMetricValue = styled.div<{
+  isNegative?: boolean;
+  isPositive?: boolean;
+}>`
   color: ${({ theme, isNegative, isPositive }) =>
     isNegative
       ? theme.color.red
@@ -46,7 +49,10 @@ const StyledMetricValue = styled.div<{ isNegative?: boolean; isPositive?: boolea
   font-weight: ${({ theme }) => theme.font.weight.semiBold};
 `;
 
-const formatCurrency = (amount: number, currencyCode: string = 'USD'): string => {
+const formatCurrency = (
+  amount: number,
+  currencyCode: string = 'USD',
+): string => {
   return new Intl.NumberFormat('en-US', {
     style: 'currency',
     currency: currencyCode,

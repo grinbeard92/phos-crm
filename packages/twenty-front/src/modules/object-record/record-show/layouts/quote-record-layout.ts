@@ -1,4 +1,3 @@
-import { CardType } from '@/object-record/record-show/types/CardType';
 import { type RecordLayout } from '@/object-record/record-show/types/RecordLayout';
 
 export const QUOTE_RECORD_LAYOUT: RecordLayout = {

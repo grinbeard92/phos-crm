@@ -24,8 +24,8 @@ const StyledTableContainer = styled.div`
 `;
 
 const StyledTable = styled.table`
-  width: 100%;
   border-collapse: collapse;
+  width: 100%;
 `;
 
 const StyledTableHeader = styled.thead`
@@ -34,11 +34,11 @@ const StyledTableHeader = styled.thead`
 `;
 
 const StyledTableHeaderCell = styled.th`
-  padding: ${({ theme }) => theme.spacing(2)} ${({ theme }) => theme.spacing(3)};
-  text-align: left;
+  color: ${({ theme }) => theme.font.color.secondary};
   font-size: ${({ theme }) => theme.font.size.sm};
   font-weight: ${({ theme }) => theme.font.weight.semiBold};
-  color: ${({ theme }) => theme.font.color.secondary};
+  padding: ${({ theme }) => theme.spacing(2)} ${({ theme }) => theme.spacing(3)};
+  text-align: left;
 `;
 
 const StyledTableRow = styled.tr`
@@ -188,13 +188,19 @@ export const QuoteLineItemEditor = ({
             <StyledTableHeaderCell style={{ width: '40%' }}>
               Description
             </StyledTableHeaderCell>
-            <StyledTableHeaderCell style={{ width: '120px', textAlign: 'right' }}>
+            <StyledTableHeaderCell
+              style={{ width: '120px', textAlign: 'right' }}
+            >
               Quantity
             </StyledTableHeaderCell>
-            <StyledTableHeaderCell style={{ width: '140px', textAlign: 'right' }}>
+            <StyledTableHeaderCell
+              style={{ width: '140px', textAlign: 'right' }}
+            >
               Unit Price
             </StyledTableHeaderCell>
-            <StyledTableHeaderCell style={{ width: '140px', textAlign: 'right' }}>
+            <StyledTableHeaderCell
+              style={{ width: '140px', textAlign: 'right' }}
+            >
               Amount
             </StyledTableHeaderCell>
             <StyledTableHeaderCell style={{ width: '50px' }}>
@@ -234,7 +240,9 @@ export const QuoteLineItemEditor = ({
                     min="0"
                     step="0.01"
                     value={item.quantity}
-                    onChange={(e) => handleQuantityChange(index, e.target.value)}
+                    onChange={(e) =>
+                      handleQuantityChange(index, e.target.value)
+                    }
                     disabled={readonly}
                     hasError={!!qtyError}
                   />
@@ -246,11 +254,15 @@ export const QuoteLineItemEditor = ({
                     min="0"
                     step="0.01"
                     value={microsToDollars(item.unitPriceMicros).toFixed(2)}
-                    onChange={(e) => handleUnitPriceChange(index, e.target.value)}
+                    onChange={(e) =>
+                      handleUnitPriceChange(index, e.target.value)
+                    }
                     disabled={readonly}
                     hasError={!!priceError}
                   />
-                  {priceError && <StyledErrorText>{priceError}</StyledErrorText>}
+                  {priceError && (
+                    <StyledErrorText>{priceError}</StyledErrorText>
+                  )}
                 </StyledTableCell>
                 <StyledTableCell>
                   <StyledAmountText>
@@ -261,7 +273,11 @@ export const QuoteLineItemEditor = ({
                   <StyledIconButton
                     onClick={() => onRemove(index)}
                     disabled={readonly || !canRemove}
-                    title={canRemove ? 'Remove line item' : 'At least one line item required'}
+                    title={
+                      canRemove
+                        ? 'Remove line item'
+                        : 'At least one line item required'
+                    }
                   >
                     <IconTrash size={16} />
                   </StyledIconButton>
