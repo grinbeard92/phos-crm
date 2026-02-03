@@ -51,18 +51,20 @@
 - **Next**: Need to add attachment support to EmailComposeModalOptions
 
 ### Task #12: 📋 Build Stripe Quote creation API integration
-**Status**: PENDING
+**Status**: PENDING - Lower priority (invoices working)
 - When Quote created in CRM → Auto-create Stripe Quote
 - Include Customer and line items sync
 - Store Stripe Quote ID in CRM
 
-### Task #13: 📋 Auto-create Stripe Customer and Contact
-**Status**: PENDING
-- Check if Customer exists in Stripe (by email/company)
-- If not exists → Create Stripe Customer
-- If not exists → Create Stripe Contact
-- Store Stripe Customer ID in CRM Company record
-- Store Stripe Contact ID in CRM Person record
+### Task #13: ✅ Auto-create Stripe Customer and sync to CRM
+**Status**: COMPLETED
+- ✅ CustomerBillingApiController now fetches real invoice data from CRM (not mock)
+- ✅ Service auto-creates Stripe Customer if doesn't exist
+- ✅ Stores stripeCustomerId in CRM Company record after invoice creation
+- ✅ Stores stripeInvoiceId and stripePaymentLink in Invoice record
+- ✅ Webhook handlers update CRM when payments succeed/fail/refund
+- ✅ Payment records created automatically from webhooks
+- ✅ Invoice status synced (PAID, REFUNDED) from Stripe events
 
 ### Task #14: 📋 Opportunity workflow trigger - auto-create Quote
 **Status**: PENDING

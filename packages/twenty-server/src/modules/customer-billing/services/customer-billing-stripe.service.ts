@@ -52,6 +52,81 @@ export class CustomerBillingStripeService {
     return this.stripe !== null;
   }
 
+  async convertQuoteToInvoice(
+    quoteId: string,
+    workspaceId: string,
+  ): Promise<string> {
+    const quoteRepository = await this.globalWorkspaceOrmManager.getRepository(
+      workspaceId,
+      'quote',
+    );
+
+    const quote = await quoteRepository.findOne({
+      where: { id: quoteId },
+      relations: {
+        company: true,
+        contact: true,
+        lineItems: true,
+      },
+    });
+
+    if (!quote) {
+      throw new Error(`Quote not found: ${quoteId}`);
+    }
+
+    // Create new invoice from quote data
+    const invoiceRepository = await this.globalWorkspaceOrmManager.getRepository(
+      workspaceId,
+      'invoice',
+    );
+
+    const invoice = await invoiceRepository.save({
+      name: quote.name || `Invoice from ${quote.quoteNumber}`,
+      invoiceDate: new Date(),
+      dueDate: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000), // 30 days from now
+      status: 'DRAFT',
+      subtotal: quote.subtotal,
+      discountPercentage: quote.discountPercentage,
+      discountAmount: quote.discountAmount,
+      taxPercentage: quote.taxPercentage,
+      taxAmount: quote.taxAmount,
+      total: quote.total,
+      paidAmount: { amountMicros: 0, currencyCode: 'USD' },
+      balanceDue: quote.total,
+      notes: quote.notes,
+      terms: quote.terms,
+      companyId: quote.companyId,
+      contactId: quote.contactId,
+      quoteId: quote.id,
+      stripePaymentStatus: 'NOT_SYNCED',
+    });
+
+    // Copy line items from quote to invoice
+    if (quote.lineItems && quote.lineItems.length > 0) {
+      const invoiceLineItemRepository =
+        await this.globalWorkspaceOrmManager.getRepository(
+          workspaceId,
+          'invoiceLineItem',
+        );
+
+      for (const quoteLineItem of quote.lineItems) {
+        await invoiceLineItemRepository.save({
+          description: quoteLineItem.description,
+          quantity: quoteLineItem.quantity,
+          unitPrice: quoteLineItem.unitPrice,
+          serviceCategory: quoteLineItem.serviceCategory,
+          invoiceId: invoice.id,
+        });
+      }
+    }
+
+    this.logger.log(
+      `Converted quote ${quoteId} to invoice ${invoice.id} with ${quote.lineItems?.length || 0} line items`,
+    );
+
+    return invoice.id;
+  }
+
   async fetchInvoiceData(
     invoiceId: string,
     workspaceId: string,
