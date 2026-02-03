@@ -116,6 +116,58 @@ export class CustomerBillingStripeService {
     };
   }
 
+  async updateCrmAfterInvoiceCreation(
+    invoiceId: string,
+    workspaceId: string,
+    stripeCustomerId: string,
+    stripeInvoiceId: string,
+    stripePaymentLink: string | null,
+  ): Promise<void> {
+    const invoiceRepository = await this.globalWorkspaceOrmManager.getRepository(
+      workspaceId,
+      'invoice',
+    );
+
+    const invoice = await invoiceRepository.findOne({
+      where: { id: invoiceId },
+      relations: { company: true },
+    });
+
+    if (!invoice) {
+      this.logger.error(`Invoice not found: ${invoiceId}`);
+      return;
+    }
+
+    // Update invoice with Stripe IDs and payment link
+    await invoiceRepository.update(invoiceId, {
+      stripeInvoiceId,
+      stripePaymentLink: stripePaymentLink || undefined,
+      stripePaymentStatus: 'PENDING',
+    });
+
+    // Update company with stripeCustomerId if not already set
+    if (invoice.companyId) {
+      const companyRepository =
+        await this.globalWorkspaceOrmManager.getRepository(
+          workspaceId,
+          'company',
+        );
+
+      const company = await companyRepository.findOne({
+        where: { id: invoice.companyId },
+      });
+
+      if (company && !company.stripeCustomerId) {
+        await companyRepository.update(invoice.companyId, {
+          stripeCustomerId,
+        });
+        this.logger.log(
+          `Updated company ${invoice.companyId} with Stripe customer ID ${stripeCustomerId}`,
+        );
+      }
+    }
+  }
+
   async createInvoice(
     input: CreateStripeInvoiceInput,
   ): Promise<StripeInvoiceResult> {

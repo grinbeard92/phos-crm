@@ -69,6 +69,15 @@ export class CustomerBillingApiController {
       const result =
         await this.customerBillingStripeService.createInvoice(invoiceData);
 
+      // Save stripeCustomerId back to CRM Company and stripeInvoiceId to Invoice
+      await this.customerBillingStripeService.updateCrmAfterInvoiceCreation(
+        request.invoiceId,
+        workspaceId,
+        result.stripeCustomerId,
+        result.stripeInvoiceId,
+        result.hostedInvoiceUrl,
+      );
+
       return {
         stripeInvoiceId: result.stripeInvoiceId,
         stripeCustomerId: result.stripeCustomerId,
