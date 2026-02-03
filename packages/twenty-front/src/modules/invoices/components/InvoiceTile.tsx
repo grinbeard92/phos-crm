@@ -75,7 +75,7 @@ export const InvoiceTile = ({ invoice }: InvoiceTileProps) => {
   const navigate = useNavigate();
 
   const handleClick = () => {
-    navigate(`/objects/invoice/${invoice.id}`);
+    navigate(`/object/invoice/${invoice.id}`);
   };
 
   const balanceDue = invoice.balanceDue || invoice.total;

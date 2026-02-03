@@ -74,7 +74,7 @@ export const QuoteTile = ({ quote }: QuoteTileProps) => {
   const navigate = useNavigate();
 
   const handleClick = () => {
-    navigate(`/objects/quote/${quote.id}`);
+    navigate(`/object/quote/${quote.id}`);
   };
 
   const formattedAmount = new Intl.NumberFormat('en-US', {

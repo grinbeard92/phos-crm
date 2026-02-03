@@ -1,5 +1,28 @@
 # CLAUDE.md
 
+# 🚨 CRITICAL: LIVE PRODUCTION DATA - NO DATABASE RESETS ALLOWED 🚨
+
+**Railway deployment is imminent. We have live production data in the database.**
+
+## ❌ FORBIDDEN DATABASE OPERATIONS - NEVER USE THESE:
+- `npx nx database:reset twenty-server` - ❌ DESTROYS ALL DATA
+- `npx nx run twenty-server:database:init:prod` - ❌ WIPES PRODUCTION DATABASE
+- ANY command that drops tables or reinitializes the database
+
+## ✅ SAFE DATABASE WORKFLOW - ALWAYS USE MIGRATIONS:
+1. Generate migration: `npx nx run twenty-server:typeorm migration:generate src/database/typeorm/core/migrations/common/[name] -d src/database/typeorm/core/core.datasource.ts`
+2. Review migration file carefully - verify no data loss
+3. Run migration: `npx nx run twenty-server:database:migrate:prod`
+4. Sync metadata: `npx nx run twenty-server:command workspace:sync-metadata`
+
+**Migration safety principles:**
+- Always additive (ADD columns/tables, never DROP)
+- New columns must be nullable OR have default values
+- Test locally before deploying to Railway
+- Keep migrations atomic and reversible
+
+---
+
 Use the native ways to extend Twenty as far as possible to maintain schema integrity. That would be GraphQL, REST API, and create-twenty-app@latest (https://docs.twenty.com/developers/extend/capabilities/apps). Only when truly custom implementations are required should we implement anything with scripts, etc. ALWAYS PREFER NATIVE DOCUMENTED TWENTY CRM PROCESSES TO ADD OBJECTS, VIEWS, DASHBOARDS, INTEGRATIONS, etc. Start there first.
 
 Review the pages in both of the following routes for MANDATORY design patterns when developing backend and frontend features so they can eventually be released as Twenty CRM feature recommendations.
