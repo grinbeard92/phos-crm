@@ -1,5 +1,6 @@
 import { MultipleRecordsActionKeys } from '@/action-menu/actions/record-actions/multiple-records/types/MultipleRecordsActionKeys';
 import { NoSelectionRecordActionKeys } from '@/action-menu/actions/record-actions/no-selection/types/NoSelectionRecordActionsKeys';
+import { ConvertQuoteToInvoiceAction } from '@/action-menu/actions/record-actions/single-record/quote-actions/components/ConvertQuoteToInvoiceAction';
 import { DownloadQuotePdfAction } from '@/action-menu/actions/record-actions/single-record/quote-actions/components/DownloadQuotePdfAction';
 import { SendQuoteEmailAction } from '@/action-menu/actions/record-actions/single-record/quote-actions/components/SendQuoteEmailAction';
 import { QuoteSingleRecordActionKeys } from '@/action-menu/actions/record-actions/single-record/quote-actions/types/QuoteSingleRecordActionKeys';
@@ -10,7 +11,7 @@ import { ActionType } from '@/action-menu/actions/types/ActionType';
 import { ActionViewType } from '@/action-menu/actions/types/ActionViewType';
 import { msg } from '@lingui/core/macro';
 import { isDefined } from 'twenty-shared/utils';
-import { IconDownload, IconMail } from 'twenty-ui/display';
+import { IconDownload, IconFileCheck, IconMail } from 'twenty-ui/display';
 
 export const QUOTE_ACTIONS_CONFIG = inheritActionsFromDefaultConfig({
   config: {
@@ -41,6 +42,22 @@ export const QUOTE_ACTIONS_CONFIG = inheritActionsFromDefaultConfig({
         isDefined(selectedRecord) && !isDefined(selectedRecord?.deletedAt),
       availableOn: [ActionViewType.SHOW_PAGE],
       component: <SendQuoteEmailAction />,
+    },
+    [QuoteSingleRecordActionKeys.CONVERT_TO_INVOICE]: {
+      key: QuoteSingleRecordActionKeys.CONVERT_TO_INVOICE,
+      label: msg`Convert to Invoice`,
+      shortLabel: msg`Convert`,
+      isPinned: false,
+      position: 5,
+      Icon: IconFileCheck,
+      type: ActionType.Standard,
+      scope: ActionScope.RecordSelection,
+      shouldBeRegistered: ({ selectedRecord }) =>
+        isDefined(selectedRecord) &&
+        !isDefined(selectedRecord?.deletedAt) &&
+        (selectedRecord.status === 'ACCEPTED' || selectedRecord.status === 'SENT'),
+      availableOn: [ActionViewType.SHOW_PAGE],
+      component: <ConvertQuoteToInvoiceAction />,
     },
   },
   actionKeys: [
