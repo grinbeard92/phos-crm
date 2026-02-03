@@ -27,6 +27,7 @@ export enum AppPath {
   // Phos CRM custom pages
   CreateQuote = '/quotes/create',
   CreateInvoice = '/invoices/create',
+  CreateExpense = '/expenses/create',
 
   Settings = `settings`,
   SettingsCatchAll = `/${Settings}/*`,

@@ -21,6 +21,7 @@ import { RecordIndexPage } from '~/pages/object-record/RecordIndexPage';
 import { RecordShowPage } from '~/pages/object-record/RecordShowPage';
 import { CreateQuotePage } from '~/pages/quotes/CreateQuotePage';
 import { CreateInvoicePage } from '~/pages/invoices/CreateInvoicePage';
+import { CreateExpensePage } from '~/pages/expenses/CreateExpensePage';
 import { BookCall } from '~/pages/onboarding/BookCall';
 import { BookCallDecision } from '~/pages/onboarding/BookCallDecision';
 import { ChooseYourPlan } from '~/pages/onboarding/ChooseYourPlan';
@@ -65,6 +66,7 @@ export const useCreateAppRouter = (
           <Route path={indexAppPath.getIndexAppPath()} element={<></>} />
           <Route path={AppPath.CreateQuote} element={<CreateQuotePage />} />
           <Route path={AppPath.CreateInvoice} element={<CreateInvoicePage />} />
+          <Route path={AppPath.CreateExpense} element={<CreateExpensePage />} />
           <Route path={AppPath.RecordIndexPage} element={<RecordIndexPage />} />
           <Route path={AppPath.RecordShowPage} element={<RecordShowPage />} />
           <Route
