@@ -22,6 +22,7 @@ import { RecordShowPage } from '~/pages/object-record/RecordShowPage';
 import { CreateQuotePage } from '~/pages/quotes/CreateQuotePage';
 import { CreateInvoicePage } from '~/pages/invoices/CreateInvoicePage';
 import { CreateExpensePage } from '~/pages/expenses/CreateExpensePage';
+import { FinancialDashboardPage } from '~/pages/financial-dashboard/FinancialDashboardPage';
 import { BookCall } from '~/pages/onboarding/BookCall';
 import { BookCallDecision } from '~/pages/onboarding/BookCallDecision';
 import { ChooseYourPlan } from '~/pages/onboarding/ChooseYourPlan';
@@ -67,6 +68,7 @@ export const useCreateAppRouter = (
           <Route path={AppPath.CreateQuote} element={<CreateQuotePage />} />
           <Route path={AppPath.CreateInvoice} element={<CreateInvoicePage />} />
           <Route path={AppPath.CreateExpense} element={<CreateExpensePage />} />
+          <Route path={AppPath.FinancialDashboard} element={<FinancialDashboardPage />} />
           <Route path={AppPath.RecordIndexPage} element={<RecordIndexPage />} />
           <Route path={AppPath.RecordShowPage} element={<RecordShowPage />} />
           <Route

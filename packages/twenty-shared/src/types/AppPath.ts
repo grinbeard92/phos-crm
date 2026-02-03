@@ -28,6 +28,7 @@ export enum AppPath {
   CreateQuote = '/quotes/create',
   CreateInvoice = '/invoices/create',
   CreateExpense = '/expenses/create',
+  FinancialDashboard = '/financial-dashboard',
 
   Settings = `settings`,
   SettingsCatchAll = `/${Settings}/*`,
