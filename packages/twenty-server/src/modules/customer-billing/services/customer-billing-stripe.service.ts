@@ -2,6 +2,8 @@ import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import Stripe from 'stripe';
 
+import { GlobalWorkspaceOrmManager } from 'src/engine/twenty-orm/global-workspace-datasource/global-workspace-orm.manager';
+
 export type CreateStripeInvoiceInput = {
   customerEmail: string;
   customerName?: string;
@@ -28,7 +30,10 @@ export class CustomerBillingStripeService {
   private readonly logger = new Logger(CustomerBillingStripeService.name);
   private stripe: Stripe | null = null;
 
-  constructor(private configService: ConfigService) {
+  constructor(
+    private configService: ConfigService,
+    private globalWorkspaceOrmManager: GlobalWorkspaceOrmManager,
+  ) {
     const apiKey = this.configService.get<string>('STRIPE_SECRET_KEY');
 
     if (apiKey) {
@@ -45,6 +50,69 @@ export class CustomerBillingStripeService {
 
   isEnabled(): boolean {
     return this.stripe !== null;
+  }
+
+  async fetchInvoiceData(
+    invoiceId: string,
+    workspaceId: string,
+  ): Promise<CreateStripeInvoiceInput> {
+    const invoiceRepository = await this.globalWorkspaceOrmManager.getRepository(
+      workspaceId,
+      'invoice',
+    );
+
+    const invoice = await invoiceRepository.findOne({
+      where: { id: invoiceId },
+      relations: {
+        company: true,
+        contact: true,
+        lineItems: true,
+      },
+    });
+
+    if (!invoice) {
+      throw new Error(`Invoice not found: ${invoiceId}`);
+    }
+
+    // Extract customer email from contact or company
+    const customerEmail = invoice.contact?.email || invoice.company?.email || '';
+    if (!customerEmail) {
+      throw new Error(
+        `No email found for invoice ${invoiceId}. Invoice must have a contact or company with an email.`,
+      );
+    }
+
+    // Build customer name
+    const customerName =
+      invoice.company?.name ||
+      (invoice.contact
+        ? `${invoice.contact.nameFirstName || ''} ${invoice.contact.nameLastName || ''}`.trim()
+        : undefined);
+
+    // Convert line items to Stripe format
+    const lineItems = (invoice.lineItems || []).map((item: any) => ({
+      description: item.description || 'Service',
+      quantity: item.quantity || 1,
+      unitAmountCents: Math.round(
+        (item.unitPrice?.amountMicros || 0) / 10000,
+      ), // Convert micros to cents
+    }));
+
+    if (lineItems.length === 0) {
+      throw new Error(`Invoice ${invoiceId} has no line items`);
+    }
+
+    return {
+      customerEmail,
+      customerName,
+      invoiceNumber: invoice.invoiceNumber || invoice.id.slice(0, 8).toUpperCase(),
+      dueDate: invoice.dueDate ? new Date(invoice.dueDate) : undefined,
+      lineItems,
+      metadata: {
+        crmInvoiceId: invoice.id,
+        crmInvoiceNumber: invoice.invoiceNumber || invoice.id.slice(0, 8),
+      },
+    };
   }
 
   async createInvoice(

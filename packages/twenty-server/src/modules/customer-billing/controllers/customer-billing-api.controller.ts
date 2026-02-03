@@ -1,5 +1,16 @@
-import { Controller, Post, Body, UseGuards } from '@nestjs/common';
+import {
+  Controller,
+  Post,
+  Body,
+  UseGuards,
+  Req,
+  HttpException,
+  HttpStatus,
+} from '@nestjs/common';
+import { type Request } from 'express';
+
 import { JwtAuthGuard } from 'src/engine/guards/jwt-auth.guard';
+import { WorkspaceAuthGuard } from 'src/engine/guards/workspace-auth.guard';
 import { CustomerBillingStripeService } from '../services/customer-billing-stripe.service';
 
 type CreateStripeInvoiceRequest = {
@@ -13,8 +24,13 @@ type CreateStripeInvoiceResponse = {
   invoicePdfUrl: string | null;
 };
 
+type AuthenticatedRequest = Request & {
+  workspaceId: string;
+  user: { workspaceId: string };
+};
+
 @Controller('api/stripe')
-@UseGuards(JwtAuthGuard)
+@UseGuards(JwtAuthGuard, WorkspaceAuthGuard)
 export class CustomerBillingApiController {
   constructor(
     private readonly customerBillingStripeService: CustomerBillingStripeService,
@@ -23,44 +39,47 @@ export class CustomerBillingApiController {
   @Post('create-invoice')
   async createInvoice(
     @Body() request: CreateStripeInvoiceRequest,
+    @Req() req: AuthenticatedRequest,
   ): Promise<CreateStripeInvoiceResponse> {
     if (!this.customerBillingStripeService.isEnabled()) {
-      throw new Error('Stripe integration is not enabled');
+      throw new HttpException(
+        'Stripe integration is not enabled',
+        HttpStatus.SERVICE_UNAVAILABLE,
+      );
     }
 
-    // TODO: Fetch invoice data from CRM using Twenty's GraphQL
-    // For now, return mock data structure
-    // In production, this would:
-    // 1. Fetch invoice from workspace using request.invoiceId
-    // 2. Fetch related customer/company data
-    // 3. Fetch line items
-    // 4. Call customerBillingStripeService.createInvoice()
+    const workspaceId = req.user?.workspaceId || req.workspaceId;
 
-    const mockInvoiceData = {
-      customerEmail: 'customer@example.com',
-      customerName: 'Example Customer',
-      invoiceNumber: 'INV-001',
-      dueDate: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000),
-      lineItems: [
-        {
-          description: 'Service A',
-          quantity: 1,
-          unitAmountCents: 10000, // $100.00
-        },
-      ],
-      metadata: {
-        crmInvoiceId: request.invoiceId,
-      },
-    };
+    if (!workspaceId) {
+      throw new HttpException(
+        'Workspace ID not found',
+        HttpStatus.UNAUTHORIZED,
+      );
+    }
 
-    const result =
-      await this.customerBillingStripeService.createInvoice(mockInvoiceData);
+    try {
+      // Fetch real invoice data from CRM
+      const invoiceData =
+        await this.customerBillingStripeService.fetchInvoiceData(
+          request.invoiceId,
+          workspaceId,
+        );
 
-    return {
-      stripeInvoiceId: result.stripeInvoiceId,
-      stripeCustomerId: result.stripeCustomerId,
-      hostedInvoiceUrl: result.hostedInvoiceUrl,
-      invoicePdfUrl: result.invoicePdfUrl,
-    };
+      // Create invoice in Stripe
+      const result =
+        await this.customerBillingStripeService.createInvoice(invoiceData);
+
+      return {
+        stripeInvoiceId: result.stripeInvoiceId,
+        stripeCustomerId: result.stripeCustomerId,
+        hostedInvoiceUrl: result.hostedInvoiceUrl,
+        invoicePdfUrl: result.invoicePdfUrl,
+      };
+    } catch (error) {
+      throw new HttpException(
+        `Failed to create Stripe invoice: ${error.message}`,
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
   }
 }
