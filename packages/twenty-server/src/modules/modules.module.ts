@@ -7,6 +7,7 @@ import { FavoriteFolderModule } from 'src/modules/favorite-folder/favorite-folde
 import { FavoriteModule } from 'src/modules/favorite/favorite.module';
 import { MessagingModule } from 'src/modules/messaging/messaging.module';
 import { OpportunityDaysInStageModule } from 'src/modules/opportunity/opportunity-days-in-stage/opportunity-days-in-stage.module';
+import { PdfGenerationModule } from 'src/modules/pdf-generation/pdf-generation.module';
 import { WorkflowModule } from 'src/modules/workflow/workflow.module';
 
 @Module({
@@ -19,6 +20,7 @@ import { WorkflowModule } from 'src/modules/workflow/workflow.module';
     FavoriteFolderModule,
     FavoriteModule,
     OpportunityDaysInStageModule,
+    PdfGenerationModule,
   ],
   providers: [],
   exports: [],
