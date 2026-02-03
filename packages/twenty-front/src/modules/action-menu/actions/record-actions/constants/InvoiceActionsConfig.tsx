@@ -1,8 +1,8 @@
 import { MultipleRecordsActionKeys } from '@/action-menu/actions/record-actions/multiple-records/types/MultipleRecordsActionKeys';
 import { NoSelectionRecordActionKeys } from '@/action-menu/actions/record-actions/no-selection/types/NoSelectionRecordActionsKeys';
-import { CreateStripeInvoiceAction } from '@/action-menu/actions/record-actions/single-record/invoice-actions/components/CreateStripeInvoiceAction';
-import { DownloadInvoicePdfAction } from '@/action-menu/actions/record-actions/single-record/invoice-actions/components/DownloadInvoicePdfAction';
-import { SendInvoiceEmailAction } from '@/action-menu/actions/record-actions/single-record/invoice-actions/components/SendInvoiceEmailAction';
+import { CreateStripeInvoiceActionEffect } from '@/action-menu/actions/record-actions/single-record/invoice-actions/components/CreateStripeInvoiceAction';
+import { DownloadInvoicePdfActionEffect } from '@/action-menu/actions/record-actions/single-record/invoice-actions/components/DownloadInvoicePdfAction';
+import { SendInvoiceEmailActionEffect } from '@/action-menu/actions/record-actions/single-record/invoice-actions/components/SendInvoiceEmailAction';
 import { InvoiceSingleRecordActionKeys } from '@/action-menu/actions/record-actions/single-record/invoice-actions/types/InvoiceSingleRecordActionKeys';
 import { SingleRecordActionKeys } from '@/action-menu/actions/record-actions/single-record/types/SingleRecordActionsKey';
 import { inheritActionsFromDefaultConfig } from '@/action-menu/actions/record-actions/utils/inheritActionsFromDefaultConfig';
@@ -27,7 +27,7 @@ export const INVOICE_ACTIONS_CONFIG = inheritActionsFromDefaultConfig({
       shouldBeRegistered: ({ selectedRecord }) =>
         isDefined(selectedRecord) && !isDefined(selectedRecord?.deletedAt),
       availableOn: [ActionViewType.SHOW_PAGE],
-      component: <DownloadInvoicePdfAction />,
+      component: <DownloadInvoicePdfActionEffect />,
     },
     [InvoiceSingleRecordActionKeys.SEND_INVOICE_EMAIL]: {
       key: InvoiceSingleRecordActionKeys.SEND_INVOICE_EMAIL,
@@ -41,7 +41,7 @@ export const INVOICE_ACTIONS_CONFIG = inheritActionsFromDefaultConfig({
       shouldBeRegistered: ({ selectedRecord }) =>
         isDefined(selectedRecord) && !isDefined(selectedRecord?.deletedAt),
       availableOn: [ActionViewType.SHOW_PAGE],
-      component: <SendInvoiceEmailAction />,
+      component: <SendInvoiceEmailActionEffect />,
     },
     [InvoiceSingleRecordActionKeys.CREATE_STRIPE_INVOICE]: {
       key: InvoiceSingleRecordActionKeys.CREATE_STRIPE_INVOICE,
@@ -57,7 +57,7 @@ export const INVOICE_ACTIONS_CONFIG = inheritActionsFromDefaultConfig({
         !isDefined(selectedRecord?.deletedAt) &&
         !isDefined(selectedRecord?.stripeInvoiceId),
       availableOn: [ActionViewType.SHOW_PAGE],
-      component: <CreateStripeInvoiceAction />,
+      component: <CreateStripeInvoiceActionEffect />,
     },
   },
   actionKeys: [

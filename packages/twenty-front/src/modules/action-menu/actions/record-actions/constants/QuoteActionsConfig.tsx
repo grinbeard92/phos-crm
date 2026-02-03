@@ -1,8 +1,8 @@
 import { MultipleRecordsActionKeys } from '@/action-menu/actions/record-actions/multiple-records/types/MultipleRecordsActionKeys';
 import { NoSelectionRecordActionKeys } from '@/action-menu/actions/record-actions/no-selection/types/NoSelectionRecordActionsKeys';
-import { ConvertQuoteToInvoiceAction } from '@/action-menu/actions/record-actions/single-record/quote-actions/components/ConvertQuoteToInvoiceAction';
-import { DownloadQuotePdfAction } from '@/action-menu/actions/record-actions/single-record/quote-actions/components/DownloadQuotePdfAction';
-import { SendQuoteEmailAction } from '@/action-menu/actions/record-actions/single-record/quote-actions/components/SendQuoteEmailAction';
+import { ConvertQuoteToInvoiceActionEffect } from '@/action-menu/actions/record-actions/single-record/quote-actions/components/ConvertQuoteToInvoiceAction';
+import { DownloadQuotePdfActionEffect } from '@/action-menu/actions/record-actions/single-record/quote-actions/components/DownloadQuotePdfAction';
+import { SendQuoteEmailActionEffect } from '@/action-menu/actions/record-actions/single-record/quote-actions/components/SendQuoteEmailAction';
 import { QuoteSingleRecordActionKeys } from '@/action-menu/actions/record-actions/single-record/quote-actions/types/QuoteSingleRecordActionKeys';
 import { SingleRecordActionKeys } from '@/action-menu/actions/record-actions/single-record/types/SingleRecordActionsKey';
 import { inheritActionsFromDefaultConfig } from '@/action-menu/actions/record-actions/utils/inheritActionsFromDefaultConfig';
@@ -27,7 +27,7 @@ export const QUOTE_ACTIONS_CONFIG = inheritActionsFromDefaultConfig({
       shouldBeRegistered: ({ selectedRecord }) =>
         isDefined(selectedRecord) && !isDefined(selectedRecord?.deletedAt),
       availableOn: [ActionViewType.SHOW_PAGE],
-      component: <DownloadQuotePdfAction />,
+      component: <DownloadQuotePdfActionEffect />,
     },
     [QuoteSingleRecordActionKeys.SEND_QUOTE_EMAIL]: {
       key: QuoteSingleRecordActionKeys.SEND_QUOTE_EMAIL,
@@ -41,7 +41,7 @@ export const QUOTE_ACTIONS_CONFIG = inheritActionsFromDefaultConfig({
       shouldBeRegistered: ({ selectedRecord }) =>
         isDefined(selectedRecord) && !isDefined(selectedRecord?.deletedAt),
       availableOn: [ActionViewType.SHOW_PAGE],
-      component: <SendQuoteEmailAction />,
+      component: <SendQuoteEmailActionEffect />,
     },
     [QuoteSingleRecordActionKeys.CONVERT_TO_INVOICE]: {
       key: QuoteSingleRecordActionKeys.CONVERT_TO_INVOICE,
@@ -58,7 +58,7 @@ export const QUOTE_ACTIONS_CONFIG = inheritActionsFromDefaultConfig({
         (selectedRecord.status === 'ACCEPTED' ||
           selectedRecord.status === 'SENT'),
       availableOn: [ActionViewType.SHOW_PAGE],
-      component: <ConvertQuoteToInvoiceAction />,
+      component: <ConvertQuoteToInvoiceActionEffect />,
     },
   },
   actionKeys: [
