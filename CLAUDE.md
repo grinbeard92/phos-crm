@@ -40,6 +40,39 @@ When adding a new feature flag for Phos:
 4. Add it to the workspace-entity-manager test mock: `packages/twenty-server/src/engine/twenty-orm/entity-manager/workspace-entity-manager.spec.ts`
 5. Run `npx nx typecheck twenty-front && npx nx typecheck twenty-server` to verify
 
+## NestJS Module Dependencies (CRITICAL - Common Error Pattern)
+
+When creating new modules that use **JwtAuthGuard** or other authentication guards:
+
+**REQUIRED MODULE IMPORTS:**
+```typescript
+@Module({
+  imports: [
+    AuthModule,              // Provides AccessTokenService
+    WorkspaceCacheModule,    // Provides WorkspaceCacheStorageService
+    // ... other imports
+  ],
+  controllers: [YourController],
+  providers: [YourService],
+})
+export class YourModule {}
+```
+
+**Why this is needed:**
+- `JwtAuthGuard` has dependencies: `AccessTokenService` and `WorkspaceCacheStorageService`
+- NestJS dependency injection requires these to be available in the module's context
+- `AuthModule` exports `AccessTokenService`
+- `WorkspaceCacheModule` provides `WorkspaceCacheStorageService`
+
+**Error pattern to watch for:**
+```
+UnknownDependenciesException: Nest can't resolve dependencies of the JwtAuthGuard
+(?, WorkspaceCacheStorageService). Please make sure that the argument
+AccessTokenService at index [0] is available in the YourModule context.
+```
+
+**Solution:** Always import `AuthModule` and `WorkspaceCacheModule` in any module using `@UseGuards(JwtAuthGuard)`.
+
 Our Workspace will be "Phos Industries" and allowable domains will be "@phos-ind.com" and "@lvnlaser.com" and "@beehivebirth.com" (Multi-tenant)
 
 We are focused on Phos only right now.
