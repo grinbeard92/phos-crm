@@ -3,8 +3,19 @@ import { type RecordLayout } from '@/object-record/record-show/types/RecordLayou
 
 export const INVOICE_RECORD_LAYOUT: RecordLayout = {
   tabs: {
-    // No additional tabs needed - the standard fields/timeline/tasks/notes will show
-    // Line items will be shown via the lineItems relation field in the fields card
-    // Payments will be shown via the payments relation field
+    payments: {
+      title: 'Payments',
+      position: 100,
+      icon: 'IconCreditCard',
+      cards: [{ type: CardType.PaymentCard }],
+      hide: {
+        ifMobile: false,
+        ifDesktop: false,
+        ifInRightDrawer: false,
+        ifFeaturesDisabled: [],
+        ifRequiredObjectsInactive: [],
+        ifRelationsMissing: [],
+      },
+    },
   },
 };

@@ -13,4 +13,5 @@ export enum CardType {
   DashboardCard = 'DashboardCard',
   QuoteCard = 'QuoteCard',
   InvoiceCard = 'InvoiceCard',
+  PaymentCard = 'PaymentCard',
 }

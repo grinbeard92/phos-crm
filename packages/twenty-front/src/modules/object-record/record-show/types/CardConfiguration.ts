@@ -25,6 +25,7 @@ export type CardTypeToConfiguration = {
   [CardType.DashboardCard]: EmptyCardConfiguration;
   [CardType.QuoteCard]: EmptyCardConfiguration;
   [CardType.InvoiceCard]: EmptyCardConfiguration;
+  [CardType.PaymentCard]: EmptyCardConfiguration;
 };
 
 // Union type for all card configurations (for general use)
