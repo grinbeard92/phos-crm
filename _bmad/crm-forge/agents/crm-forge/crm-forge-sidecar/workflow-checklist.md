@@ -93,14 +93,17 @@
 - ✅ WorkspaceId routing from metadata
 - **Note**: CRM → Stripe updates would require GraphQL subscriptions (future enhancement)
 
-### Task #17: ⚙️ Stripe configuration (Environment Variables)
-**Status**: PRODUCTION-READY (No UI needed)
-- ✅ Configuration via environment variables:
-  - `STRIPE_SECRET_KEY` - Stripe API secret key
-  - `STRIPE_WEBHOOK_SECRET` - Webhook signing secret
-- ✅ Service auto-detects configuration and enables/disables features
-- ✅ Sandbox vs Production: Use different Stripe keys in different environments
-- **Future Enhancement**: Database-backed settings UI for per-workspace configuration
+### Task #17: ✅ Stripe Settings UI in Phos Settings Panel
+**Status**: COMPLETED - Full in-app configuration with navigation integration
+- ✅ Backend API endpoints: GET/POST/test for per-workspace settings
+- ✅ File-based settings storage: `.stripe-settings/{workspaceId}.json`
+- ✅ Frontend component: SettingsPhosStripePage with form, toggle, password fields
+- ✅ Routing: SettingsPath.PhosStripe with lazy-loaded component
+- ✅ Navigation: "Stripe" menu item in Settings → Other section
+- ✅ Dynamic Stripe instance management per workspace
+- ✅ Environment variable fallback for backwards compatibility
+- ✅ Connection testing with real Stripe API validation
+- ✅ Sandbox/Live mode toggle for test vs production keys
 
 ## Key Technical Requirements
 
@@ -155,7 +158,6 @@
 - 🔄 **Email Attachments**: Twenty doesn't support attachments yet (blocked upstream)
 - 🔄 **Stripe Quote Sync**: Lower priority - invoices handle revenue (Task #12)
 - 🔄 **Opportunity Triggers**: Can use Twenty workflows when needed (Task #14)
-- 🔄 **Settings UI**: Environment variables work for now (Task #17 - optional)
 
 ### Production Deployment Checklist
 1. Set environment variables:
