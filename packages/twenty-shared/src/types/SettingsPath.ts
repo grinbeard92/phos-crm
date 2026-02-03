@@ -64,4 +64,5 @@ export enum SettingsPath {
   RoleAddObjectLevel = 'roles/:roleId/add-object-permission',
 
   LayoutModel = 'layout-model',
+  PhosFeatures = 'phos-features',
 }

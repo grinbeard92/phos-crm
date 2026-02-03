@@ -13,7 +13,7 @@ All of our additions need to be modular in design and added with Twenty's Featur
 When adding a new feature flag for Phos:
 1. Add the key to the backend enum: `packages/twenty-server/src/engine/core-modules/feature-flag/enums/feature-flag-key.enum.ts`
 2. Add it to the phos-seeder `requiredFeatureFlags` array: `packages/twenty-server/src/engine/workspace-manager/phos-seeder/services/phos-seeder.service.ts`
-3. Add it to the `PHOS_FEATURE_FLAGS` metadata array in the Admin Panel: `packages/twenty-front/src/modules/settings/admin-panel/components/SettingsAdminWorkspaceContent.tsx` — include a human-readable label and one-line description
+3. Add it to `PHOS_FEATURE_FLAGS` in: `packages/twenty-front/src/modules/settings/phos/constants/PhosFeatureFlags.ts` — include key, label, and description. The Phos Settings page auto-renders from this array.
 4. Add it to the workspace-entity-manager test mock: `packages/twenty-server/src/engine/twenty-orm/entity-manager/workspace-entity-manager.spec.ts`
 5. Run `npx nx typecheck twenty-front && npx nx typecheck twenty-server` to verify
 

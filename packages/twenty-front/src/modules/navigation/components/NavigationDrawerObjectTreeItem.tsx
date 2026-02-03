@@ -107,9 +107,11 @@ export const NavigationDrawerObjectTreeItem = ({
       <NavigationDrawerItem
         key={objectMetadataItem.id}
         label={objectMetadataItem.labelPlural}
+        to={getAppPath(AppPath.RecordIndexPage, {
+          objectNamePlural: objectMetadataItem.namePlural,
+        })}
         Icon={getIcon(objectMetadataItem.icon)}
         active={isParentActive || isChildActive}
-        onClick={() => setIsExpanded((prev) => !prev)}
         rightOptions={
           <StyledChevronButton
             onClick={(e) => {

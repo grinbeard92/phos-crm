@@ -1,0 +1,17 @@
+{
+	"folders": [
+		{
+			"path": "."
+		}
+	],
+	"settings": {
+		"javascript.format.enable": false,
+		"typescript.format.enable": false,
+		"eslint.debug": true,
+		"files.associations": {
+			".cursorrules": "markdown"
+		},
+		"typescript.tsdk": "node_modules/typescript/lib",
+		"typescript.experimental.useTsgo": false
+	}
+}

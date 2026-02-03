@@ -1,6 +1,7 @@
 import { currentUserState } from '@/auth/states/currentUserState';
 import { currentWorkspaceState } from '@/auth/states/currentWorkspaceState';
 import { canManageFeatureFlagsState } from '@/client-config/states/canManageFeatureFlagsState';
+import { PHOS_FLAG_KEYS } from '@/settings/phos/constants/PhosFeatureFlags';
 import { SettingsAdminTableCard } from '@/settings/admin-panel/components/SettingsAdminTableCard';
 import { useFeatureFlagState } from '@/settings/admin-panel/hooks/useFeatureFlagState';
 import { useImpersonationAuth } from '@/settings/admin-panel/hooks/useImpersonationAuth';
@@ -53,45 +54,6 @@ const StyledContainer = styled.div`
 const StyledButtonContainer = styled.div`
   margin-top: ${({ theme }) => theme.spacing(3)};
 `;
-
-const StyledFlagDescription = styled.span`
-  font-size: ${({ theme }) => theme.font.size.xs};
-  color: ${({ theme }) => theme.font.color.tertiary};
-`;
-
-const PHOS_FEATURE_FLAGS: {
-  key: FeatureFlagKey;
-  label: string;
-  description: string;
-}[] = [
-  {
-    key: FeatureFlagKey.IS_CALCULATED_FIELD_ENABLED,
-    label: 'Calculated Fields',
-    description: 'Formula-based fields using {{fieldName}} syntax on data model objects',
-  },
-  {
-    key: FeatureFlagKey.IS_SSE_DB_EVENTS_ENABLED,
-    label: 'SSE DB Events',
-    description: 'Real-time server-sent events for database change reactivity',
-  },
-  {
-    key: FeatureFlagKey.IS_THEME_CUSTOMIZATION_ENABLED,
-    label: 'Theme Customization',
-    description: 'Custom accent colors and background tones in Experience settings',
-  },
-  {
-    key: FeatureFlagKey.IS_NAVIGATION_HIERARCHY_ENABLED,
-    label: 'Navigation Hierarchy',
-    description: 'Categorized sidebar with parent-child object tree and Layout Model settings',
-  },
-  {
-    key: FeatureFlagKey.IS_EMAIL_COMPOSER_ENABLED,
-    label: 'Email Composer',
-    description: 'Rich email composition with templates under Accounts settings',
-  },
-];
-
-const PHOS_FLAG_KEYS = new Set(PHOS_FEATURE_FLAGS.map((f) => f.key));
 
 export const SettingsAdminWorkspaceContent = ({
   activeWorkspace,
@@ -265,57 +227,6 @@ export const SettingsAdminWorkspaceContent = ({
       </Section>
       {canManageFeatureFlags && (
         <>
-          <Section>
-            <H2Title
-              title={t`Phos Features`}
-              description={t`Custom features built for Phos Industries`}
-            />
-            <Table>
-              <TableBody>
-                <TableRow
-                  gridAutoColumns="2fr 3fr 100px"
-                  mobileGridAutoColumns="1fr 80px"
-                >
-                  <TableHeader>{t`Feature`}</TableHeader>
-                  <TableHeader>{t`Description`}</TableHeader>
-                  <TableHeader align="right">{t`Status`}</TableHeader>
-                </TableRow>
-                {PHOS_FEATURE_FLAGS.map((pf) => {
-                  const flag = activeWorkspace.featureFlags.find(
-                    (f) => f.key === pf.key,
-                  );
-
-                  return (
-                    <TableRow
-                      gridAutoColumns="2fr 3fr 100px"
-                      mobileGridAutoColumns="1fr 80px"
-                      key={pf.key}
-                    >
-                      <TableCell>{pf.label}</TableCell>
-                      <TableCell>
-                        <StyledFlagDescription>
-                          {pf.description}
-                        </StyledFlagDescription>
-                      </TableCell>
-                      <TableCell align="right">
-                        <Toggle
-                          value={flag?.value ?? false}
-                          onChange={(newValue) =>
-                            handleFeatureFlagUpdate(
-                              activeWorkspace.id,
-                              pf.key,
-                              newValue,
-                            )
-                          }
-                        />
-                      </TableCell>
-                    </TableRow>
-                  );
-                })}
-              </TableBody>
-            </Table>
-          </Section>
-
           <Section>
             <H2Title
               title={t`All Feature Flags`}

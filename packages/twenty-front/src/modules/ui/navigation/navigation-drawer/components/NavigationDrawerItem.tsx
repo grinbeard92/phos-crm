@@ -69,14 +69,14 @@ const StyledItem = styled('button', {
   box-sizing: content-box;
   align-items: center;
   background: ${(props) =>
-    props.active ? props.theme.background.transparent.light : 'inherit'};
+    props.active ? props.theme.accent.quaternary : 'inherit'};
   height: ${({ theme }) => theme.spacing(5)};
   border: none;
   border-radius: ${({ theme }) => theme.border.radius.sm};
   text-decoration: none;
   color: ${(props) => {
     if (props.active === true) {
-      return props.theme.font.color.primary;
+      return props.theme.color.blue11;
     }
     if (props.danger === true) {
       return props.theme.color.red;

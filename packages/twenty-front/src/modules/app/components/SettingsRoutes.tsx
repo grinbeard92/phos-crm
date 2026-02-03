@@ -360,6 +360,12 @@ const SettingsUpdates = lazy(() =>
   })),
 );
 
+const SettingsPhosFeatures = lazy(() =>
+  import('~/pages/settings/phos/SettingsPhosFeatures').then((module) => ({
+    default: module.SettingsPhosFeatures,
+  })),
+);
+
 const SettingsRoles = lazy(() =>
   import('~/pages/settings/roles/SettingsRoles').then((module) => ({
     default: module.SettingsRoles,
@@ -667,6 +673,10 @@ export const SettingsRoutes = ({ isAdminPageEnabled }: SettingsRoutesProps) => (
         }
       >
         <Route path={SettingsPath.Updates} element={<SettingsUpdates />} />
+        <Route
+          path={SettingsPath.PhosFeatures}
+          element={<SettingsPhosFeatures />}
+        />
       </Route>
     </Routes>
   </Suspense>
