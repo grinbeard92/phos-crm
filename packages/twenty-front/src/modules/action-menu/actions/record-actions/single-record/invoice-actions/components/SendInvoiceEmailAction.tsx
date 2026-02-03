@@ -1,23 +1,20 @@
-import { useCallback, useEffect } from 'react';
+import { Action } from '@/action-menu/actions/components/Action';
 import { useSelectedRecordIdOrThrow } from '@/action-menu/actions/record-actions/single-record/hooks/useSelectedRecordIdOrThrow';
 import { useEmailComposer } from '@/email-composer/hooks/useEmailComposer';
 import { useFindOneRecord } from '@/object-record/hooks/useFindOneRecord';
-import { useSnackBar } from '@/ui/feedback/snack-bar-manager/hooks/useSnackBar';
+import { isDefined } from 'twenty-shared/utils';
 
 export const SendInvoiceEmailActionEffect = () => {
-  const { enqueueErrorSnackBar } = useSnackBar();
   const invoiceId = useSelectedRecordIdOrThrow();
   const { openEmailComposer } = useEmailComposer();
 
-  // Fetch invoice data with relations
-  const { record: invoice, loading } = useFindOneRecord({
+  const { record: invoice } = useFindOneRecord({
     objectNameSingular: 'invoice',
     objectRecordId: invoiceId,
   });
 
-  const handleSendEmail = useCallback(() => {
-    if (!invoice) {
-      enqueueErrorSnackBar({ message: 'Invoice not found' });
+  const onClick = () => {
+    if (!isDefined(invoice)) {
       return;
     }
 
@@ -34,7 +31,6 @@ export const SendInvoiceEmailActionEffect = () => {
     const pdfDownloadLink = `${window.location.origin}/pdf/invoices/${invoiceId}`;
     const paymentLink = invoice.stripePaymentLink || pdfDownloadLink;
 
-    // Open email composer with invoice context
     openEmailComposer({
       defaultTo: contact?.emails?.primaryEmail || company?.domainName || '',
       defaultSubject: `Invoice ${invoiceNumber} from ${company?.name || 'Phos Industries'}`,
@@ -64,18 +60,8 @@ export const SendInvoiceEmailActionEffect = () => {
         personEmail: contact?.emails?.primaryEmail,
         companyName: company?.name,
       },
-      onSendSuccess: () => {
-        // TODO: Update invoice status to SENT
-      },
     });
-  }, [invoice, invoiceId, openEmailComposer, enqueueErrorSnackBar]);
+  };
 
-  // Execute on mount once invoice is loaded
-  useEffect(() => {
-    if (!loading && invoice) {
-      handleSendEmail();
-    }
-  }, [loading, invoice, handleSendEmail]);
-
-  return null;
+  return <Action onClick={onClick} />;
 };

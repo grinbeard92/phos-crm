@@ -1,23 +1,20 @@
-import { useCallback, useEffect } from 'react';
+import { Action } from '@/action-menu/actions/components/Action';
 import { useSelectedRecordIdOrThrow } from '@/action-menu/actions/record-actions/single-record/hooks/useSelectedRecordIdOrThrow';
 import { useEmailComposer } from '@/email-composer/hooks/useEmailComposer';
 import { useFindOneRecord } from '@/object-record/hooks/useFindOneRecord';
-import { useSnackBar } from '@/ui/feedback/snack-bar-manager/hooks/useSnackBar';
+import { isDefined } from 'twenty-shared/utils';
 
 export const SendQuoteEmailActionEffect = () => {
-  const { enqueueErrorSnackBar } = useSnackBar();
   const quoteId = useSelectedRecordIdOrThrow();
   const { openEmailComposer } = useEmailComposer();
 
-  // Fetch quote data with relations
-  const { record: quote, loading } = useFindOneRecord({
+  const { record: quote } = useFindOneRecord({
     objectNameSingular: 'quote',
     objectRecordId: quoteId,
   });
 
-  const handleSendEmail = useCallback(() => {
-    if (!quote) {
-      enqueueErrorSnackBar({ message: 'Quote not found' });
+  const onClick = () => {
+    if (!isDefined(quote)) {
       return;
     }
 
@@ -30,7 +27,6 @@ export const SendQuoteEmailActionEffect = () => {
 
     const pdfDownloadLink = `${window.location.origin}/pdf/quotes/${quoteId}`;
 
-    // Open email composer with quote context
     openEmailComposer({
       defaultTo: contact?.emails?.primaryEmail || company?.domainName || '',
       defaultSubject: `Quote ${quoteNumber} from ${company?.name || 'Phos Industries'}`,
@@ -59,18 +55,8 @@ export const SendQuoteEmailActionEffect = () => {
         personEmail: contact?.emails?.primaryEmail,
         companyName: company?.name,
       },
-      onSendSuccess: () => {
-        // TODO: Update quote status to SENT
-      },
     });
-  }, [quote, quoteId, openEmailComposer, enqueueErrorSnackBar]);
+  };
 
-  // Execute on mount once quote is loaded
-  useEffect(() => {
-    if (!loading && quote) {
-      handleSendEmail();
-    }
-  }, [loading, quote, handleSendEmail]);
-
-  return null;
+  return <Action onClick={onClick} />;
 };
