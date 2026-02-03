@@ -16,8 +16,7 @@ const StyledContainer = styled.div`
 `;
 
 const StyledToneButton = styled.button<{ isSelected: boolean }>`
-  padding: ${({ theme }) => theme.spacing(1)}
-    ${({ theme }) => theme.spacing(3)};
+  padding: ${({ theme }) => theme.spacing(1)} ${({ theme }) => theme.spacing(3)};
   border-radius: ${({ theme }) => theme.border.radius.sm};
   border: 1px solid
     ${({ isSelected, theme }) =>
@@ -37,10 +36,10 @@ const StyledToneButton = styled.button<{ isSelected: boolean }>`
 `;
 
 export const BackgroundToneSelector = () => {
-  const [backgroundTone, setBackgroundTone] = useRecoilState(
+  const [persistedBackgroundTone, setPersistedBackgroundTone] = useRecoilState(
     persistedBackgroundToneState,
   );
-  const selectedTone = backgroundTone ?? DEFAULT_BACKGROUND_TONE;
+  const selectedTone = persistedBackgroundTone ?? DEFAULT_BACKGROUND_TONE;
 
   return (
     <StyledContainer>
@@ -48,7 +47,7 @@ export const BackgroundToneSelector = () => {
         <StyledToneButton
           key={option.value}
           isSelected={option.value === selectedTone}
-          onClick={() => setBackgroundTone(option.value)}
+          onClick={() => setPersistedBackgroundTone(option.value)}
         >
           {option.label}
         </StyledToneButton>

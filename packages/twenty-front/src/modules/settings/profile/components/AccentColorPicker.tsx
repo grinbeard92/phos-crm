@@ -29,10 +29,10 @@ const StyledColorSwatch = styled.button<{ color: string; isSelected: boolean }>`
 `;
 
 export const AccentColorPicker = () => {
-  const [accentPresetId, setAccentPresetId] = useRecoilState(
+  const [persistedAccentPresetId, setPersistedAccentPresetId] = useRecoilState(
     persistedAccentPresetIdState,
   );
-  const selectedId = accentPresetId ?? DEFAULT_ACCENT_PRESET_ID;
+  const selectedId = persistedAccentPresetId ?? DEFAULT_ACCENT_PRESET_ID;
 
   return (
     <StyledContainer>
@@ -41,7 +41,7 @@ export const AccentColorPicker = () => {
           key={preset.id}
           color={preset.hex}
           isSelected={preset.id === selectedId}
-          onClick={() => setAccentPresetId(preset.id)}
+          onClick={() => setPersistedAccentPresetId(preset.id)}
           title={preset.label}
           aria-label={`Select ${preset.label} accent color`}
         />

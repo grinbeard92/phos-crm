@@ -29,10 +29,12 @@ export type CategorizedNavigationData = {
 };
 
 export const useNavigationHierarchy = (): CategorizedNavigationData => {
-  const [categories, setCategories] = useRecoilState(
+  const [navigationCategories, setNavigationCategories] = useRecoilState(
     navigationCategoriesState,
   );
-  const [configs, setConfigs] = useRecoilState(objectLayoutConfigsState);
+  const [objectLayoutConfigs, setObjectLayoutConfigs] = useRecoilState(
+    objectLayoutConfigsState,
+  );
 
   const { data: categoriesData, loading: categoriesLoading } = useQuery(
     GET_NAVIGATION_CATEGORIES,
@@ -43,21 +45,23 @@ export const useNavigationHierarchy = (): CategorizedNavigationData => {
 
   useEffect(() => {
     if (categoriesData?.navigationCategories) {
-      setCategories(categoriesData.navigationCategories);
+      setNavigationCategories(categoriesData.navigationCategories);
     }
-  }, [categoriesData, setCategories]);
+  }, [categoriesData, setNavigationCategories]);
 
   useEffect(() => {
     if (configsData?.objectLayoutConfigs) {
-      setConfigs(configsData.objectLayoutConfigs);
+      setObjectLayoutConfigs(configsData.objectLayoutConfigs);
     }
-  }, [configsData, setConfigs]);
+  }, [configsData, setObjectLayoutConfigs]);
 
   const configsByCategory = useMemo(() => {
     const result: Record<string, NavigationTreeNode[]> = {};
 
     // Group configs by category, build tree per category
-    const configsWithCategory = configs.filter((c) => c.categoryId !== null);
+    const configsWithCategory = objectLayoutConfigs.filter(
+      (c) => c.categoryId !== null,
+    );
     const parentConfigs = configsWithCategory.filter(
       (c) => c.uiParentObjectMetadataId === null,
     );
@@ -96,16 +100,14 @@ export const useNavigationHierarchy = (): CategorizedNavigationData => {
 
     // Sort each category's items by positionInCategory
     for (const catId of Object.keys(result)) {
-      result[catId].sort(
-        (a, b) => a.positionInCategory - b.positionInCategory,
-      );
+      result[catId].sort((a, b) => a.positionInCategory - b.positionInCategory);
     }
 
     return result;
-  }, [configs]);
+  }, [objectLayoutConfigs]);
 
   const uncategorizedConfigs = useMemo(() => {
-    return configs
+    return objectLayoutConfigs
       .filter(
         (c) => c.categoryId === null && c.uiParentObjectMetadataId === null,
       )
@@ -116,7 +118,7 @@ export const useNavigationHierarchy = (): CategorizedNavigationData => {
         uiParentObjectMetadataId: c.uiParentObjectMetadataId,
         positionInCategory: c.positionInCategory,
         positionUnderParent: c.positionUnderParent,
-        children: configs
+        children: objectLayoutConfigs
           .filter(
             (child) =>
               child.uiParentObjectMetadataId === c.objectMetadataId &&
@@ -132,16 +134,20 @@ export const useNavigationHierarchy = (): CategorizedNavigationData => {
             children: [],
           })),
       }));
-  }, [configs]);
+  }, [objectLayoutConfigs]);
 
   const getConfigForObject = useMemo(() => {
-    const map = new Map(configs.map((c) => [c.objectMetadataId, c]));
+    const map = new Map(
+      objectLayoutConfigs.map((c) => [c.objectMetadataId, c]),
+    );
 
     return (objectMetadataId: string) => map.get(objectMetadataId);
-  }, [configs]);
+  }, [objectLayoutConfigs]);
 
   return {
-    categories: [...categories].sort((a, b) => a.position - b.position),
+    categories: [...navigationCategories].sort(
+      (a, b) => a.position - b.position,
+    ),
     configsByCategory,
     uncategorizedConfigs,
     getConfigForObject,
