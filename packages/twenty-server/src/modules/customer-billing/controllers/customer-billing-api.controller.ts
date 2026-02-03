@@ -1,6 +1,7 @@
 import {
   Controller,
   Post,
+  Get,
   Body,
   UseGuards,
   Req,
@@ -35,6 +36,21 @@ type ConvertQuoteToInvoiceResponse = {
   hostedInvoiceUrl?: string;
 };
 
+type StripeSettings = {
+  sandboxMode: boolean;
+  publishableKey?: string;
+  secretKey?: string;
+  webhookSecret?: string;
+};
+
+type SaveStripeSettingsRequest = StripeSettings;
+
+type TestStripeConnectionResponse = {
+  success: boolean;
+  message: string;
+  accountId?: string;
+};
+
 type AuthenticatedRequest = Request & {
   workspaceId: string;
   user: { workspaceId: string };
@@ -46,6 +62,86 @@ export class CustomerBillingApiController {
   constructor(
     private readonly customerBillingStripeService: CustomerBillingStripeService,
   ) {}
+
+  @Get('settings')
+  async getStripeSettings(
+    @Req() req: AuthenticatedRequest,
+  ): Promise<StripeSettings> {
+    const workspaceId = req.user?.workspaceId || req.workspaceId;
+
+    if (!workspaceId) {
+      throw new HttpException(
+        'Workspace ID not found',
+        HttpStatus.UNAUTHORIZED,
+      );
+    }
+
+    try {
+      const settings =
+        await this.customerBillingStripeService.getStripeSettings(workspaceId);
+      return settings;
+    } catch (error) {
+      throw new HttpException(
+        `Failed to retrieve Stripe settings: ${error.message}`,
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
+  }
+
+  @Post('settings')
+  async saveStripeSettings(
+    @Body() settings: SaveStripeSettingsRequest,
+    @Req() req: AuthenticatedRequest,
+  ): Promise<{ success: boolean }> {
+    const workspaceId = req.user?.workspaceId || req.workspaceId;
+
+    if (!workspaceId) {
+      throw new HttpException(
+        'Workspace ID not found',
+        HttpStatus.UNAUTHORIZED,
+      );
+    }
+
+    try {
+      await this.customerBillingStripeService.saveStripeSettings(
+        workspaceId,
+        settings,
+      );
+      return { success: true };
+    } catch (error) {
+      throw new HttpException(
+        `Failed to save Stripe settings: ${error.message}`,
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
+  }
+
+  @Post('settings/test')
+  async testStripeConnection(
+    @Req() req: AuthenticatedRequest,
+  ): Promise<TestStripeConnectionResponse> {
+    const workspaceId = req.user?.workspaceId || req.workspaceId;
+
+    if (!workspaceId) {
+      throw new HttpException(
+        'Workspace ID not found',
+        HttpStatus.UNAUTHORIZED,
+      );
+    }
+
+    try {
+      const result =
+        await this.customerBillingStripeService.testStripeConnection(
+          workspaceId,
+        );
+      return result;
+    } catch (error) {
+      return {
+        success: false,
+        message: error.message || 'Failed to connect to Stripe',
+      };
+    }
+  }
 
   @Post('convert-quote-to-invoice')
   async convertQuoteToInvoice(

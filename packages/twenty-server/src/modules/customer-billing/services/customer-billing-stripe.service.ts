@@ -1,8 +1,17 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import Stripe from 'stripe';
+import * as fs from 'fs/promises';
+import * as path from 'path';
 
 import { GlobalWorkspaceOrmManager } from 'src/engine/twenty-orm/global-workspace-datasource/global-workspace-orm.manager';
+
+type StripeSettingsData = {
+  sandboxMode: boolean;
+  publishableKey?: string;
+  secretKey?: string;
+  webhookSecret?: string;
+};
 
 export type CreateStripeInvoiceInput = {
   customerEmail: string;
@@ -29,6 +38,8 @@ export type StripeInvoiceResult = {
 export class CustomerBillingStripeService {
   private readonly logger = new Logger(CustomerBillingStripeService.name);
   private stripe: Stripe | null = null;
+  private readonly settingsDir = path.join(process.cwd(), '.stripe-settings');
+  private workspaceStripeInstances = new Map<string, Stripe>();
 
   constructor(
     private configService: ConfigService,
@@ -40,11 +51,106 @@ export class CustomerBillingStripeService {
       this.stripe = new Stripe(apiKey, {
         apiVersion: '2025-10-29.clover',
       });
-      this.logger.log('Stripe SDK initialized');
+      this.logger.log('Stripe SDK initialized from environment variables');
     } else {
       this.logger.warn(
         'STRIPE_SECRET_KEY not configured. Stripe integration disabled.',
       );
+    }
+  }
+
+  private async ensureSettingsDir(): Promise<void> {
+    try {
+      await fs.access(this.settingsDir);
+    } catch {
+      await fs.mkdir(this.settingsDir, { recursive: true });
+    }
+  }
+
+  private getSettingsFilePath(workspaceId: string): string {
+    return path.join(this.settingsDir, `${workspaceId}.json`);
+  }
+
+  async getStripeSettings(
+    workspaceId: string,
+  ): Promise<StripeSettingsData> {
+    try {
+      const filePath = this.getSettingsFilePath(workspaceId);
+      const data = await fs.readFile(filePath, 'utf-8');
+      return JSON.parse(data);
+    } catch {
+      // Return default settings with environment variable values (masked)
+      const envSecretKey = this.configService.get<string>('STRIPE_SECRET_KEY');
+      const envWebhookSecret = this.configService.get<string>('STRIPE_WEBHOOK_SECRET');
+
+      return {
+        sandboxMode: envSecretKey?.startsWith('sk_test_') ?? true,
+        secretKey: envSecretKey ? '***' + envSecretKey.slice(-4) : undefined,
+        webhookSecret: envWebhookSecret ? '***' + envWebhookSecret.slice(-4) : undefined,
+      };
+    }
+  }
+
+  async saveStripeSettings(
+    workspaceId: string,
+    settings: StripeSettingsData,
+  ): Promise<void> {
+    await this.ensureSettingsDir();
+    const filePath = this.getSettingsFilePath(workspaceId);
+    await fs.writeFile(filePath, JSON.stringify(settings, null, 2), 'utf-8');
+
+    // Reinitialize Stripe instance for this workspace if secret key provided
+    if (settings.secretKey) {
+      const stripeInstance = new Stripe(settings.secretKey, {
+        apiVersion: '2025-10-29.clover',
+      });
+      this.workspaceStripeInstances.set(workspaceId, stripeInstance);
+      this.logger.log(`Stripe SDK initialized for workspace ${workspaceId}`);
+    }
+  }
+
+  async testStripeConnection(workspaceId: string): Promise<{
+    success: boolean;
+    message: string;
+    accountId?: string;
+  }> {
+    try {
+      const settings = await this.getStripeSettings(workspaceId);
+
+      let testStripe: Stripe | null = null;
+
+      // Try workspace-specific instance first
+      if (this.workspaceStripeInstances.has(workspaceId)) {
+        testStripe = this.workspaceStripeInstances.get(workspaceId)!;
+      } else if (settings.secretKey && !settings.secretKey.startsWith('***')) {
+        // Use settings secret key if not masked
+        testStripe = new Stripe(settings.secretKey, {
+          apiVersion: '2025-10-29.clover',
+        });
+      } else if (this.stripe) {
+        // Fall back to environment variable instance
+        testStripe = this.stripe;
+      }
+
+      if (!testStripe) {
+        return {
+          success: false,
+          message: 'No Stripe API key configured',
+        };
+      }
+
+      const account = await testStripe.accounts.retrieve();
+
+      return {
+        success: true,
+        message: `Connected to Stripe account: ${(account as any).display_name || account.id}`,
+        accountId: account.id,
+      };
+    } catch (error) {
+      return {
+        success: false,
+        message: error.message || 'Failed to connect to Stripe',
+      };
     }
   }
 
