@@ -366,6 +366,12 @@ const SettingsPhosFeatures = lazy(() =>
   })),
 );
 
+const SettingsPhosStripe = lazy(() =>
+  import('@/settings/phos/components/SettingsPhosStripePage').then((module) => ({
+    default: module.SettingsPhosStripePage,
+  })),
+);
+
 const SettingsRoles = lazy(() =>
   import('~/pages/settings/roles/SettingsRoles').then((module) => ({
     default: module.SettingsRoles,
@@ -674,6 +680,10 @@ export const SettingsRoutes = ({ isAdminPageEnabled }: SettingsRoutesProps) => (
         <Route
           path={SettingsPath.PhosFeatures}
           element={<SettingsPhosFeatures />}
+        />
+        <Route
+          path={SettingsPath.PhosStripe}
+          element={<SettingsPhosStripe />}
         />
       </Route>
     </Routes>

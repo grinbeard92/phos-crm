@@ -65,4 +65,5 @@ export enum SettingsPath {
 
   LayoutModel = 'layout-model',
   PhosFeatures = 'phos-features',
+  PhosStripe = 'phos-stripe',
 }
