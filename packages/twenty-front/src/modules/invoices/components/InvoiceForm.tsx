@@ -5,6 +5,11 @@ import { Button } from 'twenty-ui/input';
 import { H2Title } from 'twenty-ui/typography';
 import { useInvoiceForm } from '../hooks/useInvoiceForm';
 import { useCreateInvoice } from '../hooks/useCreateInvoice';
+import {
+  useCompanyOptions,
+  useContactOptions,
+  useProjectOptions,
+} from '../../quotes/hooks/useRelationOptions';
 import { QuoteLineItemEditor } from '../../quotes/components/QuoteLineItemEditor';
 import { InvoiceTotalsSection } from './InvoiceTotalsSection';
 
@@ -171,6 +176,14 @@ export const InvoiceForm = ({
   const { createInvoice } = useCreateInvoice();
   const [globalError, setGlobalError] = useState<string | null>(null);
 
+  // Fetch relation options
+  const { options: companyOptions, loading: companiesLoading} =
+    useCompanyOptions(formData.companyId);
+  const { options: contactOptions, loading: contactsLoading } =
+    useContactOptions(formData.companyId);
+  const { options: projectOptions, loading: projectsLoading } =
+    useProjectOptions(formData.companyId);
+
   const handleSubmit = async () => {
     setGlobalError(null);
 
@@ -211,9 +224,16 @@ export const InvoiceForm = ({
                 value={formData.companyId || ''}
                 onChange={(e) => updateField('companyId', e.target.value || null)}
                 hasError={!!errors.companyId}
+                disabled={companiesLoading}
               >
-                <option value="">Select a company...</option>
-                {/* TODO: Load companies from GraphQL and populate options */}
+                <option value="">
+                  {companiesLoading ? 'Loading companies...' : 'Select a company...'}
+                </option>
+                {companyOptions.map((option) => (
+                  <option key={option.value} value={option.value}>
+                    {option.label}
+                  </option>
+                ))}
               </StyledSelect>
               {errors.companyId && (
                 <StyledErrorText>{errors.companyId}</StyledErrorText>
@@ -225,9 +245,20 @@ export const InvoiceForm = ({
               <StyledSelect
                 value={formData.contactId || ''}
                 onChange={(e) => updateField('contactId', e.target.value || null)}
+                disabled={!formData.companyId || contactsLoading}
               >
-                <option value="">Select a contact...</option>
-                {/* TODO: Load contacts from GraphQL and populate options */}
+                <option value="">
+                  {!formData.companyId
+                    ? 'Select company first...'
+                    : contactsLoading
+                      ? 'Loading contacts...'
+                      : 'Select a contact...'}
+                </option>
+                {contactOptions.map((option) => (
+                  <option key={option.value} value={option.value}>
+                    {option.label}
+                  </option>
+                ))}
               </StyledSelect>
             </StyledField>
 
@@ -236,9 +267,16 @@ export const InvoiceForm = ({
               <StyledSelect
                 value={formData.projectId || ''}
                 onChange={(e) => updateField('projectId', e.target.value || null)}
+                disabled={projectsLoading}
               >
-                <option value="">Select a project...</option>
-                {/* TODO: Load projects from GraphQL and populate options */}
+                <option value="">
+                  {projectsLoading ? 'Loading projects...' : 'Select a project...'}
+                </option>
+                {projectOptions.map((option) => (
+                  <option key={option.value} value={option.value}>
+                    {option.label}
+                  </option>
+                ))}
               </StyledSelect>
             </StyledField>
 
