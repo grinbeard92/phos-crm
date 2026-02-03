@@ -230,6 +230,8 @@ describe('WorkspaceEntityManager', () => {
         IS_CALCULATED_FIELD_ENABLED: false,
         IS_THEME_CUSTOMIZATION_ENABLED: false,
         IS_NAVIGATION_HIERARCHY_ENABLED: false,
+        IS_QUOTING_BILLING_ENABLED: false,
+        IS_STRIPE_ENABLED: false,
       },
       userWorkspaceRoleMap: {},
       eventEmitterService: {

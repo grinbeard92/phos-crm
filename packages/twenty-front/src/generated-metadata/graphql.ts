@@ -975,6 +975,12 @@ export type CreateLogicFunctionInput = {
   toolInputSchema?: InputMaybe<Scalars['JSON']>;
 };
 
+export type CreateNavigationCategoryInput = {
+  icon?: InputMaybe<Scalars['String']>;
+  name: Scalars['String'];
+  position?: InputMaybe<Scalars['Int']>;
+};
+
 export type CreateNavigationMenuItemInput = {
   folderId?: InputMaybe<Scalars['UUID']>;
   name?: InputMaybe<Scalars['String']>;
@@ -1429,9 +1435,11 @@ export enum FeatureFlagKey {
   IS_NAVIGATION_HIERARCHY_ENABLED = 'IS_NAVIGATION_HIERARCHY_ENABLED',
   IS_NAVIGATION_MENU_ITEM_ENABLED = 'IS_NAVIGATION_MENU_ITEM_ENABLED',
   IS_PUBLIC_DOMAIN_ENABLED = 'IS_PUBLIC_DOMAIN_ENABLED',
+  IS_QUOTING_BILLING_ENABLED = 'IS_QUOTING_BILLING_ENABLED',
   IS_RECORD_PAGE_LAYOUT_ENABLED = 'IS_RECORD_PAGE_LAYOUT_ENABLED',
   IS_ROW_LEVEL_PERMISSION_PREDICATES_ENABLED = 'IS_ROW_LEVEL_PERMISSION_PREDICATES_ENABLED',
   IS_SSE_DB_EVENTS_ENABLED = 'IS_SSE_DB_EVENTS_ENABLED',
+  IS_STRIPE_ENABLED = 'IS_STRIPE_ENABLED',
   IS_THEME_CUSTOMIZATION_ENABLED = 'IS_THEME_CUSTOMIZATION_ENABLED',
   IS_TIMELINE_ACTIVITY_MIGRATED = 'IS_TIMELINE_ACTIVITY_MIGRATED',
   IS_UNIQUE_INDEXES_ENABLED = 'IS_UNIQUE_INDEXES_ENABLED'
@@ -2051,6 +2059,7 @@ export type Mutation = {
   createFrontComponent: FrontComponent;
   createManyCoreViewFields: Array<CoreViewField>;
   createManyCoreViewGroups: Array<CoreViewGroup>;
+  createNavigationCategory: NavigationCategory;
   createNavigationMenuItem: NavigationMenuItem;
   createOIDCIdentityProvider: SetupSsoOutput;
   createObjectEvent: Analytics;
@@ -2086,6 +2095,7 @@ export type Mutation = {
   deleteFile: File;
   deleteFrontComponent: FrontComponent;
   deleteJobs: DeleteJobsResponse;
+  deleteNavigationCategory: Scalars['Boolean'];
   deleteNavigationMenuItem: NavigationMenuItem;
   deleteOneAgent: Agent;
   deleteOneField: Field;
@@ -2133,6 +2143,7 @@ export type Mutation = {
   initiateOTPProvisioningForAuthenticatedUser: InitiateTwoFactorAuthenticationProvisioningOutput;
   installApplication: Scalars['Boolean'];
   publishLogicFunction: LogicFunction;
+  removeObjectLayoutConfig: Scalars['Boolean'];
   removeQueryFromEventStream: Scalars['Boolean'];
   removeRoleFromAgent: Scalars['Boolean'];
   renewToken: AuthTokens;
@@ -2172,6 +2183,7 @@ export type Mutation = {
   updateDatabaseConfigVariable: Scalars['Boolean'];
   updateFrontComponent: FrontComponent;
   updateLabPublicFeatureFlag: FeatureFlagDto;
+  updateNavigationCategory: NavigationCategory;
   updateNavigationMenuItem: NavigationMenuItem;
   updateOneAgent: Agent;
   updateOneApplicationVariable: Scalars['Boolean'];
@@ -2201,6 +2213,7 @@ export type Mutation = {
   uploadWorkspaceLogo: SignedFile;
   uploadWorkspaceMemberProfilePicture: SignedFile;
   upsertFieldPermissions: Array<FieldPermission>;
+  upsertObjectLayoutConfig: ObjectLayoutConfig;
   upsertObjectPermissions: Array<ObjectPermission>;
   upsertPermissionFlags: Array<PermissionFlag>;
   upsertRowLevelPermissionPredicates: UpsertRowLevelPermissionPredicatesResult;
@@ -2349,6 +2362,11 @@ export type MutationCreateManyCoreViewFieldsArgs = {
 
 export type MutationCreateManyCoreViewGroupsArgs = {
   inputs: Array<CreateViewGroupInput>;
+};
+
+
+export type MutationCreateNavigationCategoryArgs = {
+  input: CreateNavigationCategoryInput;
 };
 
 
@@ -2524,6 +2542,11 @@ export type MutationDeleteFrontComponentArgs = {
 export type MutationDeleteJobsArgs = {
   jobIds: Array<Scalars['String']>;
   queueName: Scalars['String'];
+};
+
+
+export type MutationDeleteNavigationCategoryArgs = {
+  id: Scalars['String'];
 };
 
 
@@ -2745,6 +2768,11 @@ export type MutationPublishLogicFunctionArgs = {
 };
 
 
+export type MutationRemoveObjectLayoutConfigArgs = {
+  objectMetadataId: Scalars['String'];
+};
+
+
 export type MutationRemoveQueryFromEventStreamArgs = {
   input: RemoveQueryFromEventStreamInput;
 };
@@ -2945,6 +2973,11 @@ export type MutationUpdateLabPublicFeatureFlagArgs = {
 };
 
 
+export type MutationUpdateNavigationCategoryArgs = {
+  input: UpdateNavigationCategoryInput;
+};
+
+
 export type MutationUpdateNavigationMenuItemArgs = {
   input: UpdateOneNavigationMenuItemInput;
 };
@@ -3101,6 +3134,11 @@ export type MutationUpsertFieldPermissionsArgs = {
 };
 
 
+export type MutationUpsertObjectLayoutConfigArgs = {
+  input: UpsertObjectLayoutConfigInput;
+};
+
+
 export type MutationUpsertObjectPermissionsArgs = {
   upsertObjectPermissionsInput: UpsertObjectPermissionsInput;
 };
@@ -3154,6 +3192,18 @@ export type NativeModelCapabilities = {
   __typename?: 'NativeModelCapabilities';
   twitterSearch?: Maybe<Scalars['Boolean']>;
   webSearch?: Maybe<Scalars['Boolean']>;
+};
+
+export type NavigationCategory = {
+  __typename?: 'NavigationCategory';
+  createdAt: Scalars['DateTime'];
+  icon?: Maybe<Scalars['String']>;
+  id: Scalars['UUID'];
+  isDefault: Scalars['Boolean'];
+  name: Scalars['String'];
+  position: Scalars['Int'];
+  updatedAt: Scalars['DateTime'];
+  workspaceId: Scalars['UUID'];
 };
 
 export type NavigationMenuItem = {
@@ -3261,6 +3311,19 @@ export type ObjectIndexMetadatasConnection = {
   edges: Array<IndexEdge>;
   /** Paging information */
   pageInfo: PageInfo;
+};
+
+export type ObjectLayoutConfig = {
+  __typename?: 'ObjectLayoutConfig';
+  categoryId?: Maybe<Scalars['UUID']>;
+  createdAt: Scalars['DateTime'];
+  id: Scalars['UUID'];
+  objectMetadataId: Scalars['UUID'];
+  positionInCategory: Scalars['Int'];
+  positionUnderParent: Scalars['Int'];
+  uiParentObjectMetadataId?: Maybe<Scalars['UUID']>;
+  updatedAt: Scalars['DateTime'];
+  workspaceId: Scalars['UUID'];
 };
 
 export type ObjectPermission = {
@@ -3627,9 +3690,11 @@ export type Query = {
   indexMetadatas: IndexConnection;
   lineChartData: LineChartDataOutput;
   listPlans: Array<BillingPlanOutput>;
+  navigationCategories: Array<NavigationCategory>;
   navigationMenuItem?: Maybe<NavigationMenuItem>;
   navigationMenuItems: Array<NavigationMenuItem>;
   object: Object;
+  objectLayoutConfigs: Array<ObjectLayoutConfig>;
   objects: ObjectConnection;
   pieChartData: PieChartDataOutput;
   search: SearchResultConnection;
@@ -4676,6 +4741,13 @@ export type UpdateLogicFunctionInputUpdates = {
   toolInputSchema?: InputMaybe<Scalars['JSON']>;
 };
 
+export type UpdateNavigationCategoryInput = {
+  icon?: InputMaybe<Scalars['String']>;
+  id: Scalars['UUID'];
+  name?: InputMaybe<Scalars['String']>;
+  position?: InputMaybe<Scalars['Int']>;
+};
+
 export type UpdateNavigationMenuItemInput = {
   folderId?: InputMaybe<Scalars['UUID']>;
   name?: InputMaybe<Scalars['String']>;
@@ -4927,6 +4999,14 @@ export type UpdateWorkspaceInput = {
 export type UpsertFieldPermissionsInput = {
   fieldPermissions: Array<FieldPermissionInput>;
   roleId: Scalars['UUID'];
+};
+
+export type UpsertObjectLayoutConfigInput = {
+  categoryId?: InputMaybe<Scalars['UUID']>;
+  objectMetadataId: Scalars['UUID'];
+  positionInCategory?: InputMaybe<Scalars['Int']>;
+  positionUnderParent?: InputMaybe<Scalars['Int']>;
+  uiParentObjectMetadataId?: InputMaybe<Scalars['UUID']>;
 };
 
 export type UpsertObjectPermissionsInput = {

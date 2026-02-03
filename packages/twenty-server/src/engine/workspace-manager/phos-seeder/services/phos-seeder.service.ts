@@ -364,6 +364,8 @@ export class PhosSeederService {
     FeatureFlagKey.IS_THEME_CUSTOMIZATION_ENABLED,
     FeatureFlagKey.IS_NAVIGATION_HIERARCHY_ENABLED,
     FeatureFlagKey.IS_EMAIL_COMPOSER_ENABLED,
+    FeatureFlagKey.IS_QUOTING_BILLING_ENABLED,
+    FeatureFlagKey.IS_STRIPE_ENABLED,
   ];
 
   // Junction configs for many-to-many via junction table

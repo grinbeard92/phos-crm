@@ -37,6 +37,18 @@ export const PHOS_FEATURE_FLAGS: PhosFeatureFlag[] = [
     description:
       'Rich email composition with templates under Accounts settings',
   },
+  {
+    key: FeatureFlagKey.IS_QUOTING_BILLING_ENABLED,
+    label: 'Quoting & Billing',
+    description:
+      'Professional quotes and invoices with PDF generation and email delivery',
+  },
+  {
+    key: FeatureFlagKey.IS_STRIPE_ENABLED,
+    label: 'Stripe Integration',
+    description:
+      'Automated payment processing with hosted payment links and webhook sync',
+  },
 ];
 
 export const PHOS_FLAG_KEYS = new Set(PHOS_FEATURE_FLAGS.map((f) => f.key));
