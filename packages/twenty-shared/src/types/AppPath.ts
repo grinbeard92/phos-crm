@@ -24,6 +24,10 @@ export enum AppPath {
   RecordIndexPage = '/objects/:objectNamePlural',
   RecordShowPage = '/object/:objectNameSingular/:objectRecordId',
 
+  // Phos CRM custom pages
+  CreateQuote = '/quotes/create',
+  CreateInvoice = '/invoices/create',
+
   Settings = `settings`,
   SettingsCatchAll = `/${Settings}/*`,
   Developers = `developers`,
