@@ -23,6 +23,8 @@ export type CardTypeToConfiguration = {
   [CardType.WorkflowVersionCard]: EmptyCardConfiguration;
   [CardType.WorkflowRunCard]: EmptyCardConfiguration;
   [CardType.DashboardCard]: EmptyCardConfiguration;
+  [CardType.QuoteCard]: EmptyCardConfiguration;
+  [CardType.InvoiceCard]: EmptyCardConfiguration;
 };
 
 // Union type for all card configurations (for general use)
