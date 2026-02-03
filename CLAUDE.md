@@ -48,8 +48,8 @@ When creating new modules that use **JwtAuthGuard** or other authentication guar
 ```typescript
 @Module({
   imports: [
-    AuthModule,              // Provides AccessTokenService
-    WorkspaceCacheModule,    // Provides WorkspaceCacheStorageService
+    AuthModule,                      // Provides AccessTokenService
+    WorkspaceCacheStorageModule,     // Provides WorkspaceCacheStorageService
     // ... other imports
   ],
   controllers: [YourController],
@@ -58,11 +58,18 @@ When creating new modules that use **JwtAuthGuard** or other authentication guar
 export class YourModule {}
 ```
 
+**Import paths:**
+```typescript
+import { AuthModule } from 'src/engine/core-modules/auth/auth.module';
+import { WorkspaceCacheStorageModule } from 'src/engine/workspace-cache-storage/workspace-cache-storage.module';
+```
+
 **Why this is needed:**
 - `JwtAuthGuard` has dependencies: `AccessTokenService` and `WorkspaceCacheStorageService`
 - NestJS dependency injection requires these to be available in the module's context
 - `AuthModule` exports `AccessTokenService`
-- `WorkspaceCacheModule` provides `WorkspaceCacheStorageService`
+- `WorkspaceCacheStorageModule` exports `WorkspaceCacheStorageService`
+- ⚠️ **IMPORTANT:** Use `WorkspaceCacheStorageModule`, NOT `WorkspaceCacheModule` (different modules!)
 
 **Error pattern to watch for:**
 ```
@@ -71,7 +78,7 @@ UnknownDependenciesException: Nest can't resolve dependencies of the JwtAuthGuar
 AccessTokenService at index [0] is available in the YourModule context.
 ```
 
-**Solution:** Always import `AuthModule` and `WorkspaceCacheModule` in any module using `@UseGuards(JwtAuthGuard)`.
+**Solution:** Always import `AuthModule` and `WorkspaceCacheStorageModule` in any module using `@UseGuards(JwtAuthGuard)`.
 
 Our Workspace will be "Phos Industries" and allowable domains will be "@phos-ind.com" and "@lvnlaser.com" and "@beehivebirth.com" (Multi-tenant)
 
